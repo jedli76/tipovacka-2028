@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import CompareModal from '../leaderboard/CompareModal'
+import ExactTipsModal from './ExactTipsModal'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -42,6 +43,30 @@ export default async function DashboardPage() {
 
   const myRank = myEntry ? (rankCount ?? 0) + 1 : null
 
+  // Přesné tipy — pouze zápasy kde tipovaný výsledek přesně odpovídá skutečnému
+  const { data: rawExactTips } = await supabase
+    .from('tips')
+    .select('home_score, away_score, is_joker, points, match_id, matches(home_team, away_team, kickoff_at, group_name, home_score, away_score)')
+    .eq('user_id', user.id)
+    .not('points', 'is', null)
+
+  const exactTips = (rawExactTips ?? [])
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .filter((t: any) => t.matches?.home_score === t.home_score && t.matches?.away_score === t.away_score)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .map((t: any) => ({
+      match_id: t.match_id,
+      home_score: t.home_score,
+      away_score: t.away_score,
+      is_joker: t.is_joker,
+      points: t.points,
+      home_team: t.matches.home_team,
+      away_team: t.matches.away_team,
+      kickoff_at: t.matches.kickoff_at,
+      group_name: t.matches.group_name,
+    }))
+    .sort((a: { kickoff_at: string }, b: { kickoff_at: string }) => new Date(a.kickoff_at).getTime() - new Date(b.kickoff_at).getTime())
+
   return (
     <div className="min-h-screen" style={{ background: '#0a0e1a', color: '#e2e8f0' }}>
       <nav style={{ background: '#111827', borderBottom: '1px solid #1f2d45' }} className="px-4 py-3">
@@ -78,12 +103,7 @@ export default async function DashboardPage() {
               {myRank ? `#${myRank}` : '–'}
             </p>
           </Link>
-          <Link href="/results" style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16, textDecoration: 'none', display: 'block' }} className="p-5">
-            <p className="text-sm font-semibold uppercase tracking-widest mb-2" style={{ color: '#64748b' }}>Přesné výsledky</p>
-            <p className="text-4xl font-black" style={{ color: '#22c55e' }}>
-              {myEntry?.correct_results ?? 0}
-            </p>
-          </Link>
+          <ExactTipsModal tips={exactTips} count={myEntry?.correct_results ?? 0} />
           <CompareModal players={(allPlayers ?? []).map(e => ({
             user_id: e.user_id,
             display_name: (e.profiles as unknown as { display_name: string })?.display_name ?? '–',
