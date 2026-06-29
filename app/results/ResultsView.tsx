@@ -1,11 +1,10 @@
 import Link from 'next/link'
 
-function formatKickoff(iso: string) {
+function formatDate(iso: string) {
   return new Date(iso).toLocaleString('cs-CZ', {
     timeZone: 'Europe/Prague',
-    weekday: 'short',
     day: 'numeric',
-    month: 'numeric',
+    month: 'short',
     hour: '2-digit',
     minute: '2-digit',
   })
@@ -71,35 +70,80 @@ type Props = {
   backLabel: string
 }
 
-// Krátký titulek bonusu z otázky
-function bonusTitle(question: string): string {
-  if (question.includes('penalt')) return 'KDO BUDE KOPAT PENALTU?'
-  if (question.includes('Proti komu')) return 'PROTI KOMU SE BUDE KOPAT PENALTA?'
-  if (question.includes('červen')) return 'KDO DOSTANE ČK?'
-  if (question.includes('nejvíc gólů') && question.includes('tým')) return 'KTERÝ TÝM VSTŘELÍ NEJVÍC GÓLŮ?'
-  if (question.includes('skupin') && question.includes('gól')) return 'VE KTERÉ SKUPINĚ PADNE NEJVÍC GÓLŮ?'
-  if (question.includes('klubů')) return 'KTERÝ KLUB NASTŘÍLÍ NEJVÍC GÓLŮ?'
-  if (question.includes('žlut')) return 'KTERÁ DVOJICE TÝMŮ NASBÍRÁ NEJVÍC ŽK?'
-  if (question.includes('nejmíň gólů')) return 'KTERÁ DVOJICE ZEMÍ DOSTANE NEJMÍŇ GÓLŮ?'
-  if (question.includes('trojice')) return 'KTERÁ TROJICE HRÁČŮ VSTŘELÍ NEJVÍCE GÓLŮ?'
-  if (question.includes('ŽK')) return 'VYBER HRÁČE – ŽK = -10 B'
-  if (question.includes('minut')) return 'MINUTY SOCHŮRKA A NEYMARA'
-  return question.slice(0, 40).toUpperCase()
+function bonusEmoji(q: string) {
+  if (q.includes('penalt') && !q.includes('Proti')) return '⚽'
+  if (q.includes('Proti komu')) return '🥅'
+  if (q.includes('červen')) return '🟥'
+  if (q.includes('nejvíc gólů') && q.includes('tým')) return '🎯'
+  if (q.includes('skupin') && q.includes('gól')) return '📊'
+  if (q.includes('klubů')) return '🏟️'
+  if (q.includes('žlut')) return '🟨'
+  if (q.includes('nejmíň')) return '🛡️'
+  if (q.includes('trojice')) return '⚡'
+  if (q.includes('ŽK')) return '😬'
+  if (q.includes('minut')) return '⏱️'
+  return '🎲'
 }
 
-function bonusEmoji(question: string): string {
-  if (question.includes('penalt')) return '⚽'
-  if (question.includes('Proti komu')) return '🥅'
-  if (question.includes('červen')) return '🟥'
-  if (question.includes('nejvíc gólů') && question.includes('tým')) return '🎯'
-  if (question.includes('skupin') && question.includes('gól')) return '📊'
-  if (question.includes('klubů')) return '🏟️'
-  if (question.includes('žlut')) return '🟨'
-  if (question.includes('nejmíň gólů')) return '🛡️'
-  if (question.includes('trojice')) return '⚡'
-  if (question.includes('ŽK')) return '😬'
-  if (question.includes('minut')) return '⏱️'
-  return '❓'
+function shortQuestion(q: string) {
+  const map: [RegExp, string][] = [
+    [/penalt.*kopat/i, 'Kdo bude kopat penaltu?'],
+    [/Proti komu/i, 'Proti komu penalta?'],
+    [/červenou/i, 'Kdo dostane červenou?'],
+    [/nejvíc gólů.*tým/i, 'Kdo vstřelí nejvíc gólů?'],
+    [/skupin.*gól/i, 'Kde padne nejvíc gólů?'],
+    [/klubů/i, 'Který klub nastřílí nejvíc?'],
+    [/žlut/i, 'Nejvíc žlutých karet?'],
+    [/nejmíň/i, 'Nejméně inkasovaných gólů?'],
+    [/trojice/i, 'Trojice s nejvíc góly?'],
+    [/ŽK.*odečte/i, 'Hráč s ŽK = −10 b'],
+    [/minut/i, 'Minuty Sochůrek + Neymar'],
+  ]
+  for (const [pattern, label] of map) {
+    if (pattern.test(q)) return label
+  }
+  return q.length > 42 ? q.slice(0, 42) + '…' : q
+}
+
+const S = {
+  page: {
+    background: 'linear-gradient(160deg, #0a0f1e 0%, #060b14 60%, #0a0f1e 100%)',
+    minHeight: '100vh',
+    color: '#e2e8f0',
+    fontFamily: '"Inter", system-ui, -apple-system, sans-serif',
+  } as React.CSSProperties,
+
+  glass: (alpha = 0.06) => ({
+    background: `rgba(255,255,255,${alpha})`,
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
+    border: '1px solid rgba(255,255,255,0.08)',
+    borderRadius: 20,
+  } as React.CSSProperties),
+
+  pill: (color: string) => ({
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 4,
+    background: `${color}18`,
+    border: `1px solid ${color}40`,
+    borderRadius: 99,
+    padding: '3px 12px',
+    fontSize: '0.72rem',
+    fontWeight: 700,
+    color,
+    letterSpacing: '0.04em',
+    textTransform: 'uppercase' as const,
+  }),
+
+  label: {
+    fontSize: '0.68rem',
+    fontWeight: 700,
+    letterSpacing: '0.12em',
+    textTransform: 'uppercase' as const,
+    color: 'rgba(255,255,255,0.35)',
+    marginBottom: 4,
+  } as React.CSSProperties,
 }
 
 export default function ResultsView({
@@ -113,18 +157,18 @@ export default function ResultsView({
   const bonusTipsMap = Object.fromEntries(bonusTips.map(t => [t.question_id, t]))
   const tournamentTipsMap = Object.fromEntries(tournamentTips.map(t => [t.question_id, t]))
 
-  const bonusByMatchColIndex: Record<number, BonusQuestion[]> = {}
+  const bonusByMatchCol: Record<number, BonusQuestion[]> = {}
   for (const q of bonusQuestions) {
     if (!q.match_col_indices?.length) continue
-    const lastCol = q.match_col_indices[q.match_col_indices.length - 1]
-    if (!bonusByMatchColIndex[lastCol]) bonusByMatchColIndex[lastCol] = []
-    bonusByMatchColIndex[lastCol].push(q)
+    const col = q.match_col_indices[q.match_col_indices.length - 1]
+    if (!bonusByMatchCol[col]) bonusByMatchCol[col] = []
+    bonusByMatchCol[col].push(q)
   }
 
-  const matchPoints = tips.reduce((s, t) => s + (t.points ?? 0), 0)
-  const bonusPoints = bonusTips.reduce((s, t) => s + (t.points ?? 0), 0)
-  const tournamentPoints = tournamentTips.reduce((s, t) => s + (t.points ?? 0), 0)
-  const totalPoints = matchPoints + bonusPoints + tournamentPoints
+  const matchPts = tips.reduce((s, t) => s + (t.points ?? 0), 0)
+  const bonusPts = bonusTips.reduce((s, t) => s + (t.points ?? 0), 0)
+  const tournPts = tournamentTips.reduce((s, t) => s + (t.points ?? 0), 0)
+  const totalPts = matchPts + bonusPts + tournPts
 
   const tipsWithResult = tips.filter(t => {
     const m = matchesMap[t.match_id]
@@ -138,114 +182,158 @@ export default function ResultsView({
   const jokerTip = tips.find(t => t.is_joker)
   const jokerMatch = jokerTip ? matchesMap[jokerTip.match_id] : null
 
-  const bigBonusQuestions = tournamentQuestions.filter(q => q.category === 'bonus')
-  const groupAdvQuestions = tournamentQuestions.filter(q => q.category === 'group_advancement')
+  const bigQ = tournamentQuestions.filter(q => q.category === 'bonus')
+  const groupQ = tournamentQuestions.filter(q => q.category === 'group_advancement')
 
   return (
-    <div style={{ background: '#0d1117', minHeight: '100vh', color: '#e2e8f0', fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <div style={S.page}>
       {/* Nav */}
-      <nav style={{ background: 'rgba(13,17,23,0.95)', borderBottom: '1px solid #21262d', position: 'sticky', top: 0, zIndex: 50, backdropFilter: 'blur(12px)' }} className="px-4 py-3">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <Link href={backHref} style={{ color: '#8b949e', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+      <nav style={{
+        position: 'sticky', top: 0, zIndex: 100,
+        background: 'rgba(6,11,20,0.8)',
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        padding: '14px 20px',
+      }}>
+        <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Link href={backHref} style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.85rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
             ← {backLabel}
           </Link>
-          <span style={{ color: '#8b949e', fontSize: '0.85rem' }}>MS 2026</span>
+          <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.8rem', fontWeight: 600 }}>MS 2026</span>
         </div>
       </nav>
 
-      {/* Header */}
-      <div style={{ background: 'linear-gradient(135deg, #161b22 0%, #0d1117 100%)', borderBottom: '1px solid #21262d', padding: '2rem 1rem 1.5rem' }}>
-        <div className="max-w-4xl mx-auto">
-          <h1 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#f0f6fc', marginBottom: '0.25rem' }}>{displayName}</h1>
+      {/* Hero header */}
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: '48px 20px 32px' }}>
+        <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>
+          Výsledky tipéře
+        </p>
+        <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: 32 }}>
+          {displayName}
+        </h1>
 
-          {/* Body badge */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginTop: '1.2rem', flexWrap: 'wrap' }}>
-            <div style={{
-              background: 'linear-gradient(135deg, #1c6038 0%, #0f3d24 100%)',
-              border: '1px solid #2ea043',
-              borderRadius: 14,
-              padding: '0.9rem 1.5rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '1rem',
-              flex: 1,
-              minWidth: 200,
-            }}>
-              <span style={{ fontSize: '2.4rem', fontWeight: 900, color: '#3fb950', lineHeight: 1 }}>{totalPoints}</span>
-              <div>
-                <div style={{ color: '#3fb950', fontWeight: 700, fontSize: '0.9rem' }}>celkových bodů</div>
-                <div style={{ color: '#8b949e', fontSize: '0.78rem', marginTop: 2 }}>
-                  Přesné výsledky: {exactCount}/{tipsWithResult.length}
-                </div>
-              </div>
+        {/* Stats row */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 16 }}>
+          {/* Total points — big card */}
+          <div style={{
+            ...S.glass(0.08),
+            padding: '24px 20px',
+            background: 'linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(168,85,247,0.08) 100%)',
+            border: '1px solid rgba(99,102,241,0.3)',
+            gridColumn: 'span 2',
+          }}>
+            <div style={S.label}>Celkem bodů</div>
+            <div style={{ fontSize: '3.5rem', fontWeight: 900, color: '#a78bfa', lineHeight: 1, letterSpacing: '-0.04em' }}>
+              {totalPts}
             </div>
+            <div style={{ marginTop: 8, color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>
+              Ze zápasů {matchPts} · Bonusy {bonusPts + tournPts}
+            </div>
+          </div>
 
-            {/* Žolík */}
-            {jokerTip && jokerMatch && (
-              <div style={{
-                background: 'linear-gradient(135deg, #2d1f00 0%, #1a1200 100%)',
-                border: '1px solid #f59e0b',
-                borderRadius: 14,
-                padding: '0.9rem 1.2rem',
-                flex: 1,
-                minWidth: 200,
-              }}>
-                <div style={{ color: '#f59e0b', fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
-                  ⚡ ŽOLÍK NASAZEN NA
-                </div>
-                <div style={{ color: '#fbbf24', fontWeight: 800, fontSize: '0.95rem' }}>
-                  {jokerMatch.home_team} – {jokerMatch.away_team}
-                  {jokerMatch.home_score !== null && ` (${jokerMatch.home_score}:${jokerMatch.away_score})`}
-                </div>
-                <div style={{ color: '#f59e0b', fontSize: '0.8rem', marginTop: 4 }}>
-                  Tip: {jokerTip.home_score}:{jokerTip.away_score}
-                  {jokerTip.points !== null && <span style={{ marginLeft: 8, fontWeight: 700 }}>+{jokerTip.points} b</span>}
-                </div>
-              </div>
-            )}
+          <div style={{ ...S.glass(), padding: '20px' }}>
+            <div style={S.label}>Přesných tipů</div>
+            <div style={{ fontSize: '2.2rem', fontWeight: 900, color: '#34d399', lineHeight: 1 }}>{exactCount}</div>
+            <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem', marginTop: 4 }}>z {tipsWithResult.length} odehraných</div>
+          </div>
+
+          <div style={{ ...S.glass(), padding: '20px' }}>
+            <div style={S.label}>Tipováno zápasů</div>
+            <div style={{ fontSize: '2.2rem', fontWeight: 900, color: '#60a5fa', lineHeight: 1 }}>{tips.length}</div>
+            <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem', marginTop: 4 }}>z {matches.length} celkem</div>
           </div>
         </div>
+
+        {/* Joker */}
+        {jokerTip && jokerMatch && (
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(245,158,11,0.12) 0%, rgba(251,191,36,0.06) 100%)',
+            border: '1px solid rgba(245,158,11,0.35)',
+            borderRadius: 16,
+            padding: '16px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+          }}>
+            <div>
+              <div style={{ ...S.pill('#f59e0b'), marginBottom: 8 }}>⚡ Žolík</div>
+              <div style={{ fontWeight: 800, color: '#fbbf24', fontSize: '1rem' }}>
+                {jokerMatch.home_team} – {jokerMatch.away_team}
+              </div>
+              <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem', marginTop: 2 }}>
+                Tip: {jokerTip.home_score}:{jokerTip.away_score}
+                {jokerMatch.home_score !== null && ` · Výsledek: ${jokerMatch.home_score}:${jokerMatch.away_score}`}
+              </div>
+            </div>
+            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+              <div style={{ fontSize: '2rem', fontWeight: 900, color: '#f59e0b', lineHeight: 1 }}>{jokerTip.points ?? '?'}</div>
+              <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.72rem' }}>bodů</div>
+            </div>
+          </div>
+        )}
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-6 space-y-8">
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 20px 60px' }}>
 
         {/* Velké turnajové bonusy */}
-        {bigBonusQuestions.length > 0 && (
-          <section>
-            <h2 style={{ color: '#8b949e', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.75rem' }}>
-              TURNAJOVÉ BONUSY
-            </h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10 }}>
-              {bigBonusQuestions.map(q => {
+        {bigQ.length > 0 && (
+          <section style={{ marginBottom: 48 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
+              <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                Turnajové bonusy
+              </span>
+              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 10 }}>
+              {bigQ.map(q => {
                 const tt = tournamentTipsMap[q.id]
-                const isCorrect = tt && tt.points > 0
-                const hasAnswer = !!tt
-                const pending = hasAnswer && !q.correct_answer && !isCorrect
+                const correct = tt && tt.points > 0
+                const pending = !!tt && !q.correct_answer && !correct
+                const wrong = !!tt && !correct && !pending
 
                 return (
                   <div key={q.id} style={{
-                    background: isCorrect ? 'linear-gradient(135deg, #1c3a1c 0%, #0f2010 100%)' : pending ? '#161b22' : hasAnswer ? '#1f1010' : '#161b22',
-                    border: `1px solid ${isCorrect ? '#2ea043' : pending ? '#30363d' : hasAnswer ? '#3d1515' : '#21262d'}`,
-                    borderRadius: 12,
-                    padding: '0.85rem',
+                    background: correct
+                      ? 'linear-gradient(135deg, rgba(52,211,153,0.12) 0%, rgba(16,185,129,0.06) 100%)'
+                      : wrong
+                      ? 'rgba(255,255,255,0.03)'
+                      : 'rgba(255,255,255,0.04)',
+                    border: `1px solid ${correct ? 'rgba(52,211,153,0.3)' : wrong ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.07)'}`,
+                    borderRadius: 14,
+                    padding: '14px 14px',
+                    position: 'relative',
+                    overflow: 'hidden',
                   }}>
-                    <div style={{ color: '#8b949e', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <span>{bonusEmoji(q.question)}</span>
-                      <span>{bonusTitle(q.question)}</span>
+                    <div style={{ fontSize: '1.3rem', marginBottom: 6 }}>{bonusEmoji(q.question)}</div>
+                    <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.3)', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 6, lineHeight: 1.3 }}>
+                      {shortQuestion(q.question)}
                     </div>
-                    {hasAnswer ? (
+                    {tt ? (
                       <>
-                        <div style={{ color: isCorrect ? '#3fb950' : pending ? '#e2e8f0' : '#ef4444', fontWeight: 700, fontSize: '0.95rem', marginBottom: 4 }}>
+                        <div style={{ fontWeight: 700, fontSize: '0.9rem', color: correct ? '#34d399' : wrong ? 'rgba(255,255,255,0.6)' : '#e2e8f0', marginBottom: 4 }}>
                           {tt.answer}
-                          {!isCorrect && !pending && <span style={{ color: '#8b949e', fontWeight: 400, fontSize: '0.8rem', display: 'block' }}>Nevyšlo.</span>}
                         </div>
-                        <div style={{ color: isCorrect ? '#3fb950' : pending ? '#8b949e' : '#ef4444', fontWeight: 800, fontSize: '1rem' }}>
-                          {pending ? '? b' : `+${tt.points} b`}
-                          {isCorrect && <span style={{ color: '#3fb950' }}> ✓</span>}
+                        {wrong && q.correct_answer && (
+                          <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.25)' }}>✓ {q.correct_answer}</div>
+                        )}
+                        {pending && (
+                          <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.2)' }}>čeká se na výsledek</div>
+                        )}
+                        <div style={{
+                          marginTop: 10,
+                          fontWeight: 900,
+                          fontSize: '1.3rem',
+                          color: correct ? '#34d399' : pending ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.15)',
+                        }}>
+                          {pending ? '—' : `+${tt.points}`}
+                          <span style={{ fontSize: '0.75rem', fontWeight: 500, marginLeft: 3 }}>b</span>
                         </div>
                       </>
                     ) : (
-                      <div style={{ color: '#484f58', fontSize: '0.85rem' }}>Bez tipu</div>
+                      <div style={{ color: 'rgba(255,255,255,0.18)', fontSize: '0.8rem', marginTop: 8 }}>bez tipu</div>
                     )}
                   </div>
                 )
@@ -255,41 +343,46 @@ export default function ResultsView({
         )}
 
         {/* Postupující ze skupin */}
-        {groupAdvQuestions.length > 0 && (
-          <section>
-            <h2 style={{ color: '#8b949e', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.75rem' }}>
-              POSTUPUJÍCÍ ZE SKUPIN
-            </h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10 }}>
-              {groupAdvQuestions.map(q => {
+        {groupQ.length > 0 && (
+          <section style={{ marginBottom: 48 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
+              <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                Postupující ze skupin
+              </span>
+              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 10 }}>
+              {groupQ.map(q => {
                 const tt = tournamentTipsMap[q.id]
-                const isCorrect = tt && tt.points > 0
-                const hasAnswer = !!tt
-                const pending = hasAnswer && !q.correct_answer
-                const groupLetter = q.question.match(/skupin[eě]\s+([A-L])/)?.[1] ?? '?'
+                const correct = tt && tt.points > 0
+                const pending = !!tt && !q.correct_answer && !correct
+                const letter = q.question.match(/skupin[eě]\s+([A-L])/)?.[1] ?? '?'
 
                 return (
                   <div key={q.id} style={{
-                    background: isCorrect ? 'linear-gradient(135deg, #1c3a1c 0%, #0f2010 100%)' : pending ? '#161b22' : hasAnswer ? '#1f1010' : '#161b22',
-                    border: `1px solid ${isCorrect ? '#2ea043' : pending ? '#30363d' : hasAnswer ? '#3d1515' : '#21262d'}`,
-                    borderRadius: 12,
-                    padding: '0.85rem',
+                    background: correct
+                      ? 'linear-gradient(135deg, rgba(52,211,153,0.12) 0%, rgba(16,185,129,0.06) 100%)'
+                      : 'rgba(255,255,255,0.03)',
+                    border: `1px solid ${correct ? 'rgba(52,211,153,0.3)' : 'rgba(255,255,255,0.06)'}`,
+                    borderRadius: 14,
+                    padding: '14px',
                   }}>
-                    <div style={{ color: '#8b949e', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>
-                      🏆 SKUPINA {groupLetter}
+                    <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.3)', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>
+                      Skupina {letter}
                     </div>
-                    {hasAnswer ? (
+                    {tt ? (
                       <>
-                        <div style={{ color: isCorrect ? '#3fb950' : pending ? '#e2e8f0' : '#ef4444', fontWeight: 700, fontSize: '0.9rem', marginBottom: 4, lineHeight: 1.3 }}>
+                        <div style={{ fontWeight: 700, fontSize: '0.85rem', color: correct ? '#34d399' : 'rgba(255,255,255,0.6)', lineHeight: 1.35, marginBottom: 8 }}>
                           {tt.answer}
                         </div>
-                        <div style={{ color: isCorrect ? '#3fb950' : pending ? '#8b949e' : '#ef4444', fontWeight: 800 }}>
-                          {pending ? '? b' : `+${tt.points} b`}
-                          {isCorrect && <span> ✓</span>}
+                        <div style={{ fontWeight: 900, fontSize: '1.1rem', color: correct ? '#34d399' : pending ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.15)' }}>
+                          {pending ? '—' : `+${tt.points}`}
+                          <span style={{ fontSize: '0.72rem', fontWeight: 500, marginLeft: 2 }}>b</span>
                         </div>
                       </>
                     ) : (
-                      <div style={{ color: '#484f58', fontSize: '0.85rem' }}>Bez tipu</div>
+                      <div style={{ color: 'rgba(255,255,255,0.15)', fontSize: '0.8rem' }}>bez tipu</div>
                     )}
                   </div>
                 )
@@ -300,92 +393,99 @@ export default function ResultsView({
 
         {/* Zápasy */}
         <section>
-          <h2 style={{ color: '#8b949e', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.75rem' }}>
-            TIPY NA ZÁPASY
-          </h2>
-          <div className="space-y-2">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+            <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
+            <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+              Tipy na zápasy
+            </span>
+            <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {matches.map(match => {
               const hasResult = match.home_score !== null && match.away_score !== null
               const tip = tipsMap[match.id]
-              const hasTip = !!tip
-              if (!hasResult && !hasTip) return null
+              if (!hasResult && !tip) return null
 
-              const evaluated = hasResult && hasTip
+              const evaluated = hasResult && !!tip
               const isExact = evaluated && tip.home_score === match.home_score && tip.away_score === match.away_score
-              const isCorrectWinner = evaluated && !isExact && (() => {
+              const isWinner = evaluated && !isExact && (() => {
                 const tw = tip.home_score > tip.away_score ? 'H' : tip.home_score < tip.away_score ? 'A' : 'D'
                 const rw = match.home_score! > match.away_score! ? 'H' : match.home_score! < match.away_score! ? 'A' : 'D'
                 return tw === rw
               })()
-
               const pts = tip?.points ?? 0
+              const isJoker = tip?.is_joker
 
-              let borderColor = '#21262d'
-              if (tip?.is_joker) borderColor = '#f59e0b'
-              else if (isExact) borderColor = '#2ea043'
-              else if (isCorrectWinner) borderColor = '#1f6feb'
+              const accentColor = isJoker ? '#f59e0b' : isExact ? '#34d399' : isWinner ? '#60a5fa' : null
 
-              const matchBonuses = match.col_index != null ? (bonusByMatchColIndex[match.col_index] ?? []) : []
+              const matchBonuses = match.col_index != null ? (bonusByMatchCol[match.col_index] ?? []) : []
 
               return (
                 <div key={match.id}>
                   <div style={{
-                    background: tip?.is_joker ? 'linear-gradient(135deg, #2d1f00 0%, #1a1200 100%)' : isExact ? 'linear-gradient(135deg, #1c3a1c 0%, #0f2010 100%)' : '#161b22',
-                    border: `1px solid ${borderColor}`,
-                    borderRadius: 12,
-                    padding: '0.9rem 1rem',
+                    background: isExact && isJoker
+                      ? 'linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(251,191,36,0.05) 100%)'
+                      : isExact
+                      ? 'linear-gradient(135deg, rgba(52,211,153,0.08) 0%, rgba(16,185,129,0.04) 100%)'
+                      : 'rgba(255,255,255,0.03)',
+                    border: `1px solid ${accentColor ? `${accentColor}30` : 'rgba(255,255,255,0.06)'}`,
+                    borderRadius: 14,
+                    padding: '14px 16px',
+                    display: 'grid',
+                    gridTemplateColumns: '1fr auto',
+                    gap: '8px 16px',
+                    alignItems: 'center',
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ color: '#484f58', fontSize: '0.75rem' }}>{formatKickoff(match.kickoff_at)}</span>
+                    {/* Left: teams */}
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                        <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.7rem' }}>{formatDate(match.kickoff_at)}</span>
                         {match.group_name && (
-                          <span style={{ background: '#21262d', borderRadius: 6, padding: '1px 7px', fontSize: '0.68rem', color: '#8b949e', fontWeight: 700 }}>
+                          <span style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 6, padding: '1px 7px', fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', fontWeight: 700 }}>
                             Sk. {match.group_name}
                           </span>
                         )}
+                        {isJoker && <span style={S.pill('#f59e0b')}>⚡ Žolík</span>}
+                        {isExact && <span style={S.pill(isJoker ? '#f59e0b' : '#34d399')}>★ Přesný</span>}
+                        {isWinner && !isExact && <span style={S.pill('#60a5fa')}>✓ Správný vítěz</span>}
                       </div>
-                      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                        {tip?.is_joker && (
-                          <span style={{ background: 'rgba(245,158,11,0.2)', border: '1px solid rgba(245,158,11,0.5)', borderRadius: 8, padding: '2px 8px', fontSize: '0.72rem', color: '#f59e0b', fontWeight: 800 }}>
-                            ⚡ ŽOLÍK
-                          </span>
-                        )}
-                        {isExact && (
-                          <span style={{ background: tip?.is_joker ? 'rgba(245,158,11,0.2)' : 'rgba(46,160,67,0.2)', border: `1px solid ${tip?.is_joker ? '#f59e0b' : '#2ea043'}`, borderRadius: 8, padding: '2px 8px', fontSize: '0.72rem', color: tip?.is_joker ? '#f59e0b' : '#3fb950', fontWeight: 800 }}>
-                            ★ PŘESNÝ TIP
-                          </span>
-                        )}
+                      <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#e2e8f0', lineHeight: 1.5 }}>
+                        {match.home_team}
+                        <span style={{ color: 'rgba(255,255,255,0.2)', margin: '0 6px' }}>–</span>
+                        {match.away_team}
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: 4 }}>{match.home_team}</div>
-                        <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{match.away_team}</div>
-                      </div>
-
+                    {/* Right: scores + points */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                       {hasResult && (
-                        <div style={{ textAlign: 'center', minWidth: 40 }}>
-                          <div style={{ fontSize: '0.65rem', color: '#484f58', fontWeight: 700, textTransform: 'uppercase', marginBottom: 2 }}>Výsl.</div>
-                          <div style={{ fontWeight: 900, fontSize: '1.1rem', color: '#f0f6fc', lineHeight: 1.2 }}>
-                            {match.home_score}<br />{match.away_score}
+                        <div style={{ textAlign: 'center' }}>
+                          <div style={S.label}>Výsl.</div>
+                          <div style={{ fontWeight: 900, fontSize: '1.1rem', color: '#fff' }}>
+                            {match.home_score}:{match.away_score}
                           </div>
                         </div>
                       )}
-
-                      {hasTip && (
-                        <div style={{ textAlign: 'center', minWidth: 36 }}>
-                          <div style={{ fontSize: '0.65rem', color: '#484f58', fontWeight: 700, textTransform: 'uppercase', marginBottom: 2 }}>Tip</div>
-                          <div style={{ fontWeight: 900, fontSize: '1.1rem', lineHeight: 1.2, color: isExact ? (tip?.is_joker ? '#f59e0b' : '#3fb950') : isCorrectWinner ? '#58a6ff' : '#8b949e' }}>
-                            {tip.home_score}<br />{tip.away_score}
+                      {tip && (
+                        <div style={{ textAlign: 'center' }}>
+                          <div style={S.label}>Tip</div>
+                          <div style={{ fontWeight: 900, fontSize: '1.1rem', color: accentColor ?? 'rgba(255,255,255,0.4)' }}>
+                            {tip.home_score}:{tip.away_score}
                           </div>
                         </div>
                       )}
-
                       {evaluated && (
-                        <div style={{ textAlign: 'center', minWidth: 44, background: 'rgba(0,0,0,0.3)', borderRadius: 10, padding: '4px 8px' }}>
-                          <div style={{ fontSize: '0.65rem', color: '#484f58', fontWeight: 700, textTransform: 'uppercase', marginBottom: 2 }}>Body</div>
-                          <div style={{ fontWeight: 900, fontSize: '1.3rem', color: isExact ? (tip?.is_joker ? '#f59e0b' : '#3fb950') : pts > 0 ? '#58a6ff' : '#484f58' }}>
+                        <div style={{
+                          textAlign: 'center',
+                          background: accentColor ? `${accentColor}15` : 'rgba(255,255,255,0.04)',
+                          border: `1px solid ${accentColor ? `${accentColor}30` : 'rgba(255,255,255,0.07)'}`,
+                          borderRadius: 12,
+                          padding: '6px 14px',
+                          minWidth: 56,
+                        }}>
+                          <div style={S.label}>Body</div>
+                          <div style={{ fontWeight: 900, fontSize: '1.4rem', color: accentColor ?? 'rgba(255,255,255,0.2)', lineHeight: 1 }}>
                             {pts}
                           </div>
                         </div>
@@ -393,35 +493,39 @@ export default function ResultsView({
                     </div>
                   </div>
 
+                  {/* Inline bonusy */}
                   {matchBonuses.map(q => {
                     const bt = bonusTipsMap[q.id]
                     const isCorrect = bt && bt.points > 0
-                    const hasAnswer = !!bt
                     return (
                       <div key={q.id} style={{
-                        background: isCorrect ? '#0f1f0f' : '#12161e',
-                        border: `1px solid ${isCorrect ? '#2ea043' : '#1a2030'}`,
-                        borderRadius: 9,
-                        padding: '0.55rem 0.9rem',
                         marginTop: 4,
+                        marginLeft: 16,
+                        background: 'rgba(255,255,255,0.02)',
+                        border: `1px solid ${isCorrect ? 'rgba(52,211,153,0.2)' : 'rgba(255,255,255,0.04)'}`,
+                        borderRadius: 10,
+                        padding: '8px 12px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
                         gap: 12,
                       }}>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: '0.68rem', color: '#484f58', fontWeight: 700, textTransform: 'uppercase', marginBottom: 2 }}>Bonus</div>
-                          <div style={{ fontSize: '0.82rem', color: '#c9d1d9', marginBottom: hasAnswer ? 2 : 0 }}>{q.question}</div>
-                          {hasAnswer && (
-                            <div style={{ fontSize: '0.78rem', color: isCorrect ? '#3fb950' : '#8b949e' }}>
+                        <div>
+                          <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.2)', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 2 }}>
+                            Bonus · {shortQuestion(q.question)}
+                          </div>
+                          {bt && (
+                            <div style={{ fontSize: '0.82rem', color: isCorrect ? '#34d399' : 'rgba(255,255,255,0.4)' }}>
                               {bt.answer}
-                              {!isCorrect && q.correct_answer && <span style={{ color: '#484f58' }}> · správně: {q.correct_answer}</span>}
+                              {!isCorrect && q.correct_answer && (
+                                <span style={{ color: 'rgba(255,255,255,0.2)', marginLeft: 8 }}>· správně: {q.correct_answer}</span>
+                              )}
                             </div>
                           )}
                         </div>
-                        {hasAnswer && (
-                          <span style={{ fontWeight: 900, fontSize: '1.1rem', color: isCorrect ? '#3fb950' : '#484f58', flexShrink: 0 }}>
-                            {bt.points}
+                        {bt && (
+                          <span style={{ fontWeight: 900, fontSize: '1rem', color: isCorrect ? '#34d399' : 'rgba(255,255,255,0.15)', flexShrink: 0 }}>
+                            +{bt.points}
                           </span>
                         )}
                       </div>
