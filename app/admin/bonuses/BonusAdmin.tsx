@@ -112,9 +112,13 @@ function QuestionRow({
 export default function BonusAdmin({
   bonusQuestions,
   tournamentQuestions,
+  forceAddOpen,
+  onAddClose,
 }: {
   bonusQuestions: BonusQ[]
   tournamentQuestions: TournamentQ[]
+  forceAddOpen?: boolean
+  onAddClose?: () => void
 }) {
   const bigBonuses = tournamentQuestions.filter(q => q.category === 'bonus')
   const groupAdv = tournamentQuestions.filter(q => q.category === 'group_advancement')
@@ -186,13 +190,19 @@ export default function BonusAdmin({
       )}
 
       {/* Přidat novou otázku */}
-      <AddQuestionForm />
+      <AddQuestionForm forceOpen={forceAddOpen} onClose={onAddClose} />
     </div>
   )
 }
 
-function AddQuestionForm() {
+function AddQuestionForm({ forceOpen, onClose }: { forceOpen?: boolean; onClose?: () => void }) {
   const [open, setOpen] = useState(false)
+  const isOpen = forceOpen || open
+
+  function close() {
+    setOpen(false)
+    onClose?.()
+  }
   const [err, setErr] = useState('')
   const [ok, setOk] = useState(false)
   const [pending, startTransition] = useTransition()
@@ -205,7 +215,7 @@ function AddQuestionForm() {
         setErr(res.error)
       } else {
         setOk(true)
-        setOpen(false)
+        close()
         setTimeout(() => setOk(false), 3000)
       }
     })
@@ -225,7 +235,7 @@ function AddQuestionForm() {
 
   return (
     <div style={{ marginTop: 16 }}>
-      {!open ? (
+      {!isOpen ? (
         <button
           onClick={() => setOpen(true)}
           style={{ background: 'rgba(99,102,241,0.15)', border: '1px dashed rgba(99,102,241,0.4)', borderRadius: 12, padding: '12px 20px', color: '#a5b4fc', fontWeight: 700, cursor: 'pointer', fontSize: '0.88rem', width: '100%' }}
@@ -260,7 +270,7 @@ function AddQuestionForm() {
             <button type="submit" disabled={pending} style={{ background: '#4f46e5', border: 'none', borderRadius: 8, padding: '9px 18px', color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: '0.88rem', opacity: pending ? 0.6 : 1 }}>
               {pending ? 'Ukládám...' : 'Přidat otázku'}
             </button>
-            <button type="button" onClick={() => setOpen(false)} style={{ background: 'none', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '9px 14px', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '0.88rem' }}>
+            <button type="button" onClick={close} style={{ background: 'none', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '9px 14px', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '0.88rem' }}>
               Zrušit
             </button>
           </div>

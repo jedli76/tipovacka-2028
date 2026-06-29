@@ -43,6 +43,7 @@ export default function AdminTabs({
   tournamentQuestions: TournamentQ[]
 }) {
   const [tab, setTab] = useState<'matches' | 'bonuses'>('matches')
+  const [addingBonus, setAddingBonus] = useState(false)
 
   const tabBtn = (t: typeof tab, label: string, count: number) => (
     <button
@@ -89,6 +90,14 @@ export default function AdminTabs({
             >
               + Přidat zápas
             </Link>
+          )}
+          {tab === 'bonuses' && (
+            <button
+              onClick={() => setAddingBonus(true)}
+              style={{ background: '#4f46e5', color: '#fff', fontWeight: 700, padding: '8px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: '0.9rem' }}
+            >
+              + Přidat otázku
+            </button>
           )}
         </div>
       </div>
@@ -141,6 +150,8 @@ export default function AdminTabs({
         <BonusAdmin
           bonusQuestions={bonusQuestions}
           tournamentQuestions={tournamentQuestions}
+          forceAddOpen={addingBonus}
+          onAddClose={() => setAddingBonus(false)}
         />
       )}
     </div>
