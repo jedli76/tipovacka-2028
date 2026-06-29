@@ -26,9 +26,15 @@ export async function GET() {
       is_joker,
       points
     `)
-    .order('matches(kickoff_at)', { ascending: true })
 
   if (!tips) return NextResponse.json({ error: 'Chyba při načítání.' }, { status: 500 })
+
+  // Seřaď podle kickoff_at
+  tips.sort((a, b) => {
+    const ma = a.matches as unknown as { kickoff_at: string } | null
+    const mb = b.matches as unknown as { kickoff_at: string } | null
+    return (ma?.kickoff_at ?? '').localeCompare(mb?.kickoff_at ?? '')
+  })
 
   const rows = [
     ['Hráč', 'Zápas', 'Fáze', 'Skupina', 'Kickoff', 'Tip domácí', 'Tip hosté', 'Žolík', 'Body'],

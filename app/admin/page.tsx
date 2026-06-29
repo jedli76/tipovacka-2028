@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import ExportButton from './ExportButton'
 
 export default async function AdminPage() {
   const supabase = await createClient()
@@ -32,13 +33,7 @@ export default async function AdminPage() {
             >
               🎯 Bonusové otázky
             </Link>
-            <a
-              href="/api/admin/export-tips"
-              download
-              className="bg-emerald-700 hover:bg-emerald-600 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors"
-            >
-              📥 Export tipů (CSV)
-            </a>
+            <ExportButton />
             <Link
               href="/admin/matches/new"
               className="bg-green-500 hover:bg-green-400 text-black font-bold px-4 py-2 rounded-lg text-sm transition-colors"
