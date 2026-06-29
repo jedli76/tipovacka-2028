@@ -100,6 +100,7 @@ export default async function DashboardPage() {
                 { href: '/tips', icon: '✏️', label: 'Zadat tipy', sub: 'Tipujte výsledky zápasů' },
                 { href: '/leaderboard', icon: '🏆', label: 'Žebříček', sub: 'Kdo vede?' },
                 { href: '/results', icon: '📊', label: 'Výsledky', sub: 'Přehled zápasů a bodů' },
+                { href: '/chat', icon: '💬', label: 'Chat', sub: 'Piš si s ostatními hráči' },
               ].map(item => (
 
                 <Link
