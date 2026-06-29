@@ -10,13 +10,17 @@ export async function GET() {
     return NextResponse.json({ error: 'Přístup odepřen.' }, { status: 403 })
   }
 
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return NextResponse.json({ error: 'SUPABASE_SERVICE_ROLE_KEY není nastaven na serveru.' }, { status: 500 })
+  }
+
   // Pro čtení všech tipů (obejití RLS) použij service role key
   const admin = createServiceClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
   )
 
-  const { data: tips } = await admin
+  const { data: tips, error: tipsError } = await admin
     .from('tips')
     .select(`
       profiles(display_name),
@@ -27,6 +31,7 @@ export async function GET() {
       points
     `)
 
+  if (tipsError) return NextResponse.json({ error: tipsError.message }, { status: 500 })
   if (!tips) return NextResponse.json({ error: 'Chyba při načítání.' }, { status: 500 })
 
   // Seřaď podle kickoff_at

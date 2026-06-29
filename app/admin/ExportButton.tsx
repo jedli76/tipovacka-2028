@@ -10,7 +10,8 @@ export default function ExportButton() {
     try {
       const res = await fetch('/api/admin/export-tips')
       if (!res.ok) {
-        alert('Export selhal: ' + res.statusText)
+        const body = await res.json().catch(() => ({}))
+        alert('Export selhal: ' + (body.error || res.statusText || res.status))
         return
       }
       const blob = await res.blob()
