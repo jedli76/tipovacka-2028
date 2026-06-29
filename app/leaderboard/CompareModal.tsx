@@ -95,7 +95,7 @@ const S = {
   }),
 }
 
-export default function CompareModal({ players }: { players: Player[] }) {
+export default function CompareModal({ players, asCard }: { players: Player[], asCard?: boolean }) {
   const [open, setOpen] = useState(false)
   const [groups, setGroups] = useState<Groups>({})
   const [selected, setSelected] = useState<string[]>([])
@@ -170,24 +170,47 @@ export default function CompareModal({ players }: { players: Player[] }) {
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          background: 'rgba(99,102,241,0.12)',
-          border: '1px solid rgba(99,102,241,0.3)',
-          borderRadius: 12,
-          padding: '8px 16px',
-          color: '#a78bfa',
-          fontWeight: 700,
-          fontSize: '0.85rem',
-          cursor: 'pointer',
-        }}
-      >
-        ⚖️ Porovnat hráče
-      </button>
+      {asCard ? (
+        <button
+          onClick={() => setOpen(true)}
+          style={{
+            background: 'rgba(99,102,241,0.08)',
+            border: '1px solid rgba(99,102,241,0.25)',
+            borderRadius: 16,
+            padding: '20px',
+            cursor: 'pointer',
+            textAlign: 'left',
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+          }}
+        >
+          <p style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7c6fcd', marginBottom: 8 }}>Porovnat</p>
+          <p style={{ fontSize: '2rem', lineHeight: 1 }}>⚖️</p>
+          <p style={{ fontSize: '0.78rem', fontWeight: 600, color: '#a78bfa', marginTop: 6 }}>s ostatními hráči</p>
+        </button>
+      ) : (
+        <button
+          onClick={() => setOpen(true)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            background: 'rgba(99,102,241,0.12)',
+            border: '1px solid rgba(99,102,241,0.3)',
+            borderRadius: 12,
+            padding: '8px 16px',
+            color: '#a78bfa',
+            fontWeight: 700,
+            fontSize: '0.85rem',
+            cursor: 'pointer',
+          }}
+        >
+          ⚖️ Porovnat hráče
+        </button>
+      )}
 
       {open && (
         <div style={S.overlay} onClick={e => { if (e.target === e.currentTarget) setOpen(false) }}>

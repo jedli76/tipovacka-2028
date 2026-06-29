@@ -65,7 +65,7 @@ export default async function DashboardPage() {
 
       <main className="max-w-6xl mx-auto p-4 py-8">
         {/* Stat karty */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16 }} className="p-5">
             <p className="text-sm font-semibold uppercase tracking-widest mb-2" style={{ color: '#64748b' }}>Moje body</p>
             <p className="text-4xl font-black" style={{ color: '#f59e0b' }}>
@@ -84,6 +84,11 @@ export default async function DashboardPage() {
               {myEntry?.correct_results ?? 0}
             </p>
           </div>
+          <CompareModal players={(allPlayers ?? []).map(e => ({
+            user_id: e.user_id,
+            display_name: (e.profiles as unknown as { display_name: string })?.display_name ?? '–',
+            total_points: e.total_points,
+          }))} asCard />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -110,11 +115,6 @@ export default async function DashboardPage() {
                   </div>
                 </Link>
               ))}
-              <CompareModal players={(allPlayers ?? []).map(e => ({
-                user_id: e.user_id,
-                display_name: (e.profiles as unknown as { display_name: string })?.display_name ?? '–',
-                total_points: e.total_points,
-              }))} />
               {user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL && (
                 <Link
                   href="/admin"
