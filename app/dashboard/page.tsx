@@ -102,7 +102,7 @@ export default async function DashboardPage() {
             <div style={{ fontSize: '1.5rem', marginBottom: 6 }}>📊</div>
             <p className="text-sm font-semibold uppercase tracking-widest mb-2" style={{ color: '#64748b' }}>Moje pořadí</p>
             <p className="text-4xl font-black" style={{ color: '#a78bfa' }}>
-              {myRank ? `#${myRank}` : '–'}
+              {myRank ? `${myRank}.` : '–'}
             </p>
           </Link>
           <ExactTipsModal tips={exactTips} count={myEntry?.correct_results ?? 0} />
