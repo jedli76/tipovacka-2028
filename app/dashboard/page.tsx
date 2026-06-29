@@ -20,13 +20,20 @@ export default async function DashboardPage() {
     .order('total_points', { ascending: false })
     .limit(10)
 
-  // Zjisti celkové pořadí uživatele
+  // Načti moje vlastní pořadí samostatně
+  const { data: myEntryArr } = await supabase
+    .from('leaderboard')
+    .select('*')
+    .eq('user_id', user.id)
+    .single()
+
+  const myEntry = myEntryArr ?? leaderboard?.find(l => l.user_id === user.id)
+
   const { count: rankCount } = await supabase
     .from('leaderboard')
     .select('*', { count: 'exact', head: true })
-    .gt('total_points', leaderboard?.find(l => l.user_id === user.id)?.total_points ?? 0)
+    .gt('total_points', myEntry?.total_points ?? 0)
 
-  const myEntry = leaderboard?.find(l => l.user_id === user.id)
   const myRank = myEntry ? (rankCount ?? 0) + 1 : null
 
   return (
