@@ -197,8 +197,18 @@ export default function AdminTabs({
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 <div>
                   <label style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', display: 'block', marginBottom: 4 }}>Kategorie</label>
-                  <select value={newCategory} onChange={e => setNewCategory(e.target.value)} style={{ width: '100%', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: '9px 12px', color: '#e2e8f0', fontSize: '0.9rem', outline: 'none' }}>
+                  <select
+                    value={newCategory}
+                    onChange={e => {
+                      setNewCategory(e.target.value)
+                      if (e.target.value === 'bonus_small') setNewPoints('3')
+                      else if (e.target.value === 'bonus') setNewPoints('10')
+                      else if (e.target.value === 'group_advancement') setNewPoints('10')
+                    }}
+                    style={{ width: '100%', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: '9px 12px', color: '#e2e8f0', fontSize: '0.9rem', outline: 'none' }}
+                  >
                     <option value="bonus">Velký bonus</option>
+                    <option value="bonus_small">Malá bonusovka</option>
                     <option value="group_advancement">Postupující ze skupin</option>
                   </select>
                 </div>

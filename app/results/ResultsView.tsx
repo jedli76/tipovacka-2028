@@ -207,7 +207,7 @@ export default function ResultsView({
   const jokerTip = tips.find(t => t.is_joker)
   const jokerMatch = jokerTip ? matchesMap[jokerTip.match_id] : null
 
-  const bigQ = tournamentQuestions.filter(q => q.category === 'bonus')
+  const bigQ = tournamentQuestions.filter(q => q.category === 'bonus' || q.category === 'bonus_small')
   const groupQ = tournamentQuestions.filter(q => q.category === 'group_advancement')
 
   return (

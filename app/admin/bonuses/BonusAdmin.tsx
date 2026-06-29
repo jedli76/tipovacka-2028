@@ -123,7 +123,7 @@ export default function BonusAdmin({
   forceAddOpen?: boolean
   onAddClose?: () => void
 }) {
-  const bigBonuses = tournamentQuestions.filter(q => q.category === 'bonus')
+  const bigBonuses = tournamentQuestions.filter(q => q.category === 'bonus' || q.category === 'bonus_small')
   const groupAdv = tournamentQuestions.filter(q => q.category === 'group_advancement')
 
   const sectionStyle = { marginBottom: 40 }
