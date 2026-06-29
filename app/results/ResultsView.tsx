@@ -1,10 +1,13 @@
 import Link from 'next/link'
 import ExactTipsCard, { type ExactTip } from './ExactTipsCard'
-import { teamWithFlag } from '@/lib/flags'
 import TeamName from '@/lib/TeamName'
 
-function answersWithFlags(answer: string): string {
-  return answer.split(',').map(s => teamWithFlag(s.trim())).join(', ')
+function AnswerTeams({ answer, inline }: { answer: string; inline?: boolean }) {
+  const teams = answer.split(',').map(s => s.trim()).filter(Boolean)
+  if (inline) {
+    return <>{teams.map((t, i) => <span key={i}>{i > 0 && ', '}<TeamName team={t} flagSize="1.35em" /></span>)}</>
+  }
+  return <>{teams.map((t, i) => <div key={i}><TeamName team={t} flagSize="1.35em" /></div>)}</>
 }
 
 function formatDate(iso: string) {
@@ -356,10 +359,10 @@ export default function ResultsView({
                     {tt ? (
                       <>
                         <div style={{ fontWeight: 700, fontSize: '0.9rem', color: correct ? '#34d399' : wrong ? 'rgba(255,255,255,0.6)' : '#e2e8f0', marginBottom: 4 }}>
-                          {answersWithFlags(tt.answer)}
+                          <AnswerTeams answer={tt.answer} inline />
                         </div>
                         {wrong && q.correct_answer && (
-                          <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.25)' }}>✓ {answersWithFlags(q.correct_answer)}</div>
+                          <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.25)' }}>✓ <AnswerTeams answer={q.correct_answer} inline /></div>
                         )}
                         {pending && (
                           <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.2)' }}>čeká se na výsledek</div>
@@ -416,9 +419,7 @@ export default function ResultsView({
                     {tt ? (
                       <>
                         <div style={{ fontWeight: 700, fontSize: '0.85rem', color: correct ? '#34d399' : 'rgba(255,255,255,0.6)', lineHeight: 1.5, marginBottom: 8 }}>
-                          {tt.answer.split(',').map(s => teamWithFlag(s.trim())).map((t, i) => (
-                            <div key={i}>{t}</div>
-                          ))}
+                          <AnswerTeams answer={tt.answer} />
                         </div>
                         <div style={{ fontWeight: 900, fontSize: '1.1rem', color: correct ? '#34d399' : pending ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.15)' }}>
                           {pending ? '—' : `+${tt.points}`}
@@ -560,9 +561,9 @@ export default function ResultsView({
                           </div>
                           {bt && (
                             <div style={{ fontSize: '0.82rem', color: isCorrect ? '#34d399' : 'rgba(255,255,255,0.4)' }}>
-                              {answersWithFlags(bt.answer)}
+                              <AnswerTeams answer={bt.answer} inline />
                               {!isCorrect && q.correct_answer && (
-                                <span style={{ color: 'rgba(255,255,255,0.2)', marginLeft: 8 }}>· správně: {answersWithFlags(q.correct_answer)}</span>
+                                <span style={{ color: 'rgba(255,255,255,0.2)', marginLeft: 8 }}>· správně: <AnswerTeams answer={q.correct_answer} inline /></span>
                               )}
                             </div>
                           )}

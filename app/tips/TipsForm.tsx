@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from 'react'
 import { saveTip } from './actions'
-import { teamWithFlag } from '@/lib/flags'
 import TeamName from '@/lib/TeamName'
 
 type Match = {
