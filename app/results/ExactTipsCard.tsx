@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { teamWithFlag } from '@/lib/flags'
+import TeamName from '@/lib/TeamName'
 
 export type ExactTip = {
   match_id: string
@@ -125,9 +125,9 @@ export default function ExactTipsCard({
                           )}
                         </div>
                         <div style={{ fontWeight: 700, fontSize: '0.92rem', color: '#e2e8f0' }}>
-                          {teamWithFlag(t.home_team)}
+                          <TeamName team={t.home_team} flagSize="1.4em" />
                           <span style={{ color: 'rgba(255,255,255,0.2)', margin: '0 6px' }}>–</span>
-                          {teamWithFlag(t.away_team)}
+                          <TeamName team={t.away_team} flagSize="1.4em" />
                         </div>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>

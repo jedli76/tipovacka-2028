@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import ExactTipsCard, { type ExactTip } from './ExactTipsCard'
 import { teamWithFlag } from '@/lib/flags'
+import TeamName from '@/lib/TeamName'
 
 function answersWithFlags(answer: string): string {
   return answer.split(',').map(s => teamWithFlag(s.trim())).join(', ')
@@ -301,7 +302,7 @@ export default function ResultsView({
             <div>
               <div style={{ ...S.pill('#f59e0b'), marginBottom: 8 }}>⚡ Žolík</div>
               <div style={{ fontWeight: 800, color: '#fbbf24', fontSize: '1rem' }}>
-                {teamWithFlag(jokerMatch.home_team)} – {teamWithFlag(jokerMatch.away_team)}
+                <TeamName team={jokerMatch.home_team} flagSize="1.6em" /> – <TeamName team={jokerMatch.away_team} flagSize="1.6em" />
               </div>
               <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem', marginTop: 2 }}>
                 Tip: {jokerTip.home_score}:{jokerTip.away_score}
@@ -494,9 +495,9 @@ export default function ResultsView({
                         {isWinner && !isExact && <span style={S.pill('#60a5fa')}>✓ Správný vítěz</span>}
                       </div>
                       <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#e2e8f0', lineHeight: 1.5 }}>
-                        {teamWithFlag(match.home_team)}
+                        <TeamName team={match.home_team} flagSize="1.4em" />
                         <span style={{ color: 'rgba(255,255,255,0.2)', margin: '0 6px' }}>–</span>
-                        {teamWithFlag(match.away_team)}
+                        <TeamName team={match.away_team} flagSize="1.4em" />
                       </div>
                     </div>
 

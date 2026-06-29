@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { saveTip } from './actions'
 import { teamWithFlag } from '@/lib/flags'
+import TeamName from '@/lib/TeamName'
 
 type Match = {
   id: string
@@ -167,7 +168,7 @@ export default function TipsForm({ matches, tipsMap, jokerUsed, userId, isClosed
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <span className="flex-1 text-right font-medium text-white">{teamWithFlag(match.home_team)}</span>
+                    <span className="flex-1 text-right font-medium text-white"><TeamName team={match.home_team} flagSize="1.5em" /></span>
 
                     <div className="flex items-center gap-2">
                       <input
@@ -193,7 +194,7 @@ export default function TipsForm({ matches, tipsMap, jokerUsed, userId, isClosed
                       />
                     </div>
 
-                    <span className="flex-1 font-medium text-white">{teamWithFlag(match.away_team)}</span>
+                    <span className="flex-1 font-medium text-white"><TeamName team={match.away_team} flagSize="1.5em" /></span>
 
                     <div className="flex items-center gap-2 ml-2">
                       <button
