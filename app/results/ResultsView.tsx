@@ -414,8 +414,10 @@ export default function ResultsView({
                     </div>
                     {tt ? (
                       <>
-                        <div style={{ fontWeight: 700, fontSize: '0.85rem', color: correct ? '#34d399' : 'rgba(255,255,255,0.6)', lineHeight: 1.35, marginBottom: 8 }}>
-                          {answersWithFlags(tt.answer)}
+                        <div style={{ fontWeight: 700, fontSize: '0.85rem', color: correct ? '#34d399' : 'rgba(255,255,255,0.6)', lineHeight: 1.5, marginBottom: 8 }}>
+                          {tt.answer.split(',').map(s => teamWithFlag(s.trim())).map((t, i) => (
+                            <div key={i}>{t}</div>
+                          ))}
                         </div>
                         <div style={{ fontWeight: 900, fontSize: '1.1rem', color: correct ? '#34d399' : pending ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.15)' }}>
                           {pending ? '—' : `+${tt.points}`}
