@@ -54,7 +54,7 @@ const S = {
     borderRadius: 20,
     width: '100%',
     maxWidth: 760,
-    maxHeight: '88vh',
+    maxHeight: '92vh',
     display: 'flex',
     flexDirection: 'column' as const,
     overflow: 'hidden',
@@ -253,7 +253,7 @@ export default function CompareModal({ players }: { players: Player[] }) {
               )}
 
               {/* Hledat hráče */}
-              <div style={{ position: 'relative', marginBottom: 16 }}>
+              <div style={{ marginBottom: 16 }}>
                 <input
                   ref={searchRef}
                   value={search}
@@ -273,18 +273,10 @@ export default function CompareModal({ players }: { players: Player[] }) {
                 />
                 {filteredPlayers.length > 0 && (
                   <div style={{
-                    position: 'absolute',
-                    top: '100%',
-                    left: 0,
-                    right: 0,
                     background: '#0f1623',
                     border: '1px solid rgba(255,255,255,0.1)',
                     borderRadius: 12,
                     marginTop: 4,
-                    maxHeight: 320,
-                    overflowY: 'auto',
-                    zIndex: 10,
-                    boxShadow: '0 16px 48px rgba(0,0,0,0.5)',
                   }}>
                     {filteredPlayers.map(p => (
                       <button
