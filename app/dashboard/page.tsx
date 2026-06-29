@@ -66,24 +66,24 @@ export default async function DashboardPage() {
       <main className="max-w-6xl mx-auto p-4 py-8">
         {/* Stat karty */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16 }} className="p-5">
+          <Link href="/results" style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16, textDecoration: 'none', display: 'block' }} className="p-5">
             <p className="text-sm font-semibold uppercase tracking-widest mb-2" style={{ color: '#64748b' }}>Moje body</p>
             <p className="text-4xl font-black" style={{ color: '#f59e0b' }}>
               {myEntry?.total_points ?? 0}
             </p>
-          </div>
-          <div style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16 }} className="p-5">
+          </Link>
+          <Link href="/leaderboard" style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16, textDecoration: 'none', display: 'block' }} className="p-5">
             <p className="text-sm font-semibold uppercase tracking-widest mb-2" style={{ color: '#64748b' }}>Moje pořadí</p>
             <p className="text-4xl font-black" style={{ color: '#a78bfa' }}>
               {myRank ? `#${myRank}` : '–'}
             </p>
-          </div>
-          <div style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16 }} className="p-5">
+          </Link>
+          <Link href="/results" style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16, textDecoration: 'none', display: 'block' }} className="p-5">
             <p className="text-sm font-semibold uppercase tracking-widest mb-2" style={{ color: '#64748b' }}>Přesné výsledky</p>
             <p className="text-4xl font-black" style={{ color: '#22c55e' }}>
               {myEntry?.correct_results ?? 0}
             </p>
-          </div>
+          </Link>
           <CompareModal players={(allPlayers ?? []).map(e => ({
             user_id: e.user_id,
             display_name: (e.profiles as unknown as { display_name: string })?.display_name ?? '–',
