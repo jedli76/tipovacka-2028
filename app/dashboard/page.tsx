@@ -113,47 +113,32 @@ export default async function DashboardPage() {
           }))} asCard />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Rychlé akce */}
-          <div style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16 }} className="p-5">
-            <h2 className="text-lg font-bold mb-4 text-white">Rychlé akce</h2>
-            <div className="space-y-2">
-              {[
-                { href: '/tips', icon: '✏️', label: 'Zadat tipy', sub: 'Tipujte výsledky zápasů' },
-                { href: '/leaderboard', icon: '🏆', label: 'Žebříček', sub: 'Kdo vede?' },
-                { href: '/results', icon: '📊', label: 'Výsledky', sub: 'Přehled zápasů a bodů' },
-                { href: '/chat', icon: '💬', label: 'Chat', sub: 'Piš si s ostatními hráči' },
-              ].map(item => (
+        {/* Rychlé akce — horizontální menu */}
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 24 }}>
+          {[
+            { href: '/tips', icon: '✏️', label: 'Zadat tipy' },
+            { href: '/leaderboard', icon: '🏆', label: 'Žebříček' },
+            { href: '/results', icon: '📊', label: 'Výsledky' },
+            { href: '/chat', icon: '💬', label: 'Chat' },
+            ...(user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL ? [{ href: '/admin', icon: '⚙️', label: 'Admin' }] : []),
+          ].map(item => (
+            <Link
+              key={item.href}
+              href={item.href}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                background: '#111827', border: '1px solid #1f2d45', borderRadius: 12,
+                padding: '10px 18px', textDecoration: 'none', color: '#e2e8f0',
+                fontWeight: 600, fontSize: '0.9rem', transition: 'border-color 0.15s',
+              }}
+            >
+              <span style={{ fontSize: '1.1rem' }}>{item.icon}</span>
+              {item.label}
+            </Link>
+          ))}
+        </div>
 
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="flex items-center gap-3 p-3 rounded-xl transition-colors hover:bg-slate-700/50"
-                  style={{ background: '#1a2235', border: '1px solid #1f2d45' }}
-                >
-                  <span className="text-2xl">{item.icon}</span>
-                  <div>
-                    <p className="font-semibold text-white">{item.label}</p>
-                    <p className="text-sm" style={{ color: '#64748b' }}>{item.sub}</p>
-                  </div>
-                </Link>
-              ))}
-              {user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL && (
-                <Link
-                  href="/admin"
-                  className="flex items-center gap-3 p-3 rounded-xl transition-colors"
-                  style={{ background: '#1a2235', border: '1px solid #1f2d45' }}
-                >
-                  <span className="text-2xl">⚙️</span>
-                  <div>
-                    <p className="font-semibold text-white">Admin</p>
-                    <p className="text-sm" style={{ color: '#64748b' }}>Správa zápasů a výsledků</p>
-                  </div>
-                </Link>
-              )}
-            </div>
-          </div>
-
+        <div>
           {/* Top 10 žebříček */}
           <div style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16 }} className="p-5">
             <h2 className="text-lg font-bold mb-4 text-white">Top 10 žebříček</h2>
