@@ -71,13 +71,31 @@ async function recalculatePoints(supabase: any, matchId: string, homeScore: numb
 
   const userIds = [...new Set(tips.map((t: { user_id: string }) => t.user_id))]
   for (const userId of userIds) {
-    const { data: userTips } = await supabase
-      .from('tips')
-      .select('points, home_score, away_score, matches(home_score, away_score)')
-      .eq('user_id', userId)
-      .not('points', 'is', null)
+    const [
+      { data: userTips },
+      { data: userBonusTips },
+      { data: userTournamentTips },
+    ] = await Promise.all([
+      supabase
+        .from('tips')
+        .select('points, home_score, away_score, matches(home_score, away_score)')
+        .eq('user_id', userId)
+        .not('points', 'is', null),
+      supabase
+        .from('bonus_tips')
+        .select('points')
+        .eq('user_id', userId),
+      supabase
+        .from('tournament_tips')
+        .select('points')
+        .eq('user_id', userId),
+    ])
 
-    const totalPoints = userTips?.reduce((sum: number, t: { points: number }) => sum + (t.points ?? 0), 0) ?? 0
+    const matchPoints = userTips?.reduce((s: number, t: { points: number }) => s + (t.points ?? 0), 0) ?? 0
+    const bonusPoints = userBonusTips?.reduce((s: number, t: { points: number }) => s + (t.points ?? 0), 0) ?? 0
+    const tournamentPoints = userTournamentTips?.reduce((s: number, t: { points: number }) => s + (t.points ?? 0), 0) ?? 0
+    const totalPoints = matchPoints + bonusPoints + tournamentPoints
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const correctResults = userTips?.filter((t: any) =>
       t.matches?.home_score === t.home_score && t.matches?.away_score === t.away_score

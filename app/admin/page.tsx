@@ -25,12 +25,20 @@ export default async function AdminPage() {
       <main className="max-w-5xl mx-auto p-4 py-8 space-y-8">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Zápasy</h1>
-          <Link
-            href="/admin/matches/new"
-            className="bg-green-500 hover:bg-green-400 text-black font-bold px-4 py-2 rounded-lg text-sm transition-colors"
-          >
-            + Přidat zápas
-          </Link>
+          <div className="flex gap-3">
+            <Link
+              href="/admin/bonuses"
+              className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors"
+            >
+              🎯 Bonusové otázky
+            </Link>
+            <Link
+              href="/admin/matches/new"
+              className="bg-green-500 hover:bg-green-400 text-black font-bold px-4 py-2 rounded-lg text-sm transition-colors"
+            >
+              + Přidat zápas
+            </Link>
+          </div>
         </div>
 
         {!matches || matches.length === 0 ? (
