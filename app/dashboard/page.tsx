@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import CompareModal from '../leaderboard/CompareModal'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -19,6 +20,11 @@ export default async function DashboardPage() {
     .select('*, profiles(display_name)')
     .order('total_points', { ascending: false })
     .limit(10)
+
+  const { data: allPlayers } = await supabase
+    .from('leaderboard')
+    .select('user_id, total_points, profiles(display_name)')
+    .order('total_points', { ascending: false })
 
   // Načti moje vlastní pořadí samostatně
   const { data: myEntryArr } = await supabase
@@ -90,6 +96,7 @@ export default async function DashboardPage() {
                 { href: '/leaderboard', icon: '🏆', label: 'Žebříček', sub: 'Kdo vede?' },
                 { href: '/results', icon: '📊', label: 'Výsledky', sub: 'Přehled zápasů a bodů' },
               ].map(item => (
+
                 <Link
                   key={item.href}
                   href={item.href}
@@ -103,6 +110,11 @@ export default async function DashboardPage() {
                   </div>
                 </Link>
               ))}
+              <CompareModal players={(allPlayers ?? []).map(e => ({
+                user_id: e.user_id,
+                display_name: (e.profiles as unknown as { display_name: string })?.display_name ?? '–',
+                total_points: e.total_points,
+              }))} />
               {user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL && (
                 <Link
                   href="/admin"
