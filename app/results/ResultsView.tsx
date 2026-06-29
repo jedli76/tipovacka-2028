@@ -2,6 +2,10 @@ import Link from 'next/link'
 import ExactTipsCard, { type ExactTip } from './ExactTipsCard'
 import { teamWithFlag } from '@/lib/flags'
 
+function answersWithFlags(answer: string): string {
+  return answer.split(',').map(s => teamWithFlag(s.trim())).join(', ')
+}
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString('cs-CZ', {
     timeZone: 'Europe/Prague',
@@ -351,10 +355,10 @@ export default function ResultsView({
                     {tt ? (
                       <>
                         <div style={{ fontWeight: 700, fontSize: '0.9rem', color: correct ? '#34d399' : wrong ? 'rgba(255,255,255,0.6)' : '#e2e8f0', marginBottom: 4 }}>
-                          {tt.answer}
+                          {answersWithFlags(tt.answer)}
                         </div>
                         {wrong && q.correct_answer && (
-                          <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.25)' }}>✓ {q.correct_answer}</div>
+                          <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.25)' }}>✓ {answersWithFlags(q.correct_answer)}</div>
                         )}
                         {pending && (
                           <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.2)' }}>čeká se na výsledek</div>
@@ -411,7 +415,7 @@ export default function ResultsView({
                     {tt ? (
                       <>
                         <div style={{ fontWeight: 700, fontSize: '0.85rem', color: correct ? '#34d399' : 'rgba(255,255,255,0.6)', lineHeight: 1.35, marginBottom: 8 }}>
-                          {tt.answer}
+                          {answersWithFlags(tt.answer)}
                         </div>
                         <div style={{ fontWeight: 900, fontSize: '1.1rem', color: correct ? '#34d399' : pending ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.15)' }}>
                           {pending ? '—' : `+${tt.points}`}
@@ -553,9 +557,9 @@ export default function ResultsView({
                           </div>
                           {bt && (
                             <div style={{ fontSize: '0.82rem', color: isCorrect ? '#34d399' : 'rgba(255,255,255,0.4)' }}>
-                              {bt.answer}
+                              {answersWithFlags(bt.answer)}
                               {!isCorrect && q.correct_answer && (
-                                <span style={{ color: 'rgba(255,255,255,0.2)', marginLeft: 8 }}>· správně: {q.correct_answer}</span>
+                                <span style={{ color: 'rgba(255,255,255,0.2)', marginLeft: 8 }}>· správně: {answersWithFlags(q.correct_answer)}</span>
                               )}
                             </div>
                           )}
