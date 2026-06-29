@@ -92,12 +92,14 @@ export default async function DashboardPage() {
         {/* Stat karty */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Link href="/results" style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16, textDecoration: 'none', display: 'block' }} className="p-5">
+            <div style={{ fontSize: '1.5rem', marginBottom: 6 }}>🏅</div>
             <p className="text-sm font-semibold uppercase tracking-widest mb-2" style={{ color: '#64748b' }}>Moje body</p>
             <p className="text-4xl font-black" style={{ color: '#f59e0b' }}>
               {myEntry?.total_points ?? 0}
             </p>
           </Link>
           <Link href="/leaderboard" style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16, textDecoration: 'none', display: 'block' }} className="p-5">
+            <div style={{ fontSize: '1.5rem', marginBottom: 6 }}>📊</div>
             <p className="text-sm font-semibold uppercase tracking-widest mb-2" style={{ color: '#64748b' }}>Moje pořadí</p>
             <p className="text-4xl font-black" style={{ color: '#a78bfa' }}>
               {myRank ? `#${myRank}` : '–'}

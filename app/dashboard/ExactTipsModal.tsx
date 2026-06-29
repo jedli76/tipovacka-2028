@@ -31,6 +31,7 @@ export default function ExactTipsModal({ tips, count }: { tips: ExactTip[], coun
         onClick={() => setOpen(true)}
         style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16, padding: '20px', textAlign: 'left', cursor: 'pointer', width: '100%' }}
       >
+        <div style={{ fontSize: '1.5rem', marginBottom: 6 }}>🎯</div>
         <p className="text-sm font-semibold uppercase tracking-widest mb-2" style={{ color: '#64748b' }}>Přesné výsledky</p>
         <p className="text-4xl font-black" style={{ color: '#22c55e' }}>{count}</p>
       </button>

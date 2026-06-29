@@ -187,9 +187,9 @@ export default function CompareModal({ players, asCard }: { players: Player[], a
             justifyContent: 'space-between',
           }}
         >
-          <p style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7c6fcd', marginBottom: 8 }}>Porovnat</p>
-          <p style={{ fontSize: '2rem', lineHeight: 1 }}>⚖️</p>
-          <p style={{ fontSize: '0.78rem', fontWeight: 600, color: '#a78bfa', marginTop: 6 }}>s ostatními hráči</p>
+          <div style={{ fontSize: '1.5rem', marginBottom: 6 }}>⚖️</div>
+          <p style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#64748b', marginBottom: 8 }}>Porovnat</p>
+          <p style={{ fontSize: '0.85rem', fontWeight: 600, color: '#a78bfa' }}>s ostatními hráči</p>
         </button>
       ) : (
         <button
