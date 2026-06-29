@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import ExactTipsCard, { type ExactTip } from './ExactTipsCard'
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString('cs-CZ', {
@@ -177,10 +178,26 @@ export default function ResultsView({
     const m = matchesMap[t.match_id]
     return m?.home_score !== null && m?.home_score !== undefined
   })
-  const exactCount = tipsWithResult.filter(t => {
-    const m = matchesMap[t.match_id]
-    return t.home_score === m?.home_score && t.away_score === m?.away_score
-  }).length
+  const exactTips: ExactTip[] = tipsWithResult
+    .filter(t => {
+      const m = matchesMap[t.match_id]
+      return t.home_score === m?.home_score && t.away_score === m?.away_score
+    })
+    .map(t => {
+      const m = matchesMap[t.match_id]
+      return {
+        match_id: t.match_id,
+        home_score: t.home_score,
+        away_score: t.away_score,
+        is_joker: t.is_joker,
+        points: t.points ?? 0,
+        home_team: m.home_team,
+        away_team: m.away_team,
+        kickoff_at: m.kickoff_at,
+        group_name: m.group_name,
+      }
+    })
+    .sort((a, b) => new Date(a.kickoff_at).getTime() - new Date(b.kickoff_at).getTime())
 
   const jokerTip = tips.find(t => t.is_joker)
   const jokerMatch = jokerTip ? matchesMap[jokerTip.match_id] : null
@@ -255,11 +272,7 @@ export default function ResultsView({
             </div>
           </div>
 
-          <div style={{ ...S.glass(), padding: '20px' }}>
-            <div style={S.label}>Přesných tipů</div>
-            <div style={{ fontSize: '2.2rem', fontWeight: 900, color: '#34d399', lineHeight: 1 }}>{exactCount}</div>
-            <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem', marginTop: 4 }}>z {tipsWithResult.length} odehraných</div>
-          </div>
+          <ExactTipsCard exactTips={exactTips} totalWithResult={tipsWithResult.length} />
 
           <div style={{ ...S.glass(), padding: '20px' }}>
             <div style={S.label}>Tipováno zápasů</div>
