@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import CompareModal from './CompareModal'
 
 export default async function LeaderboardPage() {
   const supabase = await createClient()
@@ -27,7 +28,14 @@ export default async function LeaderboardPage() {
       </nav>
 
       <main className="max-w-3xl mx-auto p-4 py-8">
-        <h1 className="text-2xl font-black text-white mb-2">Žebříček</h1>
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="text-2xl font-black text-white">Žebříček</h1>
+          <CompareModal players={(leaderboard ?? []).map(e => ({
+            user_id: e.user_id,
+            display_name: (e.profiles as { display_name: string })?.display_name ?? '–',
+            total_points: e.total_points,
+          }))} />
+        </div>
         <p className="text-sm mb-6" style={{ color: '#64748b' }}>
           {leaderboard?.length ?? 0} hráčů · klikni na jméno pro detail tipů
         </p>
