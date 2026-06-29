@@ -20,20 +20,29 @@ export default async function DashboardPage() {
     .order('total_points', { ascending: false })
     .limit(10)
 
+  // Zjisti celkové pořadí uživatele
+  const { count: rankCount } = await supabase
+    .from('leaderboard')
+    .select('*', { count: 'exact', head: true })
+    .gt('total_points', leaderboard?.find(l => l.user_id === user.id)?.total_points ?? 0)
+
+  const myEntry = leaderboard?.find(l => l.user_id === user.id)
+  const myRank = myEntry ? (rankCount ?? 0) + 1 : null
+
   return (
-    <div className="min-h-screen bg-gray-950">
-      <nav className="bg-gray-900 border-b border-gray-800 px-4 py-3">
+    <div className="min-h-screen" style={{ background: '#0a0e1a', color: '#e2e8f0' }}>
+      <nav style={{ background: '#111827', borderBottom: '1px solid #1f2d45' }} className="px-4 py-3">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-xl">⚽</span>
-            <span className="font-bold text-white">Tipovačka EURO 2028</span>
+            <span className="font-bold text-white">Tipovačka MS 2026</span>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-gray-400 text-sm">
+            <span className="text-sm" style={{ color: '#94a3b8' }}>
               👤 {profile?.display_name || user.email}
             </span>
             <form action="/auth/logout" method="post">
-              <button className="text-sm text-gray-400 hover:text-white transition-colors">
+              <button className="text-sm hover:text-white transition-colors" style={{ color: '#94a3b8' }}>
                 Odhlásit se
               </button>
             </form>
@@ -42,80 +51,101 @@ export default async function DashboardPage() {
       </nav>
 
       <main className="max-w-6xl mx-auto p-4 py-8">
+        {/* Stat karty */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-gray-900 rounded-xl p-5 border border-gray-800">
-            <p className="text-gray-400 text-sm mb-1">Moje body</p>
-            <p className="text-3xl font-bold text-green-400">
-              {leaderboard?.find(l => l.user_id === user.id)?.total_points ?? 0}
+          <div style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16 }} className="p-5">
+            <p className="text-sm font-semibold uppercase tracking-widest mb-2" style={{ color: '#64748b' }}>Moje body</p>
+            <p className="text-4xl font-black" style={{ color: '#f59e0b' }}>
+              {myEntry?.total_points ?? 0}
             </p>
           </div>
-          <div className="bg-gray-900 rounded-xl p-5 border border-gray-800">
-            <p className="text-gray-400 text-sm mb-1">Moje pořadí</p>
-            <p className="text-3xl font-bold text-yellow-400">
-              #{(leaderboard?.findIndex(l => l.user_id === user.id) ?? -1) + 1 || '–'}
+          <div style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16 }} className="p-5">
+            <p className="text-sm font-semibold uppercase tracking-widest mb-2" style={{ color: '#64748b' }}>Moje pořadí</p>
+            <p className="text-4xl font-black" style={{ color: '#a78bfa' }}>
+              {myRank ? `#${myRank}` : '–'}
             </p>
           </div>
-          <div className="bg-gray-900 rounded-xl p-5 border border-gray-800">
-            <p className="text-gray-400 text-sm mb-1">Přesné výsledky</p>
-            <p className="text-3xl font-bold text-blue-400">
-              {leaderboard?.find(l => l.user_id === user.id)?.correct_results ?? 0}
+          <div style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16 }} className="p-5">
+            <p className="text-sm font-semibold uppercase tracking-widest mb-2" style={{ color: '#64748b' }}>Přesné výsledky</p>
+            <p className="text-4xl font-black" style={{ color: '#22c55e' }}>
+              {myEntry?.correct_results ?? 0}
             </p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-gray-900 rounded-xl p-5 border border-gray-800">
-            <h2 className="text-lg font-bold mb-4">Rychlé akce</h2>
-            <div className="space-y-3">
-              <Link href="/tips" className="flex items-center gap-3 p-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors">
-                <span className="text-2xl">✏️</span>
-                <div>
-                  <p className="font-medium">Zadat tipy</p>
-                  <p className="text-sm text-gray-400">Tipujte výsledky zápasů</p>
-                </div>
-              </Link>
-              <Link href="/leaderboard" className="flex items-center gap-3 p-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors">
-                <span className="text-2xl">🏆</span>
-                <div>
-                  <p className="font-medium">Žebříček</p>
-                  <p className="text-sm text-gray-400">Kdo vede?</p>
-                </div>
-              </Link>
-              <Link href="/results" className="flex items-center gap-3 p-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors">
-                <span className="text-2xl">📊</span>
-                <div>
-                  <p className="font-medium">Výsledky</p>
-                  <p className="text-sm text-gray-400">Přehled zápasů a bodů</p>
-                </div>
-              </Link>
+          {/* Rychlé akce */}
+          <div style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16 }} className="p-5">
+            <h2 className="text-lg font-bold mb-4 text-white">Rychlé akce</h2>
+            <div className="space-y-2">
+              {[
+                { href: '/tips', icon: '✏️', label: 'Zadat tipy', sub: 'Tipujte výsledky zápasů' },
+                { href: '/leaderboard', icon: '🏆', label: 'Žebříček', sub: 'Kdo vede?' },
+                { href: '/results', icon: '📊', label: 'Výsledky', sub: 'Přehled zápasů a bodů' },
+              ].map(item => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="flex items-center gap-3 p-3 rounded-xl transition-colors hover:bg-slate-700/50"
+                  style={{ background: '#1a2235', border: '1px solid #1f2d45' }}
+                >
+                  <span className="text-2xl">{item.icon}</span>
+                  <div>
+                    <p className="font-semibold text-white">{item.label}</p>
+                    <p className="text-sm" style={{ color: '#64748b' }}>{item.sub}</p>
+                  </div>
+                </Link>
+              ))}
               {user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL && (
-                <Link href="/admin" className="flex items-center gap-3 p-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors">
+                <Link
+                  href="/admin"
+                  className="flex items-center gap-3 p-3 rounded-xl transition-colors"
+                  style={{ background: '#1a2235', border: '1px solid #1f2d45' }}
+                >
                   <span className="text-2xl">⚙️</span>
                   <div>
-                    <p className="font-medium">Admin</p>
-                    <p className="text-sm text-gray-400">Správa zápasů a výsledků</p>
+                    <p className="font-semibold text-white">Admin</p>
+                    <p className="text-sm" style={{ color: '#64748b' }}>Správa zápasů a výsledků</p>
                   </div>
                 </Link>
               )}
             </div>
           </div>
 
-          <div className="bg-gray-900 rounded-xl p-5 border border-gray-800">
-            <h2 className="text-lg font-bold mb-4">Top 10 žebříček</h2>
+          {/* Top 10 žebříček */}
+          <div style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16 }} className="p-5">
+            <h2 className="text-lg font-bold mb-4 text-white">Top 10 žebříček</h2>
             {leaderboard && leaderboard.length > 0 ? (
-              <div className="space-y-2">
-                {leaderboard.map((entry, i) => (
-                  <div key={entry.user_id} className={`flex items-center justify-between p-2 rounded-lg ${entry.user_id === user.id ? 'bg-green-500/10 border border-green-500/30' : ''}`}>
-                    <div className="flex items-center gap-3">
-                      <span className="text-gray-500 w-6 text-sm">#{i + 1}</span>
-                      <span className="text-sm">{(entry.profiles as { display_name: string })?.display_name}</span>
+              <div className="space-y-1">
+                {leaderboard.map((entry, i) => {
+                  const isMe = entry.user_id === user.id
+                  const medals = ['🥇', '🥈', '🥉']
+                  return (
+                    <div
+                      key={entry.user_id}
+                      className="flex items-center justify-between px-3 py-2 rounded-lg"
+                      style={{
+                        background: isMe ? 'rgba(245,158,11,0.08)' : 'transparent',
+                        border: isMe ? '1px solid rgba(245,158,11,0.3)' : '1px solid transparent',
+                      }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-bold w-8" style={{ color: '#64748b' }}>
+                          {medals[i] ?? `#${i + 1}`}
+                        </span>
+                        <span className="text-sm font-medium text-white">
+                          {(entry.profiles as { display_name: string })?.display_name ?? '–'}
+                        </span>
+                      </div>
+                      <span className="font-bold text-sm" style={{ color: '#f59e0b' }}>
+                        {entry.total_points} b
+                      </span>
                     </div>
-                    <span className="font-bold text-green-400">{entry.total_points} b</span>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             ) : (
-              <p className="text-gray-500 text-sm">Turnaj ještě nezačal. Zadejte tipy!</p>
+              <p className="text-sm" style={{ color: '#64748b' }}>Žádná data.</p>
             )}
           </div>
         </div>

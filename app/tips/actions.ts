@@ -25,7 +25,21 @@ export async function saveTip(input: SaveTipInput): Promise<{ error?: string }> 
     display_name: user.user_metadata?.display_name || user.email?.split('@')[0] || 'Hráč',
   }, { onConflict: 'id', ignoreDuplicates: true })
 
-  // Ověření, že zápas ještě nezačal
+  // Ověření globální uzávěrky (5 minut před prvním zápasem šampionátu)
+  const { data: firstMatch } = await supabase
+    .from('matches')
+    .select('kickoff_at')
+    .order('kickoff_at', { ascending: true })
+    .limit(1)
+    .single()
+
+  if (firstMatch) {
+    const deadline = new Date(firstMatch.kickoff_at).getTime() - 5 * 60 * 1000
+    if (Date.now() >= deadline) {
+      return { error: 'Uzávěrka tipů proběhla — tipy již nelze měnit.' }
+    }
+  }
+
   const { data: match } = await supabase
     .from('matches')
     .select('kickoff_at, home_score, away_score')
@@ -33,10 +47,6 @@ export async function saveTip(input: SaveTipInput): Promise<{ error?: string }> 
     .single()
 
   if (!match) return { error: 'Zápas nenalezen.' }
-
-  if (new Date(match.kickoff_at) <= new Date()) {
-    return { error: 'Zápas už začal, tip nelze měnit.' }
-  }
 
   // Pokud hráč nastavuje žolíka, ověř že ho nemá použitý jinde
   if (input.isJoker) {

@@ -27,6 +27,7 @@ type Props = {
   tipsMap: Record<string, Tip>
   jokerUsed: boolean
   userId: string
+  isClosed: boolean
 }
 
 function formatKickoff(iso: string) {
@@ -59,7 +60,7 @@ function stageLabel(stage: string) {
   return labels[stage] ?? stage
 }
 
-export default function TipsForm({ matches, tipsMap, jokerUsed, userId }: Props) {
+export default function TipsForm({ matches, tipsMap, jokerUsed, userId, isClosed }: Props) {
   const [tips, setTips] = useState<Record<string, { home: string; away: string; joker: boolean }>>(
     () => Object.fromEntries(
       matches.map(m => [
@@ -125,17 +126,12 @@ export default function TipsForm({ matches, tipsMap, jokerUsed, userId }: Props)
     })
   }
 
-  const grouped = groupMatches(matches)
   const now = new Date()
 
   return (
-    <div className="space-y-8">
-      {Object.entries(grouped).map(([groupName, groupMatches]) => (
-        <div key={groupName}>
-          <h2 className="text-lg font-semibold text-yellow-400 mb-3">{groupName}</h2>
-          <div className="space-y-3">
-            {groupMatches.map(match => {
-              const isLocked = new Date(match.kickoff_at) <= now
+    <div className="space-y-3">
+      {matches.map(match => {
+              const isLocked = isClosed
               const tip = tips[match.id]
               const isThisJoker = tip?.joker
               const canJoker = !jokerUsed || isThisJoker || (!currentJoker && !jokerUsed)
@@ -231,10 +227,7 @@ export default function TipsForm({ matches, tipsMap, jokerUsed, userId }: Props)
                   )}
                 </div>
               )
-            })}
-          </div>
-        </div>
-      ))}
+      })}
     </div>
   )
 }
