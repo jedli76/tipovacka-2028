@@ -132,7 +132,7 @@ export default function CompareModal({ players }: { players: Player[] }) {
     ? players.filter(p =>
         normalize(p.display_name).includes(normalize(search)) &&
         !selected.includes(p.user_id)
-      ).slice(0, 8)
+      )
     : []
 
   function togglePlayer(id: string) {
@@ -281,7 +281,8 @@ export default function CompareModal({ players }: { players: Player[] }) {
                     border: '1px solid rgba(255,255,255,0.1)',
                     borderRadius: 12,
                     marginTop: 4,
-                    overflow: 'hidden',
+                    maxHeight: 320,
+                    overflowY: 'auto',
                     zIndex: 10,
                     boxShadow: '0 16px 48px rgba(0,0,0,0.5)',
                   }}>
