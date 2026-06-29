@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import ExportButton from './ExportButton'
 import BonusAdmin from './bonuses/BonusAdmin'
-import { saveBonusAnswer, saveTournamentAnswer, addTournamentQuestion } from './bonuses/actions'
+import { addTournamentQuestion } from './bonuses/actions'
 
 type Match = {
   id: string
@@ -44,6 +44,31 @@ export default function AdminTabs({
 }) {
   const [tab, setTab] = useState<'matches' | 'bonuses'>('matches')
   const [addingBonus, setAddingBonus] = useState(false)
+  const [newQuestion, setNewQuestion] = useState('')
+  const [newCategory, setNewCategory] = useState('bonus')
+  const [newPoints, setNewPoints] = useState('10')
+  const [addErr, setAddErr] = useState('')
+  const [addPending, startAddTransition] = useTransition()
+
+  function submitNewQuestion() {
+    if (!newQuestion.trim()) return
+    setAddErr('')
+    startAddTransition(async () => {
+      const fd = new FormData()
+      fd.append('question', newQuestion)
+      fd.append('category', newCategory)
+      fd.append('points', newPoints)
+      const res = await addTournamentQuestion(fd)
+      if (res.error) {
+        setAddErr(res.error)
+      } else {
+        setAddingBonus(false)
+        setNewQuestion('')
+        setNewCategory('bonus')
+        setNewPoints('10')
+      }
+    })
+  }
 
   const tabBtn = (t: typeof tab, label: string, count: number) => (
     <button
@@ -150,9 +175,50 @@ export default function AdminTabs({
         <BonusAdmin
           bonusQuestions={bonusQuestions}
           tournamentQuestions={tournamentQuestions}
-          forceAddOpen={addingBonus}
-          onAddClose={() => setAddingBonus(false)}
         />
+      )}
+
+      {/* Modal pro přidání otázky */}
+      {addingBonus && (
+        <div
+          onClick={e => { if (e.target === e.currentTarget) setAddingBonus(false) }}
+          style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+        >
+          <div style={{ background: 'linear-gradient(160deg, #0f1623 0%, #0a0f1a 100%)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, width: '100%', maxWidth: 520, padding: 24 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <span style={{ fontWeight: 800, fontSize: '1rem', color: '#fff' }}>Nová bonusová otázka</span>
+              <button onClick={() => setAddingBonus(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)', fontSize: '1.4rem', cursor: 'pointer', lineHeight: 1 }}>×</button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div>
+                <label style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', display: 'block', marginBottom: 4 }}>Zadání / otázka</label>
+                <input value={newQuestion} onChange={e => setNewQuestion(e.target.value)} placeholder="Text otázky..." autoFocus style={{ width: '100%', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: '9px 12px', color: '#e2e8f0', fontSize: '0.9rem', outline: 'none', boxSizing: 'border-box' }} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div>
+                  <label style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', display: 'block', marginBottom: 4 }}>Kategorie</label>
+                  <select value={newCategory} onChange={e => setNewCategory(e.target.value)} style={{ width: '100%', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: '9px 12px', color: '#e2e8f0', fontSize: '0.9rem', outline: 'none' }}>
+                    <option value="bonus">Velký bonus</option>
+                    <option value="group_advancement">Postupující ze skupin</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', display: 'block', marginBottom: 4 }}>Body za správnou odpověď</label>
+                  <input type="number" value={newPoints} onChange={e => setNewPoints(e.target.value)} min="1" style={{ width: '100%', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: '9px 12px', color: '#e2e8f0', fontSize: '0.9rem', outline: 'none', boxSizing: 'border-box' }} />
+                </div>
+              </div>
+            </div>
+            {addErr && <p style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: 10 }}>{addErr}</p>}
+            <div style={{ display: 'flex', gap: 8, marginTop: 20 }}>
+              <button onClick={submitNewQuestion} disabled={addPending || !newQuestion.trim()} style={{ background: '#4f46e5', border: 'none', borderRadius: 10, padding: '10px 20px', color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem', opacity: addPending ? 0.6 : 1 }}>
+                {addPending ? 'Ukládám...' : 'Přidat otázku'}
+              </button>
+              <button onClick={() => setAddingBonus(false)} style={{ background: 'none', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '10px 16px', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '0.9rem' }}>
+                Zrušit
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
