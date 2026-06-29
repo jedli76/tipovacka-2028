@@ -1,6 +1,42 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
+
+export async function addTournamentQuestion(formData: FormData): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user || user.email !== process.env.ADMIN_EMAIL) return { error: 'Přístup odepřen.' }
+
+  const question = formData.get('question') as string
+  const category = formData.get('category') as string
+  const points = parseInt(formData.get('points') as string) || 10
+
+  if (!question?.trim()) return { error: 'Otázka nesmí být prázdná.' }
+
+  // Zjisti nejvyšší col_index a sort_order
+  const { data: last } = await supabase
+    .from('tournament_questions')
+    .select('col_index, sort_order')
+    .order('col_index', { ascending: false })
+    .limit(1)
+    .single()
+
+  const nextColIndex = (last?.col_index ?? 300) + 2
+  const nextSortOrder = (last?.sort_order ?? 0) + 1
+
+  const { error } = await supabase.from('tournament_questions').insert({
+    col_index: nextColIndex,
+    question: question.trim(),
+    category,
+    points_per_correct: points,
+    sort_order: nextSortOrder,
+  })
+
+  if (error) return { error: error.message }
+  revalidatePath('/admin/bonuses')
+  return {}
+}
 
 async function updateLeaderboardForUsers(supabase: any, userIds: string[]) {
   for (const userId of userIds) {

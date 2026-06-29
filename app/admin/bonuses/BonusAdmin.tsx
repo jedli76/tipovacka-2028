@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { saveBonusAnswer, saveTournamentAnswer } from './actions'
+import { saveBonusAnswer, saveTournamentAnswer, addTournamentQuestion } from './actions'
 
 type BonusQ = {
   id: string
@@ -183,6 +183,88 @@ export default function BonusAdmin({
             ))}
           </div>
         </div>
+      )}
+
+      {/* Přidat novou otázku */}
+      <AddQuestionForm />
+    </div>
+  )
+}
+
+function AddQuestionForm() {
+  const [open, setOpen] = useState(false)
+  const [err, setErr] = useState('')
+  const [ok, setOk] = useState(false)
+  const [pending, startTransition] = useTransition()
+
+  function submit(formData: FormData) {
+    setErr('')
+    startTransition(async () => {
+      const res = await addTournamentQuestion(formData)
+      if (res.error) {
+        setErr(res.error)
+      } else {
+        setOk(true)
+        setOpen(false)
+        setTimeout(() => setOk(false), 3000)
+      }
+    })
+  }
+
+  const inputStyle = {
+    width: '100%',
+    background: 'rgba(255,255,255,0.07)',
+    border: '1px solid rgba(255,255,255,0.15)',
+    borderRadius: 8,
+    padding: '9px 12px',
+    color: '#e2e8f0',
+    fontSize: '0.88rem',
+    outline: 'none',
+    boxSizing: 'border-box' as const,
+  }
+
+  return (
+    <div style={{ marginTop: 16 }}>
+      {!open ? (
+        <button
+          onClick={() => setOpen(true)}
+          style={{ background: 'rgba(99,102,241,0.15)', border: '1px dashed rgba(99,102,241,0.4)', borderRadius: 12, padding: '12px 20px', color: '#a5b4fc', fontWeight: 700, cursor: 'pointer', fontSize: '0.88rem', width: '100%' }}
+        >
+          + Přidat novou otázku
+        </button>
+      ) : (
+        <form action={submit} style={{ background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 14, padding: '16px' }}>
+          <div style={{ fontWeight: 700, color: '#a5b4fc', marginBottom: 14, fontSize: '0.9rem' }}>Nová bonusová otázka</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div>
+              <label style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', display: 'block', marginBottom: 4 }}>Otázka</label>
+              <input name="question" required placeholder="Text otázky..." style={inputStyle} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <div>
+                <label style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', display: 'block', marginBottom: 4 }}>Kategorie</label>
+                <select name="category" style={{ ...inputStyle }}>
+                  <option value="bonus">Velký bonus</option>
+                  <option value="group_advancement">Postupující ze skupin</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', display: 'block', marginBottom: 4 }}>Body za správnou odpověď</label>
+                <input name="points" type="number" defaultValue="10" min="1" style={inputStyle} />
+              </div>
+            </div>
+          </div>
+          {err && <p style={{ color: '#ef4444', fontSize: '0.78rem', marginTop: 8 }}>{err}</p>}
+          {ok && <p style={{ color: '#34d399', fontSize: '0.78rem', marginTop: 8 }}>✓ Otázka přidána</p>}
+          <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
+            <button type="submit" disabled={pending} style={{ background: '#4f46e5', border: 'none', borderRadius: 8, padding: '9px 18px', color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: '0.88rem', opacity: pending ? 0.6 : 1 }}>
+              {pending ? 'Ukládám...' : 'Přidat otázku'}
+            </button>
+            <button type="button" onClick={() => setOpen(false)} style={{ background: 'none', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '9px 14px', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '0.88rem' }}>
+              Zrušit
+            </button>
+          </div>
+        </form>
       )}
     </div>
   )
