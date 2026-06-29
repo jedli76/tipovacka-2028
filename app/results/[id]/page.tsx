@@ -24,13 +24,23 @@ export default async function PlayerResultsPage({ params }: { params: Promise<{ 
     .select('*')
     .eq('user_id', id)
 
-  const { data: bonusQuestions, error: bqError } = await supabase
+  const { data: bonusQuestions } = await supabase
     .from('bonus_questions')
     .select('*')
     .order('sort_order')
 
-  const { data: bonusTips, error: btError } = await supabase
+  const { data: bonusTips } = await supabase
     .from('bonus_tips')
+    .select('question_id, answer, points')
+    .eq('user_id', id)
+
+  const { data: tournamentQuestions } = await supabase
+    .from('tournament_questions')
+    .select('*')
+    .order('sort_order')
+
+  const { data: tournamentTips } = await supabase
+    .from('tournament_tips')
     .select('question_id, answer, points')
     .eq('user_id', id)
 
@@ -41,6 +51,8 @@ export default async function PlayerResultsPage({ params }: { params: Promise<{ 
       tips={tips ?? []}
       bonusQuestions={bonusQuestions ?? []}
       bonusTips={bonusTips ?? []}
+      tournamentQuestions={tournamentQuestions ?? []}
+      tournamentTips={tournamentTips ?? []}
       backHref="/leaderboard"
       backLabel="Žebříček"
     />

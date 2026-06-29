@@ -52,21 +52,43 @@ type BonusTip = {
   points: number
 }
 
+type TournamentQuestion = {
+  id: string
+  question: string
+  category: string
+  correct_answer: string | null
+  points_per_correct: number
+  sort_order: number
+}
+
+type TournamentTip = {
+  question_id: string
+  answer: string
+  points: number
+}
+
 type Props = {
   displayName: string
   matches: Match[]
   tips: Tip[]
   bonusQuestions?: BonusQuestion[]
   bonusTips?: BonusTip[]
+  tournamentQuestions?: TournamentQuestion[]
+  tournamentTips?: TournamentTip[]
   backHref: string
   backLabel: string
 }
 
-export default function ResultsView({ displayName, matches, tips, bonusQuestions = [], bonusTips = [], backHref, backLabel }: Props) {
+export default function ResultsView({ displayName, matches, tips, bonusQuestions = [], bonusTips = [], tournamentQuestions = [], tournamentTips = [], backHref, backLabel }: Props) {
   const tipsMap = Object.fromEntries(tips.map(t => [t.match_id, t]))
   const matchesMap = Object.fromEntries(matches.map(m => [m.id, m]))
 
   const bonusTipsMap = Object.fromEntries(bonusTips.map(t => [t.question_id, t]))
+  const tournamentTipsMap = Object.fromEntries(tournamentTips.map(t => [t.question_id, t]))
+
+  const tournamentPoints = tournamentTips.reduce((s, t) => s + (t.points ?? 0), 0)
+  const bigBonusQuestions = tournamentQuestions.filter(q => q.category === 'bonus')
+  const groupAdvQuestions = tournamentQuestions.filter(q => q.category === 'group_advancement')
 
   // Bonus otázky patřící k danému zápasu (podle posledního match_col_index)
   const bonusByMatchColIndex: Record<number, BonusQuestion[]> = {}
@@ -79,7 +101,7 @@ export default function ResultsView({ displayName, matches, tips, bonusQuestions
   const bonusPoints = bonusTips.reduce((s, t) => s + (t.points ?? 0), 0)
   const bonusCorrect = bonusTips.filter(t => t.points > 0).length
 
-  const totalPoints = tips.reduce((s, t) => s + (t.points ?? 0), 0) + bonusPoints
+  const totalPoints = tips.reduce((s, t) => s + (t.points ?? 0), 0) + bonusPoints + tournamentPoints
   const tipsWithResult = tips.filter(t => {
     const m = matchesMap[t.match_id]
     return m?.home_score !== null && m?.home_score !== undefined
@@ -159,6 +181,7 @@ export default function ResultsView({ displayName, matches, tips, bonusQuestions
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         <div className="space-y-3">
+
           {matches.map(match => {
             const hasResult = match.home_score !== null && match.away_score !== null
             const tip = tipsMap[match.id]
@@ -288,6 +311,117 @@ export default function ResultsView({ displayName, matches, tips, bonusQuestions
             )
           })}
         </div>
+
+        {/* Velké bonusy */}
+        {bigBonusQuestions.length > 0 && (
+          <div className="mt-10">
+            <h2 className="text-lg font-black text-white mb-3 flex items-center gap-2">
+              🎯 Velké bonusy
+              <span className="text-sm font-normal" style={{ color: '#64748b' }}>
+                · {tournamentTips.filter(t => {
+                  const q = bigBonusQuestions.find(q => q.id === t.question_id)
+                  return q && t.points > 0
+                }).length} / {bigBonusQuestions.length} správně
+              </span>
+            </h2>
+            <div className="space-y-2">
+              {bigBonusQuestions.map(q => {
+                const tt = tournamentTipsMap[q.id]
+                const isCorrect = tt && tt.points > 0
+                const hasAnswer = !!tt
+                return (
+                  <div key={q.id} style={{
+                    background: isCorrect ? '#0d1a0d' : hasAnswer ? '#1a1010' : '#111827',
+                    border: `1px solid ${isCorrect ? 'rgba(34,197,94,0.3)' : hasAnswer ? 'rgba(239,68,68,0.2)' : '#1f2d45'}`,
+                    borderRadius: 12,
+                    padding: '0.75rem 1rem',
+                  }}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1">
+                        <p className="text-sm text-white mb-1">{q.question}</p>
+                        {hasAnswer ? (
+                          <p className="text-xs" style={{ color: isCorrect ? '#22c55e' : '#94a3b8' }}>
+                            Tip: <strong>{tt.answer}</strong>
+                            {q.correct_answer && !isCorrect && (
+                              <span style={{ color: '#64748b' }}> · Správně: <strong style={{ color: '#94a3b8' }}>{q.correct_answer}</strong></span>
+                            )}
+                            {!q.correct_answer && !isCorrect && (
+                              <span style={{ color: '#64748b' }}> · Výsledek zatím není znám</span>
+                            )}
+                          </p>
+                        ) : (
+                          <p className="text-xs" style={{ color: '#475569' }}>Bez tipu</p>
+                        )}
+                      </div>
+                      {hasAnswer && (
+                        <span className="font-black text-xl shrink-0 mt-1" style={{ color: isCorrect ? '#22c55e' : '#ef4444' }}>
+                          {tt.points}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Postupující ze skupin */}
+        {groupAdvQuestions.length > 0 && (
+          <div className="mt-10">
+            <h2 className="text-lg font-black text-white mb-3 flex items-center gap-2">
+              🏆 Postupující ze skupin
+              <span className="text-sm font-normal" style={{ color: '#64748b' }}>
+                · {tournamentTips.filter(t => {
+                  const q = groupAdvQuestions.find(q => q.id === t.question_id)
+                  return q && t.points > 0
+                }).reduce((s, t) => s + t.points, 0)} bodů
+              </span>
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {groupAdvQuestions.map(q => {
+                const tt = tournamentTipsMap[q.id]
+                const isCorrect = tt && tt.points > 0
+                const hasAnswer = !!tt
+                const groupLetter = q.question.match(/skupin[eě]\s+([A-L])/)?.[1] ?? ''
+                return (
+                  <div key={q.id} style={{
+                    background: isCorrect ? '#0d1a0d' : hasAnswer ? '#1a1010' : '#111827',
+                    border: `1px solid ${isCorrect ? 'rgba(34,197,94,0.3)' : hasAnswer ? 'rgba(239,68,68,0.2)' : '#1f2d45'}`,
+                    borderRadius: 12,
+                    padding: '0.75rem 1rem',
+                  }}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1">
+                        <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: '#64748b' }}>
+                          Skupina {groupLetter}
+                        </p>
+                        {hasAnswer ? (
+                          <p className="text-sm" style={{ color: isCorrect ? '#22c55e' : '#94a3b8' }}>
+                            {tt.answer}
+                          </p>
+                        ) : (
+                          <p className="text-xs" style={{ color: '#475569' }}>Bez tipu</p>
+                        )}
+                        {q.correct_answer && hasAnswer && !isCorrect && (
+                          <p className="text-xs mt-1" style={{ color: '#64748b' }}>Správně: <strong style={{ color: '#94a3b8' }}>{q.correct_answer}</strong></p>
+                        )}
+                        {!q.correct_answer && hasAnswer && (
+                          <p className="text-xs mt-0.5" style={{ color: '#475569' }}>Výsledek zatím není znám</p>
+                        )}
+                      </div>
+                      {hasAnswer && (
+                        <span className="font-black text-xl shrink-0 mt-1" style={{ color: isCorrect ? '#22c55e' : tt.points === 0 && !q.correct_answer ? '#64748b' : '#ef4444' }}>
+                          {tt.points}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
       </main>
     </div>
   )

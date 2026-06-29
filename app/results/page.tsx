@@ -33,6 +33,16 @@ export default async function ResultsPage() {
     .select('question_id, answer, points')
     .eq('user_id', user.id)
 
+  const { data: tournamentQuestions } = await supabase
+    .from('tournament_questions')
+    .select('*')
+    .order('sort_order')
+
+  const { data: tournamentTips } = await supabase
+    .from('tournament_tips')
+    .select('question_id, answer, points')
+    .eq('user_id', user.id)
+
   return (
     <ResultsView
       displayName={profile?.display_name ?? 'Moje výsledky'}
@@ -40,6 +50,8 @@ export default async function ResultsPage() {
       tips={myTips ?? []}
       bonusQuestions={bonusQuestions ?? []}
       bonusTips={bonusTips ?? []}
+      tournamentQuestions={tournamentQuestions ?? []}
+      tournamentTips={tournamentTips ?? []}
       backHref="/dashboard"
       backLabel="Dashboard"
     />
