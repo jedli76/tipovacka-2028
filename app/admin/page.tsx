@@ -25,13 +25,20 @@ export default async function AdminPage() {
       <main className="max-w-5xl mx-auto p-4 py-8 space-y-8">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Zápasy</h1>
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-wrap">
             <Link
               href="/admin/bonuses"
               className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors"
             >
               🎯 Bonusové otázky
             </Link>
+            <a
+              href="/api/admin/export-tips"
+              download
+              className="bg-emerald-700 hover:bg-emerald-600 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors"
+            >
+              📥 Export tipů (CSV)
+            </a>
             <Link
               href="/admin/matches/new"
               className="bg-green-500 hover:bg-green-400 text-black font-bold px-4 py-2 rounded-lg text-sm transition-colors"
