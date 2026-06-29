@@ -120,6 +120,7 @@ export default async function DashboardPage() {
             { href: '/leaderboard', icon: '🏆', label: 'Žebříček' },
             { href: '/results', icon: '📊', label: 'Výsledky' },
             { href: '/chat', icon: '💬', label: 'Chat' },
+            { href: '/rules', icon: '📋', label: 'Pravidla' },
             ...(user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL ? [{ href: '/admin', icon: '⚙️', label: 'Admin' }] : []),
           ].map(item => (
             <Link
