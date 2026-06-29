@@ -1,14 +1,22 @@
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
 export async function GET() {
+  // Ověř admina přes běžného klienta (respektuje session)
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user || user.email !== process.env.ADMIN_EMAIL) {
     return NextResponse.json({ error: 'Přístup odepřen.' }, { status: 403 })
   }
 
-  const { data: tips } = await supabase
+  // Pro čtení všech tipů (obejití RLS) použij service role key
+  const admin = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  )
+
+  const { data: tips } = await admin
     .from('tips')
     .select(`
       profiles(display_name),
