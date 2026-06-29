@@ -125,9 +125,12 @@ export default function CompareModal({ players }: { players: Player[] }) {
     })
   }, [selected])
 
+  const normalize = (s: string) =>
+    s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+
   const filteredPlayers = search.length > 1
     ? players.filter(p =>
-        p.display_name.toLowerCase().includes(search.toLowerCase()) &&
+        normalize(p.display_name).includes(normalize(search)) &&
         !selected.includes(p.user_id)
       ).slice(0, 8)
     : []
