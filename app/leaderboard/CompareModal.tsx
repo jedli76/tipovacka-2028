@@ -166,7 +166,7 @@ export default function CompareModal({ players, asCard }: { players: Player[], a
     if (activeGroup === name) setActiveGroup(null)
   }
 
-  const selectedData = compareData
+  const selectedData = [...(compareData ?? [])].sort((a, b) => a.rank - b.rank)
 
   return (
     <>
@@ -258,7 +258,11 @@ export default function CompareModal({ players, asCard }: { players: Player[], a
                 <div style={{ marginBottom: 16 }}>
                   <div style={S.label}>Vybráno</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {selected.map(id => {
+                    {[...selected].sort((a, b) => {
+                      const ra = compareData?.find(x => x.user_id === a)?.rank ?? players.findIndex(x => x.user_id === a)
+                      const rb = compareData?.find(x => x.user_id === b)?.rank ?? players.findIndex(x => x.user_id === b)
+                      return ra - rb
+                    }).map(id => {
                       const p = players.find(x => x.user_id === id)
                       return (
                         <button
