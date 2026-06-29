@@ -115,13 +115,9 @@ function QuestionRow({
 export default function BonusAdmin({
   bonusQuestions,
   tournamentQuestions,
-  forceAddOpen,
-  onAddClose,
 }: {
   bonusQuestions: BonusQ[]
   tournamentQuestions: TournamentQ[]
-  forceAddOpen?: boolean
-  onAddClose?: () => void
 }) {
   const bigBonuses = tournamentQuestions.filter(q => q.category === 'bonus' || q.category === 'bonus_small')
   const groupAdv = tournamentQuestions.filter(q => q.category === 'group_advancement')
@@ -192,8 +188,8 @@ export default function BonusAdmin({
         </div>
       )}
 
-      {/* Přidat novou otázku */}
-      <AddQuestionForm forceOpen={forceAddOpen} onClose={onAddClose} />
+      {/* Přidat novou otázku — inline tlačítko pro přidání (záložní) */}
+      <AddQuestionForm />
     </div>
   )
 }

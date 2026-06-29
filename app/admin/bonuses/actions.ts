@@ -1,12 +1,24 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
 
-export async function addTournamentQuestion(formData: FormData): Promise<{ error?: string }> {
+function adminClient() {
+  return createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  )
+}
+
+async function checkAdmin(): Promise<boolean> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user || user.email !== process.env.ADMIN_EMAIL) return { error: 'Přístup odepřen.' }
+  return !!user && user.email === 'romanjedlicka@gmail.com'
+}
+
+export async function addTournamentQuestion(formData: FormData): Promise<{ error?: string }> {
+  if (!await checkAdmin()) return { error: 'Přístup odepřen.' }
 
   const question = formData.get('question') as string
   const category = formData.get('category') as string
@@ -14,8 +26,9 @@ export async function addTournamentQuestion(formData: FormData): Promise<{ error
 
   if (!question?.trim()) return { error: 'Otázka nesmí být prázdná.' }
 
-  // Zjisti nejvyšší col_index a sort_order
-  const { data: last } = await supabase
+  const db = adminClient()
+
+  const { data: last } = await db
     .from('tournament_questions')
     .select('col_index, sort_order')
     .order('col_index', { ascending: false })
@@ -25,7 +38,7 @@ export async function addTournamentQuestion(formData: FormData): Promise<{ error
   const nextColIndex = (last?.col_index ?? 300) + 2
   const nextSortOrder = (last?.sort_order ?? 0) + 1
 
-  const { error } = await supabase.from('tournament_questions').insert({
+  const { error } = await db.from('tournament_questions').insert({
     col_index: nextColIndex,
     question: question.trim(),
     category,
@@ -34,7 +47,7 @@ export async function addTournamentQuestion(formData: FormData): Promise<{ error
   })
 
   if (error) return { error: error.message }
-  revalidatePath('/admin/bonuses')
+  revalidatePath('/admin')
   return {}
 }
 
@@ -43,13 +56,11 @@ export async function saveQuestionText(
   questionId: string,
   question: string,
 ): Promise<{ error?: string }> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user || user.email !== process.env.ADMIN_EMAIL) return { error: 'Přístup odepřen.' }
+  if (!await checkAdmin()) return { error: 'Přístup odepřen.' }
   if (!question.trim()) return { error: 'Otázka nesmí být prázdná.' }
-  const { error } = await supabase.from(table).update({ question: question.trim() }).eq('id', questionId)
+  const { error } = await adminClient().from(table).update({ question: question.trim() }).eq('id', questionId)
   if (error) return { error: error.message }
-  revalidatePath('/admin/bonuses')
+  revalidatePath('/admin')
   return {}
 }
 
