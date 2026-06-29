@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import ExactTipsCard, { type ExactTip } from './ExactTipsCard'
+import { teamWithFlag } from '@/lib/flags'
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString('cs-CZ', {
@@ -296,7 +297,7 @@ export default function ResultsView({
             <div>
               <div style={{ ...S.pill('#f59e0b'), marginBottom: 8 }}>⚡ Žolík</div>
               <div style={{ fontWeight: 800, color: '#fbbf24', fontSize: '1rem' }}>
-                {jokerMatch.home_team} – {jokerMatch.away_team}
+                {teamWithFlag(jokerMatch.home_team)} – {teamWithFlag(jokerMatch.away_team)}
               </div>
               <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem', marginTop: 2 }}>
                 Tip: {jokerTip.home_score}:{jokerTip.away_score}
@@ -487,9 +488,9 @@ export default function ResultsView({
                         {isWinner && !isExact && <span style={S.pill('#60a5fa')}>✓ Správný vítěz</span>}
                       </div>
                       <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#e2e8f0', lineHeight: 1.5 }}>
-                        {match.home_team}
+                        {teamWithFlag(match.home_team)}
                         <span style={{ color: 'rgba(255,255,255,0.2)', margin: '0 6px' }}>–</span>
-                        {match.away_team}
+                        {teamWithFlag(match.away_team)}
                       </div>
                     </div>
 

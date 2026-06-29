@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { flag } from '@/lib/flags'
 
 export async function GET(request: NextRequest) {
   const ids = request.nextUrl.searchParams.get('ids')?.split(',').filter(Boolean) ?? []
@@ -36,7 +37,7 @@ export async function GET(request: NextRequest) {
     const m = j.matches as unknown as { home_team: string; away_team: string } | null
     if (m) {
       jokerMap[j.user_id] = {
-        match: `${m.home_team.slice(0, 3).toUpperCase()}-${m.away_team.slice(0, 3).toUpperCase()}`,
+        match: `${flag(m.home_team) || m.home_team.slice(0, 3).toUpperCase()}-${flag(m.away_team) || m.away_team.slice(0, 3).toUpperCase()}`,
         points: j.points,
       }
     }

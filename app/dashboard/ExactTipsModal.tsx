@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { teamWithFlag } from '@/lib/flags'
 
 type ExactTip = {
   match_id: string
@@ -103,9 +104,9 @@ export default function ExactTipsModal({ tips, count }: { tips: ExactTip[], coun
                           )}
                         </div>
                         <div style={{ fontWeight: 700, fontSize: '0.92rem', color: '#e2e8f0' }}>
-                          {t.home_team}
+                          {teamWithFlag(t.home_team)}
                           <span style={{ color: 'rgba(255,255,255,0.2)', margin: '0 6px' }}>–</span>
-                          {t.away_team}
+                          {teamWithFlag(t.away_team)}
                         </div>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
