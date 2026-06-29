@@ -38,6 +38,21 @@ export async function addTournamentQuestion(formData: FormData): Promise<{ error
   return {}
 }
 
+export async function saveQuestionText(
+  table: 'bonus_questions' | 'tournament_questions',
+  questionId: string,
+  question: string,
+): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user || user.email !== process.env.ADMIN_EMAIL) return { error: 'Přístup odepřen.' }
+  if (!question.trim()) return { error: 'Otázka nesmí být prázdná.' }
+  const { error } = await supabase.from(table).update({ question: question.trim() }).eq('id', questionId)
+  if (error) return { error: error.message }
+  revalidatePath('/admin/bonuses')
+  return {}
+}
+
 async function updateLeaderboardForUsers(supabase: any, userIds: string[]) {
   for (const userId of userIds) {
     const [
