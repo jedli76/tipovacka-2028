@@ -66,6 +66,8 @@ type Props = {
   bonusTips?: BonusTip[]
   tournamentQuestions?: TournamentQuestion[]
   tournamentTips?: TournamentTip[]
+  rank?: number | null
+  totalPlayers?: number | null
   backHref: string
   backLabel: string
 }
@@ -150,6 +152,7 @@ export default function ResultsView({
   displayName, matches, tips,
   bonusQuestions = [], bonusTips = [],
   tournamentQuestions = [], tournamentTips = [],
+  rank, totalPlayers,
   backHref, backLabel,
 }: Props) {
   const tipsMap = Object.fromEntries(tips.map(t => [t.match_id, t]))
@@ -209,9 +212,29 @@ export default function ResultsView({
         <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>
           Výsledky tipéře
         </p>
-        <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: 32 }}>
+        <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: rank ? 12 : 32 }}>
           {displayName}
         </h1>
+        {rank && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 32 }}>
+            <span style={{
+              background: 'linear-gradient(135deg, rgba(99,102,241,0.2) 0%, rgba(168,85,247,0.15) 100%)',
+              border: '1px solid rgba(99,102,241,0.35)',
+              borderRadius: 99,
+              padding: '5px 16px',
+              fontSize: '0.9rem',
+              fontWeight: 800,
+              color: '#a78bfa',
+            }}>
+              #{rank}. místo
+            </span>
+            {totalPlayers && (
+              <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.82rem' }}>
+                z {totalPlayers} tipujících
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Stats row */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 16 }}>

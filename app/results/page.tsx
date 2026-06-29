@@ -13,35 +13,28 @@ export default async function ResultsPage() {
     .eq('id', user.id)
     .single()
 
-  const { data: matches } = await supabase
-    .from('matches')
-    .select('*')
-    .order('kickoff_at', { ascending: true })
+  const [
+    { data: matches },
+    { data: myTips },
+    { data: bonusQuestions },
+    { data: bonusTips },
+    { data: tournamentQuestions },
+    { data: tournamentTips },
+    { data: myEntry },
+  ] = await Promise.all([
+    supabase.from('matches').select('*').order('kickoff_at', { ascending: true }),
+    supabase.from('tips').select('*').eq('user_id', user.id),
+    supabase.from('bonus_questions').select('*').order('sort_order'),
+    supabase.from('bonus_tips').select('question_id, answer, points').eq('user_id', user.id),
+    supabase.from('tournament_questions').select('*').order('sort_order'),
+    supabase.from('tournament_tips').select('question_id, answer, points').eq('user_id', user.id),
+    supabase.from('leaderboard').select('total_points').eq('user_id', user.id).single(),
+  ])
 
-  const { data: myTips } = await supabase
-    .from('tips')
-    .select('*')
-    .eq('user_id', user.id)
-
-  const { data: bonusQuestions } = await supabase
-    .from('bonus_questions')
-    .select('*')
-    .order('sort_order')
-
-  const { data: bonusTips } = await supabase
-    .from('bonus_tips')
-    .select('question_id, answer, points')
-    .eq('user_id', user.id)
-
-  const { data: tournamentQuestions } = await supabase
-    .from('tournament_questions')
-    .select('*')
-    .order('sort_order')
-
-  const { data: tournamentTips } = await supabase
-    .from('tournament_tips')
-    .select('question_id, answer, points')
-    .eq('user_id', user.id)
+  const [{ count: rankCount }, { count: totalPlayers }] = await Promise.all([
+    supabase.from('leaderboard').select('*', { count: 'exact', head: true }).gt('total_points', myEntry?.total_points ?? 0),
+    supabase.from('leaderboard').select('*', { count: 'exact', head: true }),
+  ])
 
   return (
     <ResultsView
@@ -52,6 +45,8 @@ export default async function ResultsPage() {
       bonusTips={bonusTips ?? []}
       tournamentQuestions={tournamentQuestions ?? []}
       tournamentTips={tournamentTips ?? []}
+      rank={myEntry ? (rankCount ?? 0) + 1 : null}
+      totalPlayers={totalPlayers}
       backHref="/dashboard"
       backLabel="Dashboard"
     />
