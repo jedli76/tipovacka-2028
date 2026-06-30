@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition, useRef } from 'react'
-import { saveNewsPost, deleteNewsPost } from './actions'
+import { saveNewsPost, deleteNewsPost, reorderNewsPost } from './actions'
 import { createClient } from '@/lib/supabase/client'
 
 type NewsPost = {
@@ -141,6 +141,7 @@ function Editor({ post, onDone }: { post?: NewsPost; onDone: () => void }) {
 export default function NewsAdmin({ posts, forceAddOpen, onAddClose }: { posts: NewsPost[]; forceAddOpen?: boolean; onAddClose?: () => void }) {
   const [editing, setEditing] = useState<NewsPost | null>(null)
   const [deletePending, startDelete] = useTransition()
+  const [reorderPending, startReorder] = useTransition()
 
   const isAdding = forceAddOpen && !editing
 
@@ -179,7 +180,21 @@ export default function NewsAdmin({ posts, forceAddOpen, onAddClose }: { posts: 
                   {post.content && <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 500 }}>{post.content.replace(/[#*`[\]!]/g, '').slice(0, 100)}</p>}
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+              <div style={{ display: 'flex', gap: 4, flexShrink: 0, alignItems: 'center' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginRight: 4 }}>
+                  <button
+                    onClick={() => startReorder(async () => { await reorderNewsPost(post.id, 'up') })}
+                    disabled={reorderPending || posts.indexOf(post) === 0}
+                    title="Posunout nahoru"
+                    style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '2px 8px', color: posts.indexOf(post) === 0 ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.5)', cursor: posts.indexOf(post) === 0 ? 'default' : 'pointer', fontSize: '0.75rem', lineHeight: 1.4 }}
+                  >▲</button>
+                  <button
+                    onClick={() => startReorder(async () => { await reorderNewsPost(post.id, 'down') })}
+                    disabled={reorderPending || posts.indexOf(post) === posts.length - 1}
+                    title="Posunout dolů"
+                    style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '2px 8px', color: posts.indexOf(post) === posts.length - 1 ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.5)', cursor: posts.indexOf(post) === posts.length - 1 ? 'default' : 'pointer', fontSize: '0.75rem', lineHeight: 1.4 }}
+                  >▼</button>
+                </div>
                 <button onClick={() => setEditing(post)} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '5px 12px', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: '0.8rem' }}>
                   Upravit
                 </button>

@@ -17,7 +17,7 @@ export default async function AdminPage() {
     supabase.from('matches').select('*').order('kickoff_at', { ascending: true }),
     supabase.from('bonus_questions').select('*').order('sort_order'),
     supabase.from('tournament_questions').select('*').order('sort_order'),
-    supabase.from('news').select('*').order('created_at', { ascending: false }),
+    supabase.from('news').select('*').order('sort_order', { ascending: true }),
   ])
 
   return (
