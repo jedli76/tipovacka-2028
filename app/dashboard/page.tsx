@@ -4,6 +4,8 @@ import Link from 'next/link'
 import CompareModal from '../leaderboard/CompareModal'
 import ExactTipsModal from './ExactTipsModal'
 import TeamName from '@/lib/TeamName'
+import HallOfFamePanel from './HallOfFame'
+import { computeHallOfFame } from '@/lib/hallOfFame'
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString('cs-CZ', {
@@ -25,20 +27,29 @@ export default async function DashboardPage() {
     { data: myEntryArr },
     { data: lastMatch },
     { data: upcomingMatches },
+    { data: last8Matches },
+    { data: allTipsRaw },
+    { data: allProfilesRaw },
   ] = await Promise.all([
     supabase.from('leaderboard').select('*, profiles(display_name)')
       .order('total_points', { ascending: false }).limit(20),
     supabase.from('leaderboard').select('user_id, total_points, profiles(display_name)')
       .order('total_points', { ascending: false }),
     supabase.from('leaderboard').select('*').eq('user_id', user.id).single(),
-    // Poslední odehraný zápas
     supabase.from('matches').select('*')
       .not('home_score', 'is', null)
       .order('kickoff_at', { ascending: false }).limit(1),
-    // Nadcházející zápasy
     supabase.from('matches').select('*')
       .is('home_score', null)
       .order('kickoff_at', { ascending: true }).limit(5),
+    // Posledních 8 odehraných zápasů (pro skokan)
+    supabase.from('matches').select('id')
+      .not('home_score', 'is', null)
+      .order('kickoff_at', { ascending: false }).limit(8),
+    // Všechny tipy s výsledky (pro Hall of Fame)
+    supabase.from('tips').select('user_id, home_score, away_score, points, match_id, matches(home_score, away_score, kickoff_at)')
+      .not('matches.home_score', 'is', null),
+    supabase.from('profiles').select('id, display_name'),
   ])
 
   const myEntry = myEntryArr ?? leaderboard?.find(l => l.user_id === user.id)
@@ -69,6 +80,26 @@ export default async function DashboardPage() {
   const top3 = leaderboard?.slice(0, 3) ?? []
   const rest = leaderboard?.slice(3) ?? []
   const last = lastMatch?.[0]
+
+  // Hall of Fame výpočet
+  const namesMap: Record<string, string> = {}
+  for (const p of allProfilesRaw ?? []) namesMap[p.id] = p.display_name ?? '–'
+
+  const last8Ids = new Set((last8Matches ?? []).map(m => m.id))
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const hofTips = (allTipsRaw ?? []).map((t: any) => ({
+    user_id: t.user_id,
+    home_score: t.home_score,
+    away_score: t.away_score,
+    points: t.points,
+    match_id: t.match_id,
+    kickoff_at: t.matches?.kickoff_at ?? '',
+    match_home_score: t.matches?.home_score ?? null,
+    match_away_score: t.matches?.away_score ?? null,
+  })).filter((t: { kickoff_at: string }) => t.kickoff_at)
+
+  const hof = computeHallOfFame(hofTips, namesMap, last8Ids)
 
   return (
     <div className="min-h-screen" style={{ background: '#0a0e1a', color: '#e2e8f0' }}>
@@ -169,39 +200,7 @@ export default async function DashboardPage() {
           {/* PRAVÝ SLOUPEC */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-            {/* Galerie slávy — Top 3 */}
-            <div style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16, padding: '16px 20px' }}>
-              <h2 style={{ fontWeight: 800, fontSize: '0.95rem', color: '#fff', marginBottom: 14 }}>🏅 Galerie slávy</h2>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-                {top3.map((entry, i) => (
-                  <div key={entry.user_id} style={{
-                    background: i === 0 ? 'linear-gradient(135deg, rgba(251,191,36,0.12), rgba(245,158,11,0.06))'
-                      : i === 1 ? 'linear-gradient(135deg, rgba(148,163,184,0.12), rgba(100,116,139,0.06))'
-                      : 'linear-gradient(135deg, rgba(180,83,9,0.12), rgba(146,64,14,0.06))',
-                    border: `1px solid ${i === 0 ? 'rgba(251,191,36,0.3)' : i === 1 ? 'rgba(148,163,184,0.2)' : 'rgba(180,83,9,0.2)'}`,
-                    borderRadius: 14, padding: '14px 12px', textAlign: 'center',
-                  }}>
-                    <div style={{ fontSize: '2rem', marginBottom: 6 }}>{medals[i]}</div>
-                    <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#e2e8f0', marginBottom: 4, lineHeight: 1.3 }}>
-                      {(entry.profiles as { display_name: string })?.display_name ?? '–'}
-                    </div>
-                    <div style={{ fontWeight: 900, fontSize: '1.3rem', color: i === 0 ? '#fbbf24' : i === 1 ? '#94a3b8' : '#b45309' }}>
-                      {entry.total_points}
-                    </div>
-                    <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.25)', fontWeight: 600 }}>bodů</div>
-                  </div>
-                ))}
-              </div>
-              {rest.length > 0 && (
-                <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: '4px 16px' }}>
-                  {rest.map((entry, i) => (
-                    <span key={entry.user_id} style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)' }}>
-                      {i + 4}. {(entry.profiles as { display_name: string })?.display_name ?? '–'} <span style={{ color: '#f59e0b', fontWeight: 700 }}>{entry.total_points}</span>
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
+            <HallOfFamePanel hof={hof} />
 
             {/* Poslední zápas + Nadcházející */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
