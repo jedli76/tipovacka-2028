@@ -250,9 +250,9 @@ export default async function DashboardPage() {
                 }
 
                 return (
-                  <div key={entry.user_id} style={{
+                  <Link key={entry.user_id} href={`/results/${entry.user_id}`} style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '5px 8px', borderRadius: 8,
+                    padding: '5px 8px', borderRadius: 8, textDecoration: 'none',
                     background: isMe ? 'rgba(245,158,11,0.1)' : 'transparent',
                     border: isMe ? '1px solid rgba(245,158,11,0.25)' : '1px solid transparent',
                   }}>
@@ -267,7 +267,7 @@ export default async function DashboardPage() {
                     <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#f59e0b', flexShrink: 0, marginLeft: 8 }}>
                       {entry.total_points}
                     </span>
-                  </div>
+                  </Link>
                 )
               })}
             </div>
