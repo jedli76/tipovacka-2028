@@ -90,7 +90,7 @@ function NewsCard({ post, divider }: { post: NewsPost; divider: boolean }) {
             <img
               src={post.cover_image_url}
               alt=""
-              style={{ width: 96, height: 72, objectFit: 'cover', objectPosition: post.cover_image_position ?? '50% 50%', borderRadius: 10, flexShrink: 0 }}
+              style={{ width: 88, height: 88, objectFit: 'cover', objectPosition: post.cover_image_position ?? '50% 50%', borderRadius: 10, flexShrink: 0 }}
             />
           )}
           <div style={{ minWidth: 0, flex: 1 }}>
