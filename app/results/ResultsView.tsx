@@ -80,6 +80,7 @@ type Props = {
   totalPlayers?: number | null
   backHref: string
   backLabel: string
+  bio?: string
 }
 
 function bonusEmoji(q: string) {
@@ -163,7 +164,7 @@ export default function ResultsView({
   bonusQuestions = [], bonusTips = [],
   tournamentQuestions = [], tournamentTips = [],
   rank, totalPlayers,
-  backHref, backLabel,
+  backHref, backLabel, bio,
 }: Props) {
   const tipsMap = Object.fromEntries(tips.map(t => [t.match_id, t]))
   const matchesMap = Object.fromEntries(matches.map(m => [m.id, m]))
@@ -238,9 +239,14 @@ export default function ResultsView({
         <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>
           Výsledky tipéře
         </p>
-        <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: rank ? 12 : 32 }}>
+        <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: bio ? 8 : (rank ? 12 : 32) }}>
           {displayName}
         </h1>
+        {bio && (
+          <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.45)', fontStyle: 'italic', marginBottom: rank ? 12 : 32, maxWidth: 480 }}>
+            {bio}
+          </p>
+        )}
         {rank && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 32 }}>
             <span style={{

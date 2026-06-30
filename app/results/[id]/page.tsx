@@ -8,7 +8,7 @@ export default async function PlayerResultsPage({ params }: { params: Promise<{ 
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('display_name')
+    .select('display_name, bio')
     .eq('id', id)
     .single()
 
@@ -40,6 +40,7 @@ export default async function PlayerResultsPage({ params }: { params: Promise<{ 
   return (
     <ResultsView
       displayName={profile.display_name}
+      bio={profile.bio ?? undefined}
       matches={matches ?? []}
       tips={tips ?? []}
       bonusQuestions={bonusQuestions ?? []}

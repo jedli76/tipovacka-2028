@@ -175,6 +175,7 @@ export default async function DashboardPage() {
             { href: '/leaderboard', icon: '🏆', label: 'Žebříček' },
             { href: '/results', icon: '📊', label: 'Výsledky' },
             { href: '/chat', icon: '💬', label: 'Chat' },
+            { href: '/profil', icon: '👤', label: 'Profil' },
             { href: '/rules', icon: '📋', label: 'Pravidla' },
             ...(isAdmin(user.email) ? [{ href: '/admin', icon: '⚙️', label: 'Admin' }] : []),
           ].map(item => (
