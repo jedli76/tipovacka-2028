@@ -251,8 +251,6 @@ export default async function DashboardPage() {
 
             <NewsSection posts={newsPosts ?? []} />
 
-            <HallOfFamePanel hof={hof} />
-
             {/* Poslední zápas + Nadcházející */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
 
@@ -300,6 +298,8 @@ export default async function DashboardPage() {
                 )}
               </div>
             </div>
+
+            <HallOfFamePanel hof={hof} />
 
           </div>
         </div>
