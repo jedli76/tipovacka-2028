@@ -126,7 +126,7 @@ function NewsCard({ post, divider }: { post: NewsPost; divider: boolean }) {
   )
 }
 
-export default function NewsSection({ posts }: { posts: NewsPost[] }) {
+export default function NewsSection({ posts, archiveMode }: { posts: NewsPost[]; archiveMode?: boolean }) {
   return (
     <div style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16, overflow: 'hidden' }}>
       <div style={{ padding: '14px 20px 10px' }}>
@@ -143,11 +143,13 @@ export default function NewsSection({ posts }: { posts: NewsPost[] }) {
           {posts.map((post, i) => (
             <NewsCard key={post.id} post={post} divider={i > 0} />
           ))}
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '10px 20px' }}>
-            <Link href="/news" style={{ fontSize: '0.8rem', fontWeight: 700, color: '#818cf8', textDecoration: 'none', letterSpacing: '0.04em' }}>
-              📂 Archiv novinek →
-            </Link>
-          </div>
+          {!archiveMode && (
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '10px 20px' }}>
+              <Link href="/news" style={{ fontSize: '0.8rem', fontWeight: 700, color: '#818cf8', textDecoration: 'none', letterSpacing: '0.04em' }}>
+                📂 Archiv novinek →
+              </Link>
+            </div>
+          )}
         </div>
       )}
     </div>
