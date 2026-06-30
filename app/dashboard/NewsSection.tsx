@@ -74,7 +74,7 @@ function NewsCard({ post, divider }: { post: NewsPost; divider: boolean }) {
   const [expanded, setExpanded] = useState(false)
   const paragraphs = post.content.trim().split(/\n\n+/)
   const firstParagraph = paragraphs[0]
-  const CHAR_LIMIT = 200
+  const CHAR_LIMIT = 160
   const preview = firstParagraph.length > CHAR_LIMIT
     ? firstParagraph.slice(0, CHAR_LIMIT).trimEnd() + '…'
     : firstParagraph
