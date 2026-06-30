@@ -200,6 +200,14 @@ export default async function DashboardPage() {
           {/* PRAVÝ SLOUPEC */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
+            {/* Novinky */}
+            <div style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16, padding: '16px 20px' }}>
+              <h2 style={{ fontWeight: 800, fontSize: '0.95rem', color: '#fff', marginBottom: 12 }}>📰 Novinky</h2>
+              <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.3)', fontStyle: 'italic' }}>
+                Tady budou aktuality a oznámení administrátora. Brzy!
+              </p>
+            </div>
+
             <HallOfFamePanel hof={hof} />
 
             {/* Poslední zápas + Nadcházející */}
@@ -248,14 +256,6 @@ export default async function DashboardPage() {
                   <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.25)' }}>Žádné nadcházející zápasy.</p>
                 )}
               </div>
-            </div>
-
-            {/* Novinky */}
-            <div style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16, padding: '16px 20px' }}>
-              <h2 style={{ fontWeight: 800, fontSize: '0.95rem', color: '#fff', marginBottom: 12 }}>📰 Novinky</h2>
-              <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.3)', fontStyle: 'italic' }}>
-                Tady budou aktuality a oznámení administrátora. Brzy!
-              </p>
             </div>
 
           </div>
