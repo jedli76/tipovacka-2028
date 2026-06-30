@@ -79,18 +79,7 @@ export default async function LeaderboardPage() {
                         <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>bodů</p>
                       </div>
                     </div>
-                    <div style={{
-                      marginTop: 12,
-                      background: 'rgba(0,0,0,0.25)',
-                      border: `1px solid ${c.border}`,
-                      borderRadius: 10,
-                      padding: '8px 14px',
-                      display: 'flex', alignItems: 'center', gap: 8,
-                    }}>
-                      <span style={{ fontSize: '1rem' }}>🏆</span>
-                      <span style={{ fontWeight: 800, fontSize: '1rem', color: c.pts }}>{prizes[i]}</span>
-                    </div>
-                  </Link>
+                    </Link>
                 )
               }
 
