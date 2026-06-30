@@ -76,7 +76,7 @@ async function recalculatePoints(supabase: any, matchId: string, homeScore: numb
   for (const tip of tips) {
     const points = calculateMatchPoints(tip.home_score, tip.away_score, homeScore, awayScore, tip.is_joker)
     const isExact = tip.home_score === homeScore && tip.away_score === awayScore
-    const brave_bonus = isExact && braveBase > 0 ? (tip.is_joker ? braveBase * 2 : braveBase) : 0
+    const brave_bonus = isExact && braveBase > 0 ? braveBase : 0
     await supabase.from('tips').update({ points, brave_bonus }).eq('id', tip.id)
   }
 
