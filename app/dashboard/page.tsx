@@ -335,38 +335,35 @@ export default async function DashboardPage() {
               <div style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16, padding: '16px 20px' }}>
                 <h2 style={{ fontWeight: 800, fontSize: '0.95rem', color: '#fff', marginBottom: 16 }}>⚽ Poslední zápasy</h2>
                 {lastMatch && lastMatch.length > 0 ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {lastMatch.map((m, idx) => {
                       const myTip = lastMatchTips[m.id]
                       return (
                         <div key={m.id}>
-                          {idx > 0 && <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', marginBottom: 16 }} />}
-                          <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.25)', marginBottom: 10, textAlign: 'center' }}>
+                          {idx > 0 && <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', marginBottom: 8 }} />}
+                          <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.25)', marginBottom: 6, textAlign: 'center' }}>
                             {formatDate(m.kickoff_at)}{m.group_name ? ` · Sk. ${m.group_name}` : ''}
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                            {/* Domácí */}
-                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                              <span style={{ fontSize: '2.2rem', lineHeight: 1 }}>{flag(m.home_team)}</span>
-                              <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#e2e8f0', letterSpacing: '0.05em' }}>{abbr(m.home_team)}</span>
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                              <span style={{ fontSize: '1.6rem', lineHeight: 1 }}>{flag(m.home_team)}</span>
+                              <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#e2e8f0', letterSpacing: '0.05em' }}>{abbr(m.home_team)}</span>
                             </div>
-                            {/* Skóre */}
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flexShrink: 0 }}>
-                              <div style={{ fontWeight: 900, fontSize: '1.6rem', color: '#fff', background: 'rgba(255,255,255,0.07)', borderRadius: 10, padding: '4px 14px', letterSpacing: '0.05em' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, flexShrink: 0 }}>
+                              <div style={{ fontWeight: 900, fontSize: '1.2rem', color: '#fff', background: 'rgba(255,255,255,0.07)', borderRadius: 8, padding: '3px 12px', letterSpacing: '0.05em' }}>
                                 {m.home_score}:{m.away_score}
                               </div>
                               {myTip ? (
-                                <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.3)', fontWeight: 600 }}>
+                                <div style={{ fontSize: '0.63rem', color: 'rgba(255,255,255,0.3)', fontWeight: 600 }}>
                                   tip: {myTip.home_score}:{myTip.away_score}
                                 </div>
                               ) : user ? (
-                                <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.18)' }}>bez tipu</div>
+                                <div style={{ fontSize: '0.63rem', color: 'rgba(255,255,255,0.18)' }}>bez tipu</div>
                               ) : null}
                             </div>
-                            {/* Hosté */}
-                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                              <span style={{ fontSize: '2.2rem', lineHeight: 1 }}>{flag(m.away_team)}</span>
-                              <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#e2e8f0', letterSpacing: '0.05em' }}>{abbr(m.away_team)}</span>
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                              <span style={{ fontSize: '1.6rem', lineHeight: 1 }}>{flag(m.away_team)}</span>
+                              <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#e2e8f0', letterSpacing: '0.05em' }}>{abbr(m.away_team)}</span>
                             </div>
                           </div>
                         </div>
