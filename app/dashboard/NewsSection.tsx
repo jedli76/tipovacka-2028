@@ -68,11 +68,11 @@ const mdComponents = {
   },
 }
 
-const COLLAPSE_THRESHOLD = 300
-
 function NewsCard({ post, divider }: { post: NewsPost; divider: boolean }) {
   const [expanded, setExpanded] = useState(false)
-  const isLong = post.content.length > COLLAPSE_THRESHOLD
+  const paragraphs = post.content.trim().split(/\n\n+/)
+  const isLong = paragraphs.length > 1
+  const preview = paragraphs[0]
 
   return (
     <div>
@@ -96,12 +96,8 @@ function NewsCard({ post, divider }: { post: NewsPost; divider: boolean }) {
             </h3>
             {/* První odstavec vždy viditelný vedle obrázku */}
             <div style={{ fontSize: '0.87rem', lineHeight: 1.65, color: '#cbd5e1' }}>
-              <ReactMarkdown
-                components={mdComponents}
-              >
-                {isLong && !expanded
-                  ? post.content.slice(0, COLLAPSE_THRESHOLD).trimEnd() + '…'
-                  : post.content}
+              <ReactMarkdown components={mdComponents}>
+                {isLong && !expanded ? preview : post.content}
               </ReactMarkdown>
             </div>
             {isLong && (
