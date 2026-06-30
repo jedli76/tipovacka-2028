@@ -170,22 +170,67 @@ export default async function DashboardPage() {
               <h2 style={{ fontWeight: 800, fontSize: '0.95rem', color: '#fff' }}>🏆 Top 20</h2>
               <Link href="/leaderboard" style={{ fontSize: '0.75rem', color: '#6366f1', textDecoration: 'none', fontWeight: 600 }}>celý žebříček →</Link>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
               {(leaderboard ?? []).map((entry, i) => {
                 const isMe = entry.user_id === user.id
+                const prizes = ['20 000 Kč', '15 000 Kč', '10 000 Kč']
+                const podiumColors = [
+                  'rgba(251,191,36,0.18)',
+                  'rgba(148,163,184,0.15)',
+                  'rgba(180,83,9,0.15)',
+                ]
+                const podiumBorders = [
+                  'rgba(251,191,36,0.35)',
+                  'rgba(148,163,184,0.25)',
+                  'rgba(180,83,9,0.25)',
+                ]
+                const ptsColors = ['#fbbf24', '#94a3b8', '#cd7c2f']
+                const isPodium = i < 3
+                const name = (entry.profiles as { display_name: string })?.display_name ?? '–'
+
+                if (isPodium) {
+                  return (
+                    <Link key={entry.user_id} href={`/results/${entry.user_id}`} style={{
+                      display: 'block', textDecoration: 'none',
+                      background: isMe ? 'rgba(245,158,11,0.13)' : podiumColors[i],
+                      border: `1px solid ${isMe ? 'rgba(245,158,11,0.5)' : podiumBorders[i]}`,
+                      borderRadius: 12, padding: '10px 12px', marginBottom: 2,
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontSize: '1.2rem', flexShrink: 0 }}>{medals[i]}</span>
+                        <span style={{ fontSize: '0.82rem', fontWeight: 700, color: isMe ? '#f59e0b' : '#fff', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {name}
+                        </span>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 900, color: ptsColors[i], flexShrink: 0 }}>
+                          {entry.total_points}
+                        </span>
+                      </div>
+                      <div style={{
+                        marginTop: 7, background: 'rgba(0,0,0,0.2)',
+                        border: `1px solid ${podiumBorders[i]}`,
+                        borderRadius: 7, padding: '4px 10px',
+                        display: 'flex', alignItems: 'center', gap: 6,
+                      }}>
+                        <span style={{ fontSize: '0.8rem' }}>🏆</span>
+                        <span style={{ fontWeight: 800, fontSize: '0.82rem', color: ptsColors[i] }}>{prizes[i]}</span>
+                      </div>
+                    </Link>
+                  )
+                }
+
                 return (
                   <div key={entry.user_id} style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '6px 8px', borderRadius: 8,
+                    padding: '5px 8px', borderRadius: 8,
                     background: isMe ? 'rgba(245,158,11,0.1)' : 'transparent',
                     border: isMe ? '1px solid rgba(245,158,11,0.25)' : '1px solid transparent',
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-                      <span style={{ fontSize: i < 3 ? '1rem' : '0.72rem', fontWeight: 700, color: '#64748b', minWidth: 22, textAlign: 'center', flexShrink: 0 }}>
-                        {medals[i] ?? `${i + 1}.`}
+                      <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', minWidth: 22, textAlign: 'center', flexShrink: 0 }}>
+                        {i + 1}.
                       </span>
                       <span style={{ fontSize: '0.83rem', fontWeight: isMe ? 700 : 500, color: isMe ? '#f59e0b' : '#e2e8f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {(entry.profiles as { display_name: string })?.display_name ?? '–'}
+                        {name}
                       </span>
                     </div>
                     <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#f59e0b', flexShrink: 0, marginLeft: 8 }}>
