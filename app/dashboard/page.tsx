@@ -332,9 +332,10 @@ export default async function DashboardPage() {
             <div className="dash-match-grid">
 
               {/* Poslední odehrané zápasy */}
-              <div>
-              <h2 style={{ fontWeight: 800, fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 8 }}>⚽ Odehrané zápasy</h2>
               <div style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16, overflow: 'hidden' }}>
+              <div style={{ padding: '14px 16px 0' }}>
+                <h2 style={{ fontWeight: 800, fontSize: '0.95rem', color: '#fff' }}>⚽ Odehrané zápasy</h2>
+              </div>
                 {lastMatch && lastMatch.length > 0 ? (
                   <div>
                     {lastMatch.map((m, idx) => {
@@ -390,12 +391,12 @@ export default async function DashboardPage() {
                   <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.25)', padding: '16px 20px' }}>Zatím žádný odehraný zápas.</p>
                 )}
               </div>
-              </div>
 
               {/* Nadcházející zápasy */}
-              <div>
-              <h2 style={{ fontWeight: 800, fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 8 }}>📅 Následující zápasy</h2>
               <div style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16, overflow: 'hidden' }}>
+              <div style={{ padding: '14px 16px 0' }}>
+                <h2 style={{ fontWeight: 800, fontSize: '0.95rem', color: '#fff' }}>📅 Následující zápasy</h2>
+              </div>
                 {upcomingMatches && upcomingMatches.length > 0 ? (
                   <div>
                     {upcomingMatches.map((m, idx) => (
@@ -431,7 +432,6 @@ export default async function DashboardPage() {
                 ) : (
                   <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.25)', padding: '16px 20px' }}>Žádné nadcházející zápasy.</p>
                 )}
-              </div>
               </div>
             </div>
 
