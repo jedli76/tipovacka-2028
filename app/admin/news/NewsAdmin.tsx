@@ -9,6 +9,7 @@ type NewsPost = {
   title: string
   content: string
   cover_image_url: string | null
+  cover_image_position: string | null
   published: boolean
   created_at: string
 }
@@ -27,11 +28,13 @@ function Editor({ post, onDone }: { post?: NewsPost; onDone: () => void }) {
   const [title, setTitle] = useState(post?.title ?? '')
   const [content, setContent] = useState(post?.content ?? '')
   const [coverImageUrl, setCoverImageUrl] = useState(post?.cover_image_url ?? '')
+  const [position, setPosition] = useState(post?.cover_image_position ?? '50% 50%')
   const [published, setPublished] = useState(post?.published ?? true)
   const [err, setErr] = useState('')
   const [pending, startTransition] = useTransition()
   const [uploading, setUploading] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+  const previewRef = useRef<HTMLDivElement>(null)
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -45,9 +48,18 @@ function Editor({ post, onDone }: { post?: NewsPost; onDone: () => void }) {
       if (error) { setErr(error.message); return }
       const { data } = supabase.storage.from('news-images').getPublicUrl(path)
       setCoverImageUrl(data.publicUrl)
+      setPosition('50% 50%')
     } finally {
       setUploading(false)
     }
+  }
+
+  function handlePositionClick(e: React.MouseEvent<HTMLDivElement>) {
+    const rect = previewRef.current?.getBoundingClientRect()
+    if (!rect) return
+    const x = Math.round(((e.clientX - rect.left) / rect.width) * 100)
+    const y = Math.round(((e.clientY - rect.top) / rect.height) * 100)
+    setPosition(`${x}% ${y}%`)
   }
 
   function submit() {
@@ -58,6 +70,7 @@ function Editor({ post, onDone }: { post?: NewsPost; onDone: () => void }) {
       fd.append('title', title)
       fd.append('content', content)
       fd.append('cover_image_url', coverImageUrl)
+      fd.append('cover_image_position', position)
       fd.append('published', String(published))
       const res = await saveNewsPost(fd)
       if (res.error) setErr(res.error)
@@ -100,8 +113,33 @@ function Editor({ post, onDone }: { post?: NewsPost; onDone: () => void }) {
             )}
           </div>
           {coverImageUrl && (
-            <div style={{ marginTop: 10, borderRadius: 8, overflow: 'hidden' }}>
-              <img src={coverImageUrl} alt="náhled" style={{ width: 180, height: 120, objectFit: 'cover', display: 'block', borderRadius: 8 }} />
+            <div style={{ marginTop: 10 }}>
+              <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)', marginBottom: 6 }}>
+                Klikni na obrázek pro nastavení středu ořezu — <span style={{ color: '#a5b4fc' }}>{position}</span>
+              </p>
+              <div
+                ref={previewRef}
+                onClick={handlePositionClick}
+                style={{ width: 240, height: 160, borderRadius: 10, overflow: 'hidden', cursor: 'crosshair', position: 'relative', border: '1px solid rgba(99,102,241,0.4)' }}
+              >
+                <img
+                  src={coverImageUrl}
+                  alt="náhled"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: position, display: 'block', pointerEvents: 'none' }}
+                />
+                {/* Crosshair ukazující aktuální střed */}
+                {(() => {
+                  const [px, py] = position.split(' ').map(v => parseFloat(v))
+                  return (
+                    <div style={{ position: 'absolute', left: `${px}%`, top: `${py}%`, transform: 'translate(-50%, -50%)', pointerEvents: 'none' }}>
+                      <div style={{ width: 16, height: 16, border: '2px solid #fff', borderRadius: '50%', boxShadow: '0 0 0 1px rgba(0,0,0,0.5)' }} />
+                    </div>
+                  )
+                })()}
+              </div>
+              <p style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.2)', marginTop: 4 }}>
+                Takto bude vypadat ořez 96×72 px v náhledu novinky
+              </p>
             </div>
           )}
         </div>

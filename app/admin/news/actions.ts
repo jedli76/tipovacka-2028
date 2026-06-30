@@ -23,14 +23,15 @@ export async function saveNewsPost(formData: FormData): Promise<{ error?: string
   const title = (formData.get('title') as string)?.trim()
   const content = (formData.get('content') as string)?.trim()
   const cover_image_url = (formData.get('cover_image_url') as string)?.trim() || null
+  const cover_image_position = (formData.get('cover_image_position') as string)?.trim() || '50% 50%'
   const published = formData.get('published') === 'true'
   if (!title) return { error: 'Název nesmí být prázdný.' }
   const db = adminDb()
   if (id) {
-    const { error } = await db.from('news').update({ title, content, cover_image_url, published }).eq('id', id)
+    const { error } = await db.from('news').update({ title, content, cover_image_url, cover_image_position, published }).eq('id', id)
     if (error) return { error: error.message }
   } else {
-    const { error } = await db.from('news').insert({ title, content, cover_image_url, published })
+    const { error } = await db.from('news').insert({ title, content, cover_image_url, cover_image_position, published })
     if (error) return { error: error.message }
   }
   revalidatePath('/admin')
