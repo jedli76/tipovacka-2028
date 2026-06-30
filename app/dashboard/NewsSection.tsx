@@ -93,31 +93,30 @@ function NewsCard({ post, divider }: { post: NewsPost; divider: boolean }) {
             />
           )}
           <div style={{ minWidth: 0, flex: 1 }}>
-            <h3 style={{ fontWeight: 800, fontSize: '1rem', color: '#fff', marginBottom: 8, lineHeight: 1.3 }}>
+            <h3 style={{ fontWeight: 800, fontSize: '1rem', color: '#fff', marginBottom: 6, lineHeight: 1.3 }}>
               {post.title}
               <span style={{ fontWeight: 400, fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', marginLeft: 8, whiteSpace: 'nowrap' }}>
                 ({formatDate(post.created_at)})
               </span>
             </h3>
-            {/* První odstavec vždy viditelný vedle obrázku */}
-            <div style={{ fontSize: '0.87rem', lineHeight: 1.65, color: '#cbd5e1' }}>
-              <ReactMarkdown components={mdComponents}>
-                {isLong && !expanded ? preview : post.content}
-              </ReactMarkdown>
-            </div>
-            {isLong && (
-              <button
-                onClick={() => setExpanded(v => !v)}
-                style={{
-                  marginTop: 6,
-                  background: 'none', border: '1px solid rgba(99,102,241,0.4)',
-                  borderRadius: 8, padding: '4px 14px',
-                  color: '#818cf8', fontWeight: 700, fontSize: '0.78rem',
-                  cursor: 'pointer', letterSpacing: '0.05em',
-                }}
-              >
-                {expanded ? 'MÉNĚ ▲' : 'VÍCE ▼'}
-              </button>
+            {expanded ? (
+              <div style={{ fontSize: '0.87rem', lineHeight: 1.65, color: '#cbd5e1' }}>
+                <ReactMarkdown components={mdComponents}>{post.content}</ReactMarkdown>
+                {isLong && (
+                  <button onClick={() => setExpanded(false)} style={{ background: 'none', border: 'none', color: '#818cf8', fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer', padding: 0 }}>
+                    méně ▲
+                  </button>
+                )}
+              </div>
+            ) : (
+              <p style={{ fontSize: '0.87rem', lineHeight: 1.65, color: '#cbd5e1', margin: 0 }}>
+                {preview}
+                {isLong && (
+                  <button onClick={() => setExpanded(true)} style={{ background: 'none', border: 'none', color: '#818cf8', fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer', padding: '0 0 0 6px', verticalAlign: 'baseline' }}>
+                    více ▼
+                  </button>
+                )}
+              </p>
             )}
           </div>
         </div>
