@@ -7,6 +7,7 @@ type NewsPost = {
   id: string
   title: string
   content: string
+  cover_image_url: string | null
   published: boolean
   created_at: string
 }
@@ -24,6 +25,7 @@ const inputStyle = {
 function Editor({ post, onDone }: { post?: NewsPost; onDone: () => void }) {
   const [title, setTitle] = useState(post?.title ?? '')
   const [content, setContent] = useState(post?.content ?? '')
+  const [coverImageUrl, setCoverImageUrl] = useState(post?.cover_image_url ?? '')
   const [published, setPublished] = useState(post?.published ?? true)
   const [err, setErr] = useState('')
   const [pending, startTransition] = useTransition()
@@ -35,6 +37,7 @@ function Editor({ post, onDone }: { post?: NewsPost; onDone: () => void }) {
       if (post?.id) fd.append('id', post.id)
       fd.append('title', title)
       fd.append('content', content)
+      fd.append('cover_image_url', coverImageUrl)
       fd.append('published', String(published))
       const res = await saveNewsPost(fd)
       if (res.error) setErr(res.error)
@@ -54,17 +57,33 @@ function Editor({ post, onDone }: { post?: NewsPost; onDone: () => void }) {
         </div>
         <div>
           <label style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', display: 'block', marginBottom: 4 }}>
+            Náhledový obrázek (URL)
+          </label>
+          <input
+            value={coverImageUrl}
+            onChange={e => setCoverImageUrl(e.target.value)}
+            placeholder="https://... (volitelné)"
+            style={inputStyle}
+          />
+          {coverImageUrl && (
+            <div style={{ marginTop: 8, borderRadius: 8, overflow: 'hidden', maxHeight: 160 }}>
+              <img src={coverImageUrl} alt="náhled" style={{ width: '100%', objectFit: 'cover', maxHeight: 160, display: 'block' }} />
+            </div>
+          )}
+        </div>
+        <div>
+          <label style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', display: 'block', marginBottom: 4 }}>
             Obsah (Markdown)
           </label>
           <textarea
             value={content}
             onChange={e => setContent(e.target.value)}
             rows={10}
-            placeholder={`**Tučný text**, *kurzíva*, [odkaz](https://url.cz)\n\n![Popis obrázku](https://url-obrazku.cz/foto.jpg)\n\nOdkaz na tweet: https://x.com/...`}
+            placeholder={`**Tučný text**, *kurzíva*, [odkaz](https://url.cz)\n\nOdkaz na tweet (samostatně na řádku):\nhttps://x.com/uzivatel/status/123456789`}
             style={{ ...inputStyle, resize: 'vertical', fontFamily: 'monospace', lineHeight: 1.6 }}
           />
           <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.25)', marginTop: 4 }}>
-            Markdown: **tučně**, *kurzíva*, [text](url), ![alt](url-obrázku), ## Nadpis
+            Markdown: **tučně**, *kurzíva*, [text](url), ![alt](url-obrázku), ## Nadpis · Tweet: vlož URL na samostatný řádek
           </p>
         </div>
         <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
@@ -113,13 +132,18 @@ export default function NewsAdmin({ posts, forceAddOpen, onAddClose }: { posts: 
             borderRadius: 12, padding: '12px 16px',
           }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
-              <div style={{ minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                  <span style={{ fontWeight: 700, fontSize: '0.92rem', color: '#e2e8f0' }}>{post.title}</span>
-                  {!post.published && <span style={{ fontSize: '0.65rem', background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.3)', borderRadius: 4, padding: '1px 6px', fontWeight: 700 }}>SKRYTÝ</span>}
+              <div style={{ display: 'flex', gap: 12, minWidth: 0, flex: 1 }}>
+                {post.cover_image_url && (
+                  <img src={post.cover_image_url} alt="" style={{ width: 56, height: 40, objectFit: 'cover', borderRadius: 6, flexShrink: 0 }} />
+                )}
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <span style={{ fontWeight: 700, fontSize: '0.92rem', color: '#e2e8f0' }}>{post.title}</span>
+                    {!post.published && <span style={{ fontSize: '0.65rem', background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.3)', borderRadius: 4, padding: '1px 6px', fontWeight: 700 }}>SKRYTÝ</span>}
+                  </div>
+                  <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.25)' }}>{formatDate(post.created_at)}</p>
+                  {post.content && <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 500 }}>{post.content.replace(/[#*`[\]!]/g, '').slice(0, 100)}</p>}
                 </div>
-                <p style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.25)' }}>{formatDate(post.created_at)}</p>
-                {post.content && <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 500 }}>{post.content.replace(/[#*`[\]!]/g, '').slice(0, 100)}</p>}
               </div>
               <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
                 <button onClick={() => setEditing(post)} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '5px 12px', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: '0.8rem' }}>

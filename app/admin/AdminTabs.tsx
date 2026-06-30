@@ -38,6 +38,7 @@ type NewsPost = {
   id: string
   title: string
   content: string
+  cover_image_url: string | null
   published: boolean
   created_at: string
 }

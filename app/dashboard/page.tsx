@@ -52,7 +52,7 @@ export default async function DashboardPage() {
     supabase.from('tips').select('user_id, home_score, away_score, points, match_id, matches(home_score, away_score, kickoff_at)')
       .not('matches.home_score', 'is', null),
     supabase.from('profiles').select('id, display_name'),
-    supabase.from('news').select('id, title, content, created_at').eq('published', true).order('created_at', { ascending: false }).limit(5),
+    supabase.from('news').select('id, title, content, cover_image_url, created_at').eq('published', true).order('created_at', { ascending: false }).limit(5),
   ])
 
   const myEntry = myEntryArr ?? leaderboard?.find(l => l.user_id === user.id)
