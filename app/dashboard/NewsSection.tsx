@@ -1,7 +1,7 @@
 'use client'
 
 import ReactMarkdown from 'react-markdown'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 type NewsPost = {
   id: string
@@ -48,10 +48,87 @@ function isStandaloneTweetUrl(children: React.ReactNode): string | null {
   return null
 }
 
+const mdComponents = {
+  a: ({ href, children }: { href?: string; children?: React.ReactNode }) => (
+    <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: '#818cf8', textDecoration: 'underline' }}>{children}</a>
+  ),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  img: (props: any) => (
+    <img src={props.src as string} alt={props.alt} style={{ maxWidth: '100%', borderRadius: 10, marginTop: 8, marginBottom: 8 }} />
+  ),
+  strong: ({ children }: { children?: React.ReactNode }) => <strong style={{ color: '#fff', fontWeight: 700 }}>{children}</strong>,
+  h2: ({ children }: { children?: React.ReactNode }) => <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#fff', marginTop: 14, marginBottom: 6 }}>{children}</div>,
+  h3: ({ children }: { children?: React.ReactNode }) => <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#e2e8f0', marginTop: 10, marginBottom: 4 }}>{children}</div>,
+  ul: ({ children }: { children?: React.ReactNode }) => <ul style={{ paddingLeft: 18, marginTop: 6, marginBottom: 6 }}>{children}</ul>,
+  li: ({ children }: { children?: React.ReactNode }) => <li style={{ marginBottom: 3 }}>{children}</li>,
+  p: ({ children }: { children?: React.ReactNode }) => {
+    const tweetUrl = isStandaloneTweetUrl(children)
+    if (tweetUrl) return <TweetEmbed url={tweetUrl} />
+    return <p style={{ marginBottom: 8 }}>{children}</p>
+  },
+}
+
+const COLLAPSE_THRESHOLD = 300
+
+function NewsCard({ post, divider }: { post: NewsPost; divider: boolean }) {
+  const [expanded, setExpanded] = useState(false)
+  const isLong = post.content.length > COLLAPSE_THRESHOLD
+
+  return (
+    <div>
+      {divider && <div style={{ height: 1, background: 'rgba(255,255,255,0.06)' }} />}
+      <div style={{ padding: '16px 20px' }}>
+        {/* Hlavička: obrázek + nadpis + datum */}
+        <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+          {post.cover_image_url && (
+            <img
+              src={post.cover_image_url}
+              alt=""
+              style={{ width: 96, height: 72, objectFit: 'cover', borderRadius: 10, flexShrink: 0 }}
+            />
+          )}
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <h3 style={{ fontWeight: 800, fontSize: '1rem', color: '#fff', marginBottom: 8, lineHeight: 1.3 }}>
+              {post.title}
+              <span style={{ fontWeight: 400, fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', marginLeft: 8, whiteSpace: 'nowrap' }}>
+                ({formatDate(post.created_at)})
+              </span>
+            </h3>
+            {/* První odstavec vždy viditelný vedle obrázku */}
+            <div style={{ fontSize: '0.87rem', lineHeight: 1.65, color: '#cbd5e1' }}>
+              <ReactMarkdown
+                components={mdComponents}
+              >
+                {isLong && !expanded
+                  ? post.content.slice(0, COLLAPSE_THRESHOLD).trimEnd() + '…'
+                  : post.content}
+              </ReactMarkdown>
+            </div>
+            {isLong && (
+              <button
+                onClick={() => setExpanded(v => !v)}
+                style={{
+                  marginTop: 6,
+                  background: 'none', border: '1px solid rgba(99,102,241,0.4)',
+                  borderRadius: 8, padding: '4px 14px',
+                  color: '#818cf8', fontWeight: 700, fontSize: '0.78rem',
+                  cursor: 'pointer', letterSpacing: '0.05em',
+                }}
+              >
+                {expanded ? 'MÉNĚ ▲' : 'VÍCE ▼'}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function NewsSection({ posts }: { posts: NewsPost[] }) {
   return (
     <div style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16, overflow: 'hidden' }}>
-      <div style={{ padding: '16px 20px 12px' }}>
+      <div style={{ padding: '14px 20px 10px' }}>
         <h2 style={{ fontWeight: 800, fontSize: '0.95rem', color: '#fff' }}>📰 Novinky</h2>
       </div>
       {posts.length === 0 ? (
@@ -63,50 +140,7 @@ export default function NewsSection({ posts }: { posts: NewsPost[] }) {
       ) : (
         <div>
           {posts.map((post, i) => (
-            <div key={post.id}>
-              {i > 0 && <div style={{ height: 1, background: 'rgba(255,255,255,0.06)' }} />}
-              <div style={{ padding: '14px 20px 16px' }}>
-                <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-                  {post.cover_image_url && (
-                    <img
-                      src={post.cover_image_url}
-                      alt=""
-                      style={{ width: 110, height: 80, objectFit: 'cover', borderRadius: 10, flexShrink: 0 }}
-                    />
-                  )}
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', marginBottom: 4, fontWeight: 600 }}>
-                      {formatDate(post.created_at)}
-                    </div>
-                    <h3 style={{ fontWeight: 800, fontSize: '1rem', color: '#fff', marginBottom: 0 }}>{post.title}</h3>
-                  </div>
-                </div>
-                <div style={{ fontSize: '0.88rem', lineHeight: 1.7, color: '#cbd5e1', marginTop: 10 }}>
-                  <ReactMarkdown
-                    components={{
-                      a: ({ href, children }) => (
-                        <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: '#818cf8', textDecoration: 'underline' }}>{children}</a>
-                      ),
-                      img: ({ src, alt }) => (
-                        <img src={src} alt={alt} style={{ maxWidth: '100%', borderRadius: 10, marginTop: 8, marginBottom: 8 }} />
-                      ),
-                      strong: ({ children }) => <strong style={{ color: '#fff', fontWeight: 700 }}>{children}</strong>,
-                      h2: ({ children }) => <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#fff', marginTop: 14, marginBottom: 6 }}>{children}</div>,
-                      h3: ({ children }) => <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#e2e8f0', marginTop: 10, marginBottom: 4 }}>{children}</div>,
-                      ul: ({ children }) => <ul style={{ paddingLeft: 18, marginTop: 6, marginBottom: 6 }}>{children}</ul>,
-                      li: ({ children }) => <li style={{ marginBottom: 3 }}>{children}</li>,
-                      p: ({ children }) => {
-                        const tweetUrl = isStandaloneTweetUrl(children)
-                        if (tweetUrl) return <TweetEmbed url={tweetUrl} />
-                        return <p style={{ marginBottom: 8 }}>{children}</p>
-                      },
-                    }}
-                  >
-                    {post.content}
-                  </ReactMarkdown>
-                </div>
-              </div>
-            </div>
+            <NewsCard key={post.id} post={post} divider={i > 0} />
           ))}
         </div>
       )}
