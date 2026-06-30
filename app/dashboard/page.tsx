@@ -31,7 +31,7 @@ export default async function DashboardPage() {
     { data: newsPosts },
   ] = await Promise.all([
     supabase.from('leaderboard').select('*, profiles(display_name)')
-      .order('total_points', { ascending: false }).limit(20),
+      .order('total_points', { ascending: false }).limit(40),
     supabase.from('leaderboard').select('user_id, total_points, profiles(display_name)')
       .order('total_points', { ascending: false }),
     supabase.from('matches').select('*')
@@ -233,10 +233,10 @@ export default async function DashboardPage() {
         {/* Dvousloupcový layout */}
         <div className="dash-main-grid">
 
-          {/* LEVÝ SLOUPEC — Top 20 */}
+          {/* LEVÝ SLOUPEC — Top 40 */}
           <div style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16, padding: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-              <h2 style={{ fontWeight: 800, fontSize: '0.95rem', color: '#fff' }}>🏆 Top 20</h2>
+              <h2 style={{ fontWeight: 800, fontSize: '0.95rem', color: '#fff' }}>🏆 Top 40</h2>
               <Link href="/leaderboard" style={{ fontSize: '0.75rem', color: '#6366f1', textDecoration: 'none', fontWeight: 600 }}>celý žebříček →</Link>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
