@@ -45,8 +45,7 @@ export default function HallOfFamePanel({ hof }: { hof: HallOfFame }) {
         <Card icon="🏆" label="Nejlepší série" entry={hof.bestStreak} suffix="🏆" unit="v řadě" />
         <Card icon="🔥" label="Aktuální série" entry={hof.currentStreak} suffix="🔥" unit="v řadě" />
         <Card icon="😬" label="Aktuální série nul" entry={hof.currentZeroStreak} unit="× 0b" />
-        <Card icon="🚀" label="Skokan (posl. 8 zápasů)" entry={hof.hotStreak} unit="b" />
-        <Card icon="😢" label="Smolař (o 1 gól od přesného)" entry={hof.nearMiss} unit="×" />
+<Card icon="😢" label="Smolař (o 1 gól od přesného)" entry={hof.nearMiss} unit="×" />
       </div>
     </div>
   )
