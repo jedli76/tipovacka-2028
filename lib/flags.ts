@@ -49,8 +49,63 @@ const FLAGS: Record<string, string> = {
   'Česko': '🇨🇿',
 }
 
+const ABBR: Record<string, string> = {
+  'Alžírsko': 'ALG',
+  'Anglie': 'ENG',
+  'Argentina': 'ARG',
+  'Austrálie': 'AUS',
+  'Belgie': 'BEL',
+  'Bosna a Hercegovina': 'BIH',
+  'Brazílie': 'BRA',
+  'Chorvatsko': 'CRO',
+  'Curacao': 'CUW',
+  'DR Kongo': 'COD',
+  'Egypt': 'EGY',
+  'Ekvádor': 'ECU',
+  'Francie': 'FRA',
+  'Ghana': 'GHA',
+  'Haiti': 'HAI',
+  'Irák': 'IRQ',
+  'Írán': 'IRN',
+  'Japonsko': 'JPN',
+  'Jihoafrická republika': 'RSA',
+  'Jižní Korea': 'KOR',
+  'Jordánsko': 'JOR',
+  'Kanada': 'CAN',
+  'Kapverdy': 'CPV',
+  'Katar': 'QAT',
+  'Kolumbie': 'COL',
+  'Maroko': 'MAR',
+  'Mexiko': 'MEX',
+  'Německo': 'GER',
+  'Nizozemsko': 'NED',
+  'Norsko': 'NOR',
+  'Nový Zéland': 'NZL',
+  'Panama': 'PAN',
+  'Paraguay': 'PAR',
+  'Pobřeží slonoviny': 'CIV',
+  'Portugalsko': 'POR',
+  'Rakousko': 'AUT',
+  'Saúdská Arábie': 'KSA',
+  'Senegal': 'SEN',
+  'Skotsko': 'SCO',
+  'Španělsko': 'ESP',
+  'Švédsko': 'SWE',
+  'Švýcarsko': 'SUI',
+  'Tunisko': 'TUN',
+  'Turecko': 'TUR',
+  'Uruguay': 'URU',
+  'USA': 'USA',
+  'Uzbekistán': 'UZB',
+  'Česko': 'CZE',
+}
+
 export function flag(team: string): string {
   return FLAGS[team] ?? ''
+}
+
+export function abbr(team: string): string {
+  return ABBR[team] ?? team.slice(0, 3).toUpperCase()
 }
 
 export function teamWithFlag(team: string): string {

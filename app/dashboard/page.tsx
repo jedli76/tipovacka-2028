@@ -3,6 +3,7 @@ import Link from 'next/link'
 import CompareModal from '../leaderboard/CompareModal'
 import ExactTipsModal from './ExactTipsModal'
 import TeamName from '@/lib/TeamName'
+import { flag, abbr } from '@/lib/flags'
 import HallOfFamePanel from './HallOfFame'
 import { computeHallOfFame } from '@/lib/hallOfFame'
 import NewsSection from './NewsSection'
@@ -35,7 +36,7 @@ export default async function DashboardPage() {
       .order('total_points', { ascending: false }),
     supabase.from('matches').select('*')
       .not('home_score', 'is', null)
-      .order('kickoff_at', { ascending: false }).limit(1),
+      .order('kickoff_at', { ascending: false }).limit(2),
     supabase.from('matches').select('*')
       .is('home_score', null)
       .order('kickoff_at', { ascending: true }).limit(5),
@@ -53,6 +54,7 @@ export default async function DashboardPage() {
   let myEntry = null
   let myRank: number | null = null
   let exactTips: { match_id: string; home_score: number; away_score: number; is_joker: boolean; points: number; home_team: string; away_team: string; kickoff_at: string; group_name: string | null }[] = []
+  let lastMatchTips: Record<string, { home_score: number; away_score: number }> = {}
 
   if (user) {
     const [{ data: profileData }, { data: myEntryData }] = await Promise.all([
@@ -84,10 +86,20 @@ export default async function DashboardPage() {
     })).sort((a: { kickoff_at: string }, b: { kickoff_at: string }) =>
       new Date(a.kickoff_at).getTime() - new Date(b.kickoff_at).getTime()
     )
+
+    // Tipy pro poslední 2 zápasy
+    const lastMatchIds = (lastMatch ?? []).map(m => m.id)
+    if (lastMatchIds.length > 0) {
+      const { data: lmTips } = await supabase
+        .from('tips').select('match_id, home_score, away_score')
+        .eq('user_id', user.id).in('match_id', lastMatchIds)
+      for (const t of lmTips ?? []) {
+        lastMatchTips[t.match_id] = { home_score: t.home_score, away_score: t.away_score }
+      }
+    }
   }
 
   const medals = ['🥇', '🥈', '🥉']
-  const last = lastMatch?.[0]
 
   const namesMap: Record<string, string> = {}
   for (const p of allProfilesRaw ?? []) namesMap[p.id] = p.display_name ?? '–'
@@ -319,23 +331,47 @@ export default async function DashboardPage() {
             {/* Poslední zápas + Nadcházející */}
             <div className="dash-match-grid">
 
-              {/* Poslední odehraný zápas */}
+              {/* Poslední odehrané zápasy */}
               <div style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16, padding: '16px 20px' }}>
-                <h2 style={{ fontWeight: 800, fontSize: '0.95rem', color: '#fff', marginBottom: 12 }}>⚽ Poslední zápas</h2>
-                {last ? (
-                  <div>
-                    <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>{formatDate(last.kickoff_at)}{last.group_name ? ` · Sk. ${last.group_name}` : ''}</div>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                      <div style={{ flex: 1, textAlign: 'right' }}>
-                        <TeamName team={last.home_team} flagSize="1.4em" />
-                      </div>
-                      <div style={{ fontWeight: 900, fontSize: '1.4rem', color: '#fff', background: 'rgba(255,255,255,0.07)', borderRadius: 8, padding: '4px 12px', flexShrink: 0 }}>
-                        {last.home_score}:{last.away_score}
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <TeamName team={last.away_team} flagSize="1.4em" />
-                      </div>
-                    </div>
+                <h2 style={{ fontWeight: 800, fontSize: '0.95rem', color: '#fff', marginBottom: 16 }}>⚽ Poslední zápasy</h2>
+                {lastMatch && lastMatch.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    {lastMatch.map((m, idx) => {
+                      const myTip = lastMatchTips[m.id]
+                      return (
+                        <div key={m.id}>
+                          {idx > 0 && <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', marginBottom: 16 }} />}
+                          <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.25)', marginBottom: 10, textAlign: 'center' }}>
+                            {formatDate(m.kickoff_at)}{m.group_name ? ` · Sk. ${m.group_name}` : ''}
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                            {/* Domácí */}
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                              <span style={{ fontSize: '2.2rem', lineHeight: 1 }}>{flag(m.home_team)}</span>
+                              <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#e2e8f0', letterSpacing: '0.05em' }}>{abbr(m.home_team)}</span>
+                            </div>
+                            {/* Skóre */}
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+                              <div style={{ fontWeight: 900, fontSize: '1.6rem', color: '#fff', background: 'rgba(255,255,255,0.07)', borderRadius: 10, padding: '4px 14px', letterSpacing: '0.05em' }}>
+                                {m.home_score}:{m.away_score}
+                              </div>
+                              {myTip ? (
+                                <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.3)', fontWeight: 600 }}>
+                                  tip: {myTip.home_score}:{myTip.away_score}
+                                </div>
+                              ) : user ? (
+                                <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.18)' }}>bez tipu</div>
+                              ) : null}
+                            </div>
+                            {/* Hosté */}
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                              <span style={{ fontSize: '2.2rem', lineHeight: 1 }}>{flag(m.away_team)}</span>
+                              <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#e2e8f0', letterSpacing: '0.05em' }}>{abbr(m.away_team)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
                   </div>
                 ) : (
                   <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.25)' }}>Zatím žádný odehraný zápas.</p>
