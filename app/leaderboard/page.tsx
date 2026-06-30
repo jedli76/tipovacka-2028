@@ -56,7 +56,7 @@ export default async function LeaderboardPage() {
                     {medals[i] ? (
                       <span className="text-xl">{medals[i]}</span>
                     ) : (
-                      <span className="text-sm font-mono" style={{ color: '#64748b' }}>#{i + 1}</span>
+                      <span className="text-sm font-mono" style={{ color: '#64748b' }}>{i + 1}.</span>
                     )}
                   </div>
 
