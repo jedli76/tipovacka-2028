@@ -39,7 +39,7 @@ export default async function DashboardPage() {
       .order('kickoff_at', { ascending: false }).limit(2),
     supabase.from('matches').select('*')
       .is('home_score', null)
-      .order('kickoff_at', { ascending: true }).limit(5),
+      .order('kickoff_at', { ascending: true }).limit(4),
     supabase.from('matches').select('id')
       .not('home_score', 'is', null)
       .order('kickoff_at', { ascending: false }).limit(8),
@@ -332,6 +332,8 @@ export default async function DashboardPage() {
             <div className="dash-match-grid">
 
               {/* Poslední odehrané zápasy */}
+              <div>
+              <h2 style={{ fontWeight: 800, fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 8 }}>⚽ Odehrané zápasy</h2>
               <div style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16, overflow: 'hidden' }}>
                 {lastMatch && lastMatch.length > 0 ? (
                   <div>
@@ -388,26 +390,48 @@ export default async function DashboardPage() {
                   <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.25)', padding: '16px 20px' }}>Zatím žádný odehraný zápas.</p>
                 )}
               </div>
+              </div>
 
               {/* Nadcházející zápasy */}
-              <div style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16, padding: '16px 20px' }}>
-                <h2 style={{ fontWeight: 800, fontSize: '0.95rem', color: '#fff', marginBottom: 12 }}>📅 Nadcházející zápasy</h2>
+              <div>
+              <h2 style={{ fontWeight: 800, fontSize: '0.85rem', color: 'rgba(255,255,255,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 8 }}>📅 Následující zápasy</h2>
+              <div style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16, overflow: 'hidden' }}>
                 {upcomingMatches && upcomingMatches.length > 0 ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {upcomingMatches.map(m => (
-                      <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)', flexShrink: 0, minWidth: 70 }}>{formatDate(m.kickoff_at)}</span>
-                        <span style={{ fontSize: '0.82rem', color: '#e2e8f0', fontWeight: 600 }}>
-                          <TeamName team={m.home_team} flagSize="1.2em" />
-                          <span style={{ color: 'rgba(255,255,255,0.2)', margin: '0 4px' }}>–</span>
-                          <TeamName team={m.away_team} flagSize="1.2em" />
-                        </span>
+                  <div>
+                    {upcomingMatches.map((m, idx) => (
+                      <div key={m.id} style={{ borderTop: idx > 0 ? '1px solid #1f2d45' : undefined }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px 0' }}>
+                          <span style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)' }}>
+                            {m.group_name ? `Skupina ${m.group_name}` : 'Zápas'}
+                          </span>
+                          <span style={{ fontSize: '0.62rem', color: 'rgba(255,255,255,0.25)', fontWeight: 600 }}>
+                            {new Date(m.kickoff_at).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'short' })} · {new Date(m.kickoff_at).toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Prague' })}
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 20px 12px', gap: 8 }}>
+                          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
+                            <div style={{ width: 44, height: 44, borderRadius: 10, background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.7rem', lineHeight: 1 }}>
+                              {flag(m.home_team)}
+                            </div>
+                            <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#e2e8f0', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{abbr(m.home_team)}</span>
+                          </div>
+                          <div style={{ background: 'rgba(0,0,0,0.35)', borderRadius: 10, padding: '5px 14px', border: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}>
+                            <span style={{ fontWeight: 900, fontSize: '1.1rem', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.08em' }}>vs</span>
+                          </div>
+                          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
+                            <div style={{ width: 44, height: 44, borderRadius: 10, background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.7rem', lineHeight: 1 }}>
+                              {flag(m.away_team)}
+                            </div>
+                            <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#e2e8f0', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{abbr(m.away_team)}</span>
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.25)' }}>Žádné nadcházející zápasy.</p>
+                  <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.25)', padding: '16px 20px' }}>Žádné nadcházející zápasy.</p>
                 )}
+              </div>
               </div>
             </div>
 
