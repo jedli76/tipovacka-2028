@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import CompareModal from '../leaderboard/CompareModal'
 import ExactTipsModal from './ExactTipsModal'
@@ -19,15 +18,10 @@ function formatDate(iso: string) {
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
-
-  const { data: profile } = await supabase
-    .from('profiles').select('*').eq('id', user.id).single()
 
   const [
     { data: leaderboard },
     { data: allPlayers },
-    { data: myEntryArr },
     { data: lastMatch },
     { data: upcomingMatches },
     { data: last8Matches },
@@ -39,54 +33,62 @@ export default async function DashboardPage() {
       .order('total_points', { ascending: false }).limit(20),
     supabase.from('leaderboard').select('user_id, total_points, profiles(display_name)')
       .order('total_points', { ascending: false }),
-    supabase.from('leaderboard').select('*').eq('user_id', user.id).single(),
     supabase.from('matches').select('*')
       .not('home_score', 'is', null)
       .order('kickoff_at', { ascending: false }).limit(1),
     supabase.from('matches').select('*')
       .is('home_score', null)
       .order('kickoff_at', { ascending: true }).limit(5),
-    // Posledních 8 odehraných zápasů (pro skokan)
     supabase.from('matches').select('id')
       .not('home_score', 'is', null)
       .order('kickoff_at', { ascending: false }).limit(8),
-    // Všechny tipy s výsledky (pro Hall of Fame)
     supabase.from('tips').select('user_id, home_score, away_score, points, match_id, matches(home_score, away_score, kickoff_at)')
       .not('matches.home_score', 'is', null),
     supabase.from('profiles').select('id, display_name'),
     supabase.from('news').select('id, title, content, cover_image_url, cover_image_position, created_at').eq('published', true).order('sort_order', { ascending: true }).limit(3),
   ])
 
-  const myEntry = myEntryArr ?? leaderboard?.find(l => l.user_id === user.id)
-  const { count: rankCount } = await supabase
-    .from('leaderboard').select('*', { count: 'exact', head: true })
-    .gt('total_points', myEntry?.total_points ?? 0)
-  const myRank = myEntry ? (rankCount ?? 0) + 1 : null
+  // Osobní data — jen pro přihlášené
+  let profile = null
+  let myEntry = null
+  let myRank: number | null = null
+  let exactTips: { match_id: string; home_score: number; away_score: number; is_joker: boolean; points: number; home_team: string; away_team: string; kickoff_at: string; group_name: string | null }[] = []
 
-  const { data: rawExactTips } = await supabase
-    .from('tips')
-    .select('home_score, away_score, is_joker, points, match_id, matches(home_team, away_team, kickoff_at, group_name, home_score, away_score)')
-    .eq('user_id', user.id).not('points', 'is', null)
+  if (user) {
+    const [{ data: profileData }, { data: myEntryData }] = await Promise.all([
+      supabase.from('profiles').select('*').eq('id', user.id).single(),
+      supabase.from('leaderboard').select('*').eq('user_id', user.id).single(),
+    ])
+    profile = profileData
+    myEntry = myEntryData ?? leaderboard?.find(l => l.user_id === user.id)
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const exactTips = (rawExactTips ?? []).filter((t: any) =>
-    t.matches?.home_score === t.home_score && t.matches?.away_score === t.away_score
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ).map((t: any) => ({
-    match_id: t.match_id, home_score: t.home_score, away_score: t.away_score,
-    is_joker: t.is_joker, points: t.points,
-    home_team: t.matches.home_team, away_team: t.matches.away_team,
-    kickoff_at: t.matches.kickoff_at, group_name: t.matches.group_name,
-  })).sort((a: { kickoff_at: string }, b: { kickoff_at: string }) =>
-    new Date(a.kickoff_at).getTime() - new Date(b.kickoff_at).getTime()
-  )
+    const { count: rankCount } = await supabase
+      .from('leaderboard').select('*', { count: 'exact', head: true })
+      .gt('total_points', myEntry?.total_points ?? 0)
+    myRank = myEntry ? (rankCount ?? 0) + 1 : null
+
+    const { data: rawExactTips } = await supabase
+      .from('tips')
+      .select('home_score, away_score, is_joker, points, match_id, matches(home_team, away_team, kickoff_at, group_name, home_score, away_score)')
+      .eq('user_id', user.id).not('points', 'is', null)
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    exactTips = (rawExactTips ?? []).filter((t: any) =>
+      t.matches?.home_score === t.home_score && t.matches?.away_score === t.away_score
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ).map((t: any) => ({
+      match_id: t.match_id, home_score: t.home_score, away_score: t.away_score,
+      is_joker: t.is_joker, points: t.points,
+      home_team: t.matches.home_team, away_team: t.matches.away_team,
+      kickoff_at: t.matches.kickoff_at, group_name: t.matches.group_name,
+    })).sort((a: { kickoff_at: string }, b: { kickoff_at: string }) =>
+      new Date(a.kickoff_at).getTime() - new Date(b.kickoff_at).getTime()
+    )
+  }
 
   const medals = ['🥇', '🥈', '🥉']
-  const top3 = leaderboard?.slice(0, 3) ?? []
-  const rest = leaderboard?.slice(3) ?? []
   const last = lastMatch?.[0]
 
-  // Hall of Fame výpočet
   const namesMap: Record<string, string> = {}
   for (const p of allProfilesRaw ?? []) namesMap[p.id] = p.display_name ?? '–'
 
@@ -127,55 +129,82 @@ export default async function DashboardPage() {
             <span className="font-bold text-white" style={{ whiteSpace: 'nowrap' }}>Tipovačka MS 2026</span>
           </div>
           <div className="flex items-center gap-3" style={{ flexShrink: 0, minWidth: 0 }}>
-            <span className="dash-nav-name">👤 {profile?.display_name || user.email}</span>
-            <form action="/auth/logout" method="post">
-              <button className="text-sm hover:text-white transition-colors" style={{ color: '#94a3b8', whiteSpace: 'nowrap' }}>Odhlásit se</button>
-            </form>
+            {user ? (
+              <>
+                <span className="dash-nav-name">👤 {profile?.display_name || user.email}</span>
+                <form action="/auth/logout" method="post">
+                  <button className="text-sm hover:text-white transition-colors" style={{ color: '#94a3b8', whiteSpace: 'nowrap' }}>Odhlásit se</button>
+                </form>
+              </>
+            ) : (
+              <Link href="/auth/login" style={{ fontSize: '0.875rem', color: '#a78bfa', fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+                Přihlásit se →
+              </Link>
+            )}
           </div>
         </div>
       </nav>
 
       <main className="max-w-7xl mx-auto p-4 py-6">
         {/* Stat karty */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-          <Link href="/results" style={{
-            background: 'linear-gradient(135deg, rgba(245,158,11,0.18) 0%, rgba(251,191,36,0.06) 100%)',
-            border: '1px solid rgba(245,158,11,0.35)',
-            borderRadius: 20, textDecoration: 'none', display: 'block',
-            padding: '20px 22px', position: 'relative', overflow: 'hidden',
+        {user ? (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+            <Link href="/results" style={{
+              background: 'linear-gradient(135deg, rgba(245,158,11,0.18) 0%, rgba(251,191,36,0.06) 100%)',
+              border: '1px solid rgba(245,158,11,0.35)',
+              borderRadius: 20, textDecoration: 'none', display: 'block',
+              padding: '20px 22px', position: 'relative', overflow: 'hidden',
+            }}>
+              <div style={{ position: 'absolute', right: 14, top: 10, fontSize: '3.5rem', opacity: 0.18, userSelect: 'none' }}>🏅</div>
+              <p style={{ fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(245,158,11,0.7)', marginBottom: 10 }}>Moje body</p>
+              <p style={{ fontSize: '2.8rem', fontWeight: 900, color: '#f59e0b', lineHeight: 1, letterSpacing: '-0.02em' }}>{myEntry?.total_points ?? 0}</p>
+            </Link>
+            <Link href="/leaderboard" style={{
+              background: 'linear-gradient(135deg, rgba(139,92,246,0.18) 0%, rgba(99,102,241,0.06) 100%)',
+              border: '1px solid rgba(139,92,246,0.35)',
+              borderRadius: 20, textDecoration: 'none', display: 'block',
+              padding: '20px 22px', position: 'relative', overflow: 'hidden',
+            }}>
+              <div style={{ position: 'absolute', right: 14, top: 10, fontSize: '3.5rem', opacity: 0.18, userSelect: 'none' }}>📊</div>
+              <p style={{ fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(139,92,246,0.7)', marginBottom: 10 }}>Moje pořadí</p>
+              <p style={{ fontSize: '2.8rem', fontWeight: 900, color: '#a78bfa', lineHeight: 1, letterSpacing: '-0.02em' }}>{myRank ? `${myRank}.` : '–'}</p>
+            </Link>
+            <ExactTipsModal tips={exactTips} count={myEntry?.correct_results ?? 0} />
+            <CompareModal players={(allPlayers ?? []).map(e => ({
+              user_id: e.user_id,
+              display_name: (e.profiles as unknown as { display_name: string })?.display_name ?? '–',
+              total_points: e.total_points,
+            }))} asCard />
+          </div>
+        ) : (
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(99,102,241,0.1) 0%, rgba(139,92,246,0.05) 100%)',
+            border: '1px solid rgba(99,102,241,0.2)',
+            borderRadius: 16, padding: '16px 20px', marginBottom: 24,
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12,
           }}>
-            <div style={{ position: 'absolute', right: 14, top: 10, fontSize: '3.5rem', opacity: 0.18, userSelect: 'none' }}>🏅</div>
-            <p style={{ fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(245,158,11,0.7)', marginBottom: 10 }}>Moje body</p>
-            <p style={{ fontSize: '2.8rem', fontWeight: 900, color: '#f59e0b', lineHeight: 1, letterSpacing: '-0.02em' }}>{myEntry?.total_points ?? 0}</p>
-          </Link>
-          <Link href="/leaderboard" style={{
-            background: 'linear-gradient(135deg, rgba(139,92,246,0.18) 0%, rgba(99,102,241,0.06) 100%)',
-            border: '1px solid rgba(139,92,246,0.35)',
-            borderRadius: 20, textDecoration: 'none', display: 'block',
-            padding: '20px 22px', position: 'relative', overflow: 'hidden',
-          }}>
-            <div style={{ position: 'absolute', right: 14, top: 10, fontSize: '3.5rem', opacity: 0.18, userSelect: 'none' }}>📊</div>
-            <p style={{ fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(139,92,246,0.7)', marginBottom: 10 }}>Moje pořadí</p>
-            <p style={{ fontSize: '2.8rem', fontWeight: 900, color: '#a78bfa', lineHeight: 1, letterSpacing: '-0.02em' }}>{myRank ? `${myRank}.` : '–'}</p>
-          </Link>
-          <ExactTipsModal tips={exactTips} count={myEntry?.correct_results ?? 0} />
-          <CompareModal players={(allPlayers ?? []).map(e => ({
-            user_id: e.user_id,
-            display_name: (e.profiles as unknown as { display_name: string })?.display_name ?? '–',
-            total_points: e.total_points,
-          }))} asCard />
-        </div>
+            <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.55)' }}>
+              👀 Prohlížíš jako host — tipy, chat a osobní statistiky jsou dostupné po přihlášení.
+            </p>
+            <Link href="/auth/login" style={{
+              background: '#4f46e5', borderRadius: 10, padding: '8px 20px',
+              color: '#fff', fontWeight: 700, fontSize: '0.88rem', textDecoration: 'none', whiteSpace: 'nowrap',
+            }}>
+              Přihlásit se →
+            </Link>
+          </div>
+        )}
 
         {/* Rychlé akce */}
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 24 }}>
           {[
-            { href: '/tips', icon: '✏️', label: 'Zadat tipy' },
+            ...(user ? [{ href: '/tips', icon: '✏️', label: 'Zadat tipy' }] : []),
             { href: '/leaderboard', icon: '🏆', label: 'Žebříček' },
             { href: '/results', icon: '📊', label: 'Výsledky' },
-            { href: '/chat', icon: '💬', label: 'Chat' },
-            { href: '/profil', icon: '👤', label: 'Profil' },
+            ...(user ? [{ href: '/chat', icon: '💬', label: 'Chat' }] : []),
+            ...(user ? [{ href: '/profil', icon: '👤', label: 'Profil' }] : []),
             { href: '/rules', icon: '📋', label: 'Pravidla' },
-            ...(isAdmin(user.email) ? [{ href: '/admin', icon: '⚙️', label: 'Admin' }] : []),
+            ...(isAdmin(user?.email) ? [{ href: '/admin', icon: '⚙️', label: 'Admin' }] : []),
           ].map(item => (
             <Link key={item.href} href={item.href} style={{
               display: 'flex', alignItems: 'center', gap: 8,
@@ -199,8 +228,8 @@ export default async function DashboardPage() {
               <Link href="/leaderboard" style={{ fontSize: '0.75rem', color: '#6366f1', textDecoration: 'none', fontWeight: 600 }}>celý žebříček →</Link>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              {(leaderboard ?? []).map((entry, i) => {
-                const isMe = entry.user_id === user.id
+              {(leaderboard ?? []).map((entry) => {
+                const isMe = user ? entry.user_id === user.id : false
                 const prizes = ['20 000 Kč', '15 000 Kč', '10 000 Kč']
                 const podiumColors = [
                   'rgba(251,191,36,0.18)',
@@ -276,7 +305,15 @@ export default async function DashboardPage() {
 
             <div className="dash-news-chat">
               <NewsSection posts={newsPosts ?? []} />
-              <DashboardChat currentUserId={user.id} currentDisplayName={profile?.display_name ?? user.email ?? 'Anonym'} />
+              {user ? (
+                <DashboardChat currentUserId={user.id} currentDisplayName={profile?.display_name ?? user.email ?? 'Anonym'} />
+              ) : (
+                <div style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, padding: 24 }}>
+                  <p style={{ fontSize: '1.5rem' }}>💬</p>
+                  <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.3)', textAlign: 'center' }}>Chat je dostupný<br />po přihlášení</p>
+                  <Link href="/auth/login" style={{ fontSize: '0.82rem', color: '#6366f1', fontWeight: 700, textDecoration: 'none' }}>Přihlásit se →</Link>
+                </div>
+              )}
             </div>
 
             {/* Poslední zápas + Nadcházející */}

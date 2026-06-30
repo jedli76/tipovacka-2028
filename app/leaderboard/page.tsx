@@ -1,11 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
 
 export default async function LeaderboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
 
   const { data: leaderboard } = await supabase
     .from('leaderboard')
@@ -37,7 +35,7 @@ export default async function LeaderboardPage() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {leaderboard.map((entry, i) => {
-              const isMe = entry.user_id === user.id
+              const isMe = user ? entry.user_id === user.id : false
               const medals = ['🥇', '🥈', '🥉']
               const podiumColors = [
                 { bg: 'linear-gradient(135deg, rgba(251,191,36,0.13) 0%, rgba(245,158,11,0.05) 100%)', border: 'rgba(251,191,36,0.35)', pts: '#fbbf24' },
