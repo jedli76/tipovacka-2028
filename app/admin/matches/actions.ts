@@ -65,9 +65,19 @@ async function recalculatePoints(supabase: any, matchId: string, homeScore: numb
 
   if (!tips || tips.length === 0) return
 
+  // Spočítej, kolik hráčů má přesný tip
+  const exactCount = tips.filter(
+    (t: { home_score: number; away_score: number }) =>
+      t.home_score === homeScore && t.away_score === awayScore
+  ).length
+
+  const braveBase = exactCount <= 5 ? 15 : exactCount <= 10 ? 10 : 0
+
   for (const tip of tips) {
     const points = calculateMatchPoints(tip.home_score, tip.away_score, homeScore, awayScore, tip.is_joker)
-    await supabase.from('tips').update({ points }).eq('id', tip.id)
+    const isExact = tip.home_score === homeScore && tip.away_score === awayScore
+    const brave_bonus = isExact && braveBase > 0 ? (tip.is_joker ? braveBase * 2 : braveBase) : 0
+    await supabase.from('tips').update({ points, brave_bonus }).eq('id', tip.id)
   }
 
   const userIds = [...new Set(tips.map((t: { user_id: string }) => t.user_id))]
@@ -79,7 +89,7 @@ async function recalculatePoints(supabase: any, matchId: string, homeScore: numb
     ] = await Promise.all([
       supabase
         .from('tips')
-        .select('points, home_score, away_score, matches(home_score, away_score)')
+        .select('points, brave_bonus, home_score, away_score, matches(home_score, away_score)')
         .eq('user_id', userId)
         .not('points', 'is', null),
       supabase
@@ -92,7 +102,7 @@ async function recalculatePoints(supabase: any, matchId: string, homeScore: numb
         .eq('user_id', userId),
     ])
 
-    const matchPoints = userTips?.reduce((s: number, t: { points: number }) => s + (t.points ?? 0), 0) ?? 0
+    const matchPoints = userTips?.reduce((s: number, t: { points: number; brave_bonus: number }) => s + (t.points ?? 0) + (t.brave_bonus ?? 0), 0) ?? 0
     const bonusPoints = userBonusTips?.reduce((s: number, t: { points: number }) => s + (t.points ?? 0), 0) ?? 0
     const tournamentPoints = userTournamentTips?.reduce((s: number, t: { points: number }) => s + (t.points ?? 0), 0) ?? 0
     const totalPoints = matchPoints + bonusPoints + tournamentPoints

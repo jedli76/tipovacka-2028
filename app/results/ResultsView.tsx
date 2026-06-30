@@ -37,6 +37,7 @@ type Tip = {
   away_score: number
   is_joker: boolean
   points: number | null
+  brave_bonus?: number | null
 }
 
 type BonusQuestion = {
@@ -201,6 +202,7 @@ export default function ResultsView({
         away_score: t.away_score,
         is_joker: t.is_joker,
         points: t.points ?? 0,
+        brave_bonus: t.brave_bonus ?? 0,
         home_team: m.home_team,
         away_team: m.away_team,
         kickoff_at: m.kickoff_at,
@@ -466,6 +468,7 @@ export default function ResultsView({
                 return tw === rw
               })()
               const pts = tip?.points ?? 0
+              const braveBonus = tip?.brave_bonus ?? 0
               const isJoker = tip?.is_joker
 
               const accentColor = isJoker ? '#f59e0b' : isExact ? '#34d399' : isWinner ? '#60a5fa' : null
@@ -500,6 +503,7 @@ export default function ResultsView({
                         {isJoker && <span style={S.pill('#f59e0b')}>⚡ Žolík</span>}
                         {isExact && <span style={S.pill(isJoker ? '#f59e0b' : '#34d399')}>★ Přesný</span>}
                         {isWinner && !isExact && <span style={S.pill('#60a5fa')}>✓ Správný vítěz</span>}
+                        {braveBonus > 0 && <span style={S.pill('#a78bfa')}>🎯 Odvážný tip +{braveBonus} b</span>}
                       </div>
                       <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#e2e8f0', lineHeight: 1.5 }}>
                         <TeamName team={match.home_team} flagSize="1.4em" />
