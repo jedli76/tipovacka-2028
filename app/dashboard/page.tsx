@@ -54,7 +54,7 @@ export default async function DashboardPage() {
   let myEntry = null
   let myRank: number | null = null
   let exactTips: { match_id: string; home_score: number; away_score: number; is_joker: boolean; points: number; home_team: string; away_team: string; kickoff_at: string; group_name: string | null }[] = []
-  let lastMatchTips: Record<string, { home_score: number; away_score: number }> = {}
+  let lastMatchTips: Record<string, { home_score: number; away_score: number; points: number | null }> = {}
 
   if (user) {
     const [{ data: profileData }, { data: myEntryData }] = await Promise.all([
@@ -91,10 +91,10 @@ export default async function DashboardPage() {
     const lastMatchIds = (lastMatch ?? []).map(m => m.id)
     if (lastMatchIds.length > 0) {
       const { data: lmTips } = await supabase
-        .from('tips').select('match_id, home_score, away_score')
+        .from('tips').select('match_id, home_score, away_score, points')
         .eq('user_id', user.id).in('match_id', lastMatchIds)
       for (const t of lmTips ?? []) {
-        lastMatchTips[t.match_id] = { home_score: t.home_score, away_score: t.away_score }
+        lastMatchTips[t.match_id] = { home_score: t.home_score, away_score: t.away_score, points: t.points }
       }
     }
   }
@@ -368,9 +368,16 @@ export default async function DashboardPage() {
                                 </span>
                               </div>
                               {myTip ? (
-                                <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', fontWeight: 600 }}>
-                                  tip: {myTip.home_score}:{myTip.away_score}
-                                </span>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                                  <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', fontWeight: 600 }}>
+                                    tip: {myTip.home_score}:{myTip.away_score}
+                                  </span>
+                                  {myTip.points !== null && (
+                                    <span style={{ fontSize: '0.72rem', fontWeight: 800, color: myTip.points > 0 ? '#34d399' : 'rgba(255,255,255,0.2)' }}>
+                                      {myTip.points > 0 ? `+${myTip.points} b` : '0 b'}
+                                    </span>
+                                  )}
+                                </div>
                               ) : user ? (
                                 <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.15)' }}>bez tipu</span>
                               ) : null}
