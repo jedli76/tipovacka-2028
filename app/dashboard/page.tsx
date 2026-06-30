@@ -147,7 +147,6 @@ export default async function DashboardPage() {
             <div style={{ position: 'absolute', right: 14, top: 10, fontSize: '3.5rem', opacity: 0.18, userSelect: 'none' }}>🏅</div>
             <p style={{ fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(245,158,11,0.7)', marginBottom: 10 }}>Moje body</p>
             <p style={{ fontSize: '2.8rem', fontWeight: 900, color: '#f59e0b', lineHeight: 1, letterSpacing: '-0.02em' }}>{myEntry?.total_points ?? 0}</p>
-            <p style={{ fontSize: '0.72rem', color: 'rgba(245,158,11,0.45)', marginTop: 6, fontWeight: 600 }}>bodů celkem →</p>
           </Link>
           <Link href="/leaderboard" style={{
             background: 'linear-gradient(135deg, rgba(139,92,246,0.18) 0%, rgba(99,102,241,0.06) 100%)',
@@ -158,7 +157,6 @@ export default async function DashboardPage() {
             <div style={{ position: 'absolute', right: 14, top: 10, fontSize: '3.5rem', opacity: 0.18, userSelect: 'none' }}>📊</div>
             <p style={{ fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(139,92,246,0.7)', marginBottom: 10 }}>Moje pořadí</p>
             <p style={{ fontSize: '2.8rem', fontWeight: 900, color: '#a78bfa', lineHeight: 1, letterSpacing: '-0.02em' }}>{myRank ? `${myRank}.` : '–'}</p>
-            <p style={{ fontSize: '0.72rem', color: 'rgba(139,92,246,0.45)', marginTop: 6, fontWeight: 600 }}>z {leaderboard?.length ?? 0} hráčů →</p>
           </Link>
           <ExactTipsModal tips={exactTips} count={myEntry?.correct_results ?? 0} />
           <CompareModal players={(allPlayers ?? []).map(e => ({

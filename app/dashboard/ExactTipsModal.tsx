@@ -39,7 +39,6 @@ export default function ExactTipsModal({ tips, count }: { tips: ExactTip[], coun
         <div style={{ position: 'absolute', right: 14, top: 10, fontSize: '3.5rem', opacity: 0.18, userSelect: 'none' }}>🎯</div>
         <p style={{ fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(34,197,94,0.7)', marginBottom: 10 }}>Přesné výsledky</p>
         <p style={{ fontSize: '2.8rem', fontWeight: 900, color: '#22c55e', lineHeight: 1, letterSpacing: '-0.02em' }}>{count}</p>
-        <p style={{ fontSize: '0.72rem', color: 'rgba(34,197,94,0.45)', marginTop: 6, fontWeight: 600 }}>přesných tipů →</p>
       </button>
 
       {open && (
