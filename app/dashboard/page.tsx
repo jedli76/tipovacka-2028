@@ -7,6 +7,7 @@ import TeamName from '@/lib/TeamName'
 import HallOfFamePanel from './HallOfFame'
 import { computeHallOfFame } from '@/lib/hallOfFame'
 import NewsSection from './NewsSection'
+import { isAdmin } from '@/lib/admins'
 import DashboardChat from './DashboardChat'
 
 function formatDate(iso: string) {
@@ -175,7 +176,7 @@ export default async function DashboardPage() {
             { href: '/results', icon: '📊', label: 'Výsledky' },
             { href: '/chat', icon: '💬', label: 'Chat' },
             { href: '/rules', icon: '📋', label: 'Pravidla' },
-            ...(user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL ? [{ href: '/admin', icon: '⚙️', label: 'Admin' }] : []),
+            ...(isAdmin(user.email) ? [{ href: '/admin', icon: '⚙️', label: 'Admin' }] : []),
           ].map(item => (
             <Link key={item.href} href={item.href} style={{
               display: 'flex', alignItems: 'center', gap: 8,

@@ -1,3 +1,4 @@
+import { isAdmin } from '@/lib/admins'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -6,7 +7,7 @@ import BonusAdmin from './BonusAdmin'
 export default async function AdminBonusesPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user || user.email !== process.env.ADMIN_EMAIL) redirect('/dashboard')
+  if (!user || !isAdmin(user.email)) redirect('/dashboard')
 
   const [{ data: bonusQuestions }, { data: tournamentQuestions }] = await Promise.all([
     supabase.from('bonus_questions').select('*').order('sort_order'),

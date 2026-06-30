@@ -1,10 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { isAdmin } from '@/lib/admins'
 
 export async function GET() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user || user.email !== process.env.ADMIN_EMAIL) {
+  if (!user || !isAdmin(user.email)) {
     return NextResponse.json({ error: 'Přístup odepřen.' }, { status: 403 })
   }
 

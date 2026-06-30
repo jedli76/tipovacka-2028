@@ -1,3 +1,4 @@
+import { isAdmin } from '@/lib/admins'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -6,7 +7,7 @@ import AdminTabs from './AdminTabs'
 export default async function AdminPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user || user.email !== process.env.ADMIN_EMAIL) redirect('/dashboard')
+  if (!user || !isAdmin(user.email)) redirect('/dashboard')
 
   const [
     { data: matches },

@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
+import { isAdmin } from '@/lib/admins'
 
 function adminClient() {
   return createServiceClient(
@@ -14,7 +15,7 @@ function adminClient() {
 async function checkAdmin(): Promise<boolean> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  return !!user && user.email === 'romanjedlicka@gmail.com'
+  return isAdmin(user?.email)
 }
 
 export async function addTournamentQuestion(formData: FormData): Promise<{ error?: string }> {
@@ -102,7 +103,7 @@ async function updateLeaderboardForUsers(supabase: any, userIds: string[]) {
 export async function saveBonusAnswer(questionId: string, correctAnswer: string): Promise<{ error?: string }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user || user.email !== process.env.ADMIN_EMAIL) return { error: 'Přístup odepřen.' }
+  if (!user || !isAdmin(user.email)) return { error: 'Přístup odepřen.' }
 
   const { error } = await supabase
     .from('bonus_questions')
@@ -140,7 +141,7 @@ export async function saveBonusAnswer(questionId: string, correctAnswer: string)
 export async function saveTournamentAnswer(questionId: string, correctAnswer: string): Promise<{ error?: string }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user || user.email !== process.env.ADMIN_EMAIL) return { error: 'Přístup odepřen.' }
+  if (!user || !isAdmin(user.email)) return { error: 'Přístup odepřen.' }
 
   const { data: q, error: qErr } = await supabase
     .from('tournament_questions')

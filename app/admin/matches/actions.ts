@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { calculateMatchPoints } from '@/lib/scoring'
+import { isAdmin } from '@/lib/admins'
 
 type SaveMatchInput = {
   id?: string
@@ -17,7 +18,7 @@ type SaveMatchInput = {
 export async function saveMatch(input: SaveMatchInput): Promise<{ error?: string }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user || user.email !== process.env.ADMIN_EMAIL) return { error: 'Přístup odepřen.' }
+  if (!user || !isAdmin(user.email)) return { error: 'Přístup odepřen.' }
 
   const payload = {
     home_team: input.homeTeam,
@@ -50,7 +51,7 @@ export async function saveMatch(input: SaveMatchInput): Promise<{ error?: string
 export async function deleteMatch(id: string): Promise<void> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user || user.email !== process.env.ADMIN_EMAIL) return
+  if (!user || !isAdmin(user.email)) return
 
   await supabase.from('matches').delete().eq('id', id)
 }

@@ -3,6 +3,7 @@
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { isAdmin } from '@/lib/admins'
 
 function adminDb() {
   return createServiceClient(
@@ -14,7 +15,7 @@ function adminDb() {
 async function checkAdmin(): Promise<boolean> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  return !!user && user.email === 'romanjedlicka@gmail.com'
+  return isAdmin(user?.email)
 }
 
 export async function saveNewsPost(formData: FormData): Promise<{ error?: string }> {
