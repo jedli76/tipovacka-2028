@@ -2,6 +2,7 @@
 
 import ReactMarkdown from 'react-markdown'
 import { useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
 
 type NewsPost = {
   id: string
@@ -142,6 +143,11 @@ export default function NewsSection({ posts }: { posts: NewsPost[] }) {
           {posts.map((post, i) => (
             <NewsCard key={post.id} post={post} divider={i > 0} />
           ))}
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '10px 20px' }}>
+            <Link href="/news" style={{ fontSize: '0.8rem', fontWeight: 700, color: '#818cf8', textDecoration: 'none', letterSpacing: '0.04em' }}>
+              📂 Archiv novinek →
+            </Link>
+          </div>
         </div>
       )}
     </div>
