@@ -237,7 +237,7 @@ export default function ResultsView({
       {/* Hero header */}
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '48px 20px 32px' }}>
         <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>
-          Výsledky tipéře
+          Profil hráče
         </p>
         <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 900, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: bio ? 8 : (rank ? 12 : 32) }}>
           {displayName}
