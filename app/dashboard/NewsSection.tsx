@@ -72,8 +72,12 @@ const mdComponents = {
 function NewsCard({ post, divider }: { post: NewsPost; divider: boolean }) {
   const [expanded, setExpanded] = useState(false)
   const paragraphs = post.content.trim().split(/\n\n+/)
-  const isLong = paragraphs.length > 1
-  const preview = paragraphs[0]
+  const firstParagraph = paragraphs[0]
+  const CHAR_LIMIT = 200
+  const preview = firstParagraph.length > CHAR_LIMIT
+    ? firstParagraph.slice(0, CHAR_LIMIT).trimEnd() + '…'
+    : firstParagraph
+  const isLong = paragraphs.length > 1 || post.content.trim().length > CHAR_LIMIT
 
   return (
     <div>
