@@ -106,16 +106,26 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen" style={{ background: '#0a0e1a', color: '#e2e8f0' }}>
+      <style>{`
+        .dash-main-grid { display: grid; grid-template-columns: 300px 1fr; gap: 20px; align-items: start; }
+        .dash-match-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .dash-nav-name { color: #94a3b8; font-size: 0.875rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 140px; }
+        @media (max-width: 768px) {
+          .dash-main-grid { grid-template-columns: 1fr; }
+          .dash-match-grid { grid-template-columns: 1fr; }
+          .dash-nav-name { max-width: 100px; font-size: 0.78rem; }
+        }
+      `}</style>
       <nav style={{ background: '#111827', borderBottom: '1px solid #1f2d45' }} className="px-4 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">⚽</span>
-            <span className="font-bold text-white">Tipovačka MS 2026</span>
+          <div className="flex items-center gap-2" style={{ minWidth: 0 }}>
+            <span className="text-xl" style={{ flexShrink: 0 }}>⚽</span>
+            <span className="font-bold text-white" style={{ whiteSpace: 'nowrap' }}>Tipovačka MS 2026</span>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm" style={{ color: '#94a3b8' }}>👤 {profile?.display_name || user.email}</span>
+          <div className="flex items-center gap-3" style={{ flexShrink: 0, minWidth: 0 }}>
+            <span className="dash-nav-name">👤 {profile?.display_name || user.email}</span>
             <form action="/auth/logout" method="post">
-              <button className="text-sm hover:text-white transition-colors" style={{ color: '#94a3b8' }}>Odhlásit se</button>
+              <button className="text-sm hover:text-white transition-colors" style={{ color: '#94a3b8', whiteSpace: 'nowrap' }}>Odhlásit se</button>
             </form>
           </div>
         </div>
@@ -177,7 +187,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Dvousloupcový layout */}
-        <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: 20, alignItems: 'start' }}>
+        <div className="dash-main-grid">
 
           {/* LEVÝ SLOUPEC — Top 20 */}
           <div style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16, padding: '16px' }}>
@@ -264,7 +274,7 @@ export default async function DashboardPage() {
             <NewsSection posts={newsPosts ?? []} />
 
             {/* Poslední zápas + Nadcházející */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div className="dash-match-grid">
 
               {/* Poslední odehraný zápas */}
               <div style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16, padding: '16px 20px' }}>
