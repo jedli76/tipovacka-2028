@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import ExportButton from './ExportButton'
 import BonusAdmin from './bonuses/BonusAdmin'
+import NewsAdmin from './news/NewsAdmin'
 import { addTournamentQuestion } from './bonuses/actions'
 
 type Match = {
@@ -33,16 +34,27 @@ type TournamentQ = {
   sort_order: number
 }
 
+type NewsPost = {
+  id: string
+  title: string
+  content: string
+  published: boolean
+  created_at: string
+}
+
 export default function AdminTabs({
   matches,
   bonusQuestions,
   tournamentQuestions,
+  newsPosts,
 }: {
   matches: Match[]
   bonusQuestions: BonusQ[]
   tournamentQuestions: TournamentQ[]
+  newsPosts: NewsPost[]
 }) {
-  const [tab, setTab] = useState<'matches' | 'bonuses'>('matches')
+  const [tab, setTab] = useState<'matches' | 'bonuses' | 'news'>('matches')
+  const [addingNews, setAddingNews] = useState(false)
   const [addingBonus, setAddingBonus] = useState(false)
   const [newQuestion, setNewQuestion] = useState('')
   const [newCategory, setNewCategory] = useState('bonus')
@@ -70,7 +82,7 @@ export default function AdminTabs({
     })
   }
 
-  const tabBtn = (t: typeof tab, label: string, count: number) => (
+  const tabBtn = (t: 'matches' | 'bonuses' | 'news', label: string, count: number) => (
     <button
       onClick={() => setTab(t)}
       style={{
@@ -105,6 +117,7 @@ export default function AdminTabs({
         <div style={{ display: 'flex', gap: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 12, padding: 4 }}>
           {tabBtn('matches', '⚽ Zápasy', matches.length)}
           {tabBtn('bonuses', '🎯 Bonusové otázky', bonusQuestions.length + tournamentQuestions.length)}
+          {tabBtn('news', '📰 Novinky', newsPosts.length)}
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <ExportButton />
@@ -122,6 +135,14 @@ export default function AdminTabs({
               style={{ background: '#4f46e5', color: '#fff', fontWeight: 700, padding: '8px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: '0.9rem' }}
             >
               + Přidat otázku
+            </button>
+          )}
+          {tab === 'news' && (
+            <button
+              onClick={() => setAddingNews(true)}
+              style={{ background: '#4f46e5', color: '#fff', fontWeight: 700, padding: '8px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: '0.9rem' }}
+            >
+              + Nový příspěvek
             </button>
           )}
         </div>
@@ -175,6 +196,15 @@ export default function AdminTabs({
         <BonusAdmin
           bonusQuestions={bonusQuestions}
           tournamentQuestions={tournamentQuestions}
+        />
+      )}
+
+      {/* Novinky */}
+      {tab === 'news' && (
+        <NewsAdmin
+          posts={newsPosts}
+          forceAddOpen={addingNews}
+          onAddClose={() => setAddingNews(false)}
         />
       )}
 

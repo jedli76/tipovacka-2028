@@ -6,6 +6,7 @@ import ExactTipsModal from './ExactTipsModal'
 import TeamName from '@/lib/TeamName'
 import HallOfFamePanel from './HallOfFame'
 import { computeHallOfFame } from '@/lib/hallOfFame'
+import NewsSection from './NewsSection'
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString('cs-CZ', {
@@ -30,6 +31,7 @@ export default async function DashboardPage() {
     { data: last8Matches },
     { data: allTipsRaw },
     { data: allProfilesRaw },
+    { data: newsPosts },
   ] = await Promise.all([
     supabase.from('leaderboard').select('*, profiles(display_name)')
       .order('total_points', { ascending: false }).limit(20),
@@ -50,6 +52,7 @@ export default async function DashboardPage() {
     supabase.from('tips').select('user_id, home_score, away_score, points, match_id, matches(home_score, away_score, kickoff_at)')
       .not('matches.home_score', 'is', null),
     supabase.from('profiles').select('id, display_name'),
+    supabase.from('news').select('id, title, content, created_at').eq('published', true).order('created_at', { ascending: false }).limit(5),
   ])
 
   const myEntry = myEntryArr ?? leaderboard?.find(l => l.user_id === user.id)
@@ -246,13 +249,7 @@ export default async function DashboardPage() {
           {/* PRAVÝ SLOUPEC */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-            {/* Novinky */}
-            <div style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16, padding: '16px 20px' }}>
-              <h2 style={{ fontWeight: 800, fontSize: '0.95rem', color: '#fff', marginBottom: 12 }}>📰 Novinky</h2>
-              <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.3)', fontStyle: 'italic' }}>
-                Tady budou aktuality a oznámení administrátora. Brzy!
-              </p>
-            </div>
+            <NewsSection posts={newsPosts ?? []} />
 
             <HallOfFamePanel hof={hof} />
 

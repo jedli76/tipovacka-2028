@@ -12,10 +12,12 @@ export default async function AdminPage() {
     { data: matches },
     { data: bonusQuestions },
     { data: tournamentQuestions },
+    { data: newsPosts },
   ] = await Promise.all([
     supabase.from('matches').select('*').order('kickoff_at', { ascending: true }),
     supabase.from('bonus_questions').select('*').order('sort_order'),
     supabase.from('tournament_questions').select('*').order('sort_order'),
+    supabase.from('news').select('*').order('created_at', { ascending: false }),
   ])
 
   return (
@@ -32,6 +34,7 @@ export default async function AdminPage() {
           matches={matches ?? []}
           bonusQuestions={bonusQuestions ?? []}
           tournamentQuestions={tournamentQuestions ?? []}
+          newsPosts={newsPosts ?? []}
         />
       </div>
     </div>
