@@ -65,21 +65,23 @@ export default function NewsSection({ posts }: { posts: NewsPost[] }) {
           {posts.map((post, i) => (
             <div key={post.id}>
               {i > 0 && <div style={{ height: 1, background: 'rgba(255,255,255,0.06)' }} />}
-              {post.cover_image_url && (
-                <div style={{ width: '100%', maxHeight: 220, overflow: 'hidden' }}>
-                  <img
-                    src={post.cover_image_url}
-                    alt=""
-                    style={{ width: '100%', height: 220, objectFit: 'cover', display: 'block' }}
-                  />
-                </div>
-              )}
               <div style={{ padding: '14px 20px 16px' }}>
-                <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', marginBottom: 5, fontWeight: 600 }}>
-                  {formatDate(post.created_at)}
+                <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                  {post.cover_image_url && (
+                    <img
+                      src={post.cover_image_url}
+                      alt=""
+                      style={{ width: 110, height: 80, objectFit: 'cover', borderRadius: 10, flexShrink: 0 }}
+                    />
+                  )}
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', marginBottom: 4, fontWeight: 600 }}>
+                      {formatDate(post.created_at)}
+                    </div>
+                    <h3 style={{ fontWeight: 800, fontSize: '1rem', color: '#fff', marginBottom: 0 }}>{post.title}</h3>
+                  </div>
                 </div>
-                <h3 style={{ fontWeight: 800, fontSize: '1rem', color: '#fff', marginBottom: 10 }}>{post.title}</h3>
-                <div style={{ fontSize: '0.88rem', lineHeight: 1.7, color: '#cbd5e1' }}>
+                <div style={{ fontSize: '0.88rem', lineHeight: 1.7, color: '#cbd5e1', marginTop: 10 }}>
                   <ReactMarkdown
                     components={{
                       a: ({ href, children }) => (
