@@ -7,6 +7,7 @@ import TeamName from '@/lib/TeamName'
 import HallOfFamePanel from './HallOfFame'
 import { computeHallOfFame } from '@/lib/hallOfFame'
 import NewsSection from './NewsSection'
+import DashboardChat from './DashboardChat'
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString('cs-CZ', {
@@ -109,10 +110,12 @@ export default async function DashboardPage() {
       <style>{`
         .dash-main-grid { display: grid; grid-template-columns: 300px 1fr; gap: 20px; align-items: start; }
         .dash-match-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .dash-news-chat { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: stretch; }
         .dash-nav-name { color: #94a3b8; font-size: 0.875rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 140px; }
         @media (max-width: 768px) {
           .dash-main-grid { grid-template-columns: 1fr; }
           .dash-match-grid { grid-template-columns: 1fr; }
+          .dash-news-chat { grid-template-columns: 1fr; }
           .dash-nav-name { max-width: 100px; font-size: 0.78rem; }
         }
       `}</style>
@@ -271,7 +274,10 @@ export default async function DashboardPage() {
           {/* PRAVÝ SLOUPEC */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-            <NewsSection posts={newsPosts ?? []} />
+            <div className="dash-news-chat">
+              <NewsSection posts={newsPosts ?? []} />
+              <DashboardChat currentUserId={user.id} currentDisplayName={profile?.display_name ?? user.email ?? 'Anonym'} />
+            </div>
 
             {/* Poslední zápas + Nadcházející */}
             <div className="dash-match-grid">
