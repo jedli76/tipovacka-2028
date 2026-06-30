@@ -124,15 +124,27 @@ export default async function DashboardPage() {
       <main className="max-w-7xl mx-auto p-4 py-6">
         {/* Stat karty */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-          <Link href="/results" style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16, textDecoration: 'none', display: 'block' }} className="p-5">
-            <div style={{ fontSize: '1.5rem', marginBottom: 6 }}>🏅</div>
-            <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: '#64748b' }}>Moje body</p>
-            <p className="text-4xl font-black" style={{ color: '#f59e0b' }}>{myEntry?.total_points ?? 0}</p>
+          <Link href="/results" style={{
+            background: 'linear-gradient(135deg, rgba(245,158,11,0.18) 0%, rgba(251,191,36,0.06) 100%)',
+            border: '1px solid rgba(245,158,11,0.35)',
+            borderRadius: 20, textDecoration: 'none', display: 'block',
+            padding: '20px 22px', position: 'relative', overflow: 'hidden',
+          }}>
+            <div style={{ position: 'absolute', right: 16, top: 14, fontSize: '2rem', opacity: 0.18, userSelect: 'none' }}>🏅</div>
+            <p style={{ fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(245,158,11,0.7)', marginBottom: 10 }}>Moje body</p>
+            <p style={{ fontSize: '2.8rem', fontWeight: 900, color: '#f59e0b', lineHeight: 1, letterSpacing: '-0.02em' }}>{myEntry?.total_points ?? 0}</p>
+            <p style={{ fontSize: '0.72rem', color: 'rgba(245,158,11,0.45)', marginTop: 6, fontWeight: 600 }}>bodů celkem →</p>
           </Link>
-          <Link href="/leaderboard" style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16, textDecoration: 'none', display: 'block' }} className="p-5">
-            <div style={{ fontSize: '1.5rem', marginBottom: 6 }}>📊</div>
-            <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: '#64748b' }}>Moje pořadí</p>
-            <p className="text-4xl font-black" style={{ color: '#a78bfa' }}>{myRank ? `${myRank}.` : '–'}</p>
+          <Link href="/leaderboard" style={{
+            background: 'linear-gradient(135deg, rgba(139,92,246,0.18) 0%, rgba(99,102,241,0.06) 100%)',
+            border: '1px solid rgba(139,92,246,0.35)',
+            borderRadius: 20, textDecoration: 'none', display: 'block',
+            padding: '20px 22px', position: 'relative', overflow: 'hidden',
+          }}>
+            <div style={{ position: 'absolute', right: 16, top: 14, fontSize: '2rem', opacity: 0.18, userSelect: 'none' }}>📊</div>
+            <p style={{ fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(139,92,246,0.7)', marginBottom: 10 }}>Moje pořadí</p>
+            <p style={{ fontSize: '2.8rem', fontWeight: 900, color: '#a78bfa', lineHeight: 1, letterSpacing: '-0.02em' }}>{myRank ? `${myRank}.` : '–'}</p>
+            <p style={{ fontSize: '0.72rem', color: 'rgba(139,92,246,0.45)', marginTop: 6, fontWeight: 600 }}>z {leaderboard?.length ?? 0} hráčů →</p>
           </Link>
           <ExactTipsModal tips={exactTips} count={myEntry?.correct_results ?? 0} />
           <CompareModal players={(allPlayers ?? []).map(e => ({

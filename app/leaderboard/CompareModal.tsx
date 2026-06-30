@@ -174,22 +174,16 @@ export default function CompareModal({ players, asCard }: { players: Player[], a
         <button
           onClick={() => setOpen(true)}
           style={{
-            background: 'rgba(99,102,241,0.08)',
-            border: '1px solid rgba(99,102,241,0.25)',
-            borderRadius: 16,
-            padding: '20px',
-            cursor: 'pointer',
-            textAlign: 'left',
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
+            background: 'linear-gradient(135deg, rgba(99,102,241,0.18) 0%, rgba(139,92,246,0.06) 100%)',
+            border: '1px solid rgba(99,102,241,0.35)',
+            borderRadius: 20, padding: '20px 22px', cursor: 'pointer', textAlign: 'left',
+            width: '100%', height: '100%', position: 'relative', overflow: 'hidden',
           }}
         >
-          <div style={{ fontSize: '1.5rem', marginBottom: 6 }}>⚖️</div>
-          <p style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#64748b', marginBottom: 8 }}>Porovnat</p>
-          <p style={{ fontSize: '0.85rem', fontWeight: 600, color: '#a78bfa' }}>s ostatními hráči</p>
+          <div style={{ position: 'absolute', right: 16, top: 14, fontSize: '2rem', opacity: 0.18, userSelect: 'none' }}>⚖️</div>
+          <p style={{ fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(99,102,241,0.7)', marginBottom: 10 }}>Porovnat</p>
+          <p style={{ fontSize: '2.8rem', fontWeight: 900, color: '#818cf8', lineHeight: 1, letterSpacing: '-0.02em' }}>vs</p>
+          <p style={{ fontSize: '0.72rem', color: 'rgba(99,102,241,0.45)', marginTop: 6, fontWeight: 600 }}>s ostatními hráči →</p>
         </button>
       ) : (
         <button

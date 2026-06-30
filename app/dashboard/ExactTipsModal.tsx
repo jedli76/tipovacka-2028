@@ -29,11 +29,17 @@ export default function ExactTipsModal({ tips, count }: { tips: ExactTip[], coun
     <>
       <button
         onClick={() => setOpen(true)}
-        style={{ background: '#111827', border: '1px solid #1f2d45', borderRadius: 16, padding: '20px', textAlign: 'left', cursor: 'pointer', width: '100%' }}
+        style={{
+          background: 'linear-gradient(135deg, rgba(34,197,94,0.18) 0%, rgba(16,185,129,0.06) 100%)',
+          border: '1px solid rgba(34,197,94,0.35)',
+          borderRadius: 20, padding: '20px 22px', textAlign: 'left', cursor: 'pointer', width: '100%',
+          position: 'relative', overflow: 'hidden',
+        }}
       >
-        <div style={{ fontSize: '1.5rem', marginBottom: 6 }}>🎯</div>
-        <p className="text-sm font-semibold uppercase tracking-widest mb-2" style={{ color: '#64748b' }}>Přesné výsledky</p>
-        <p className="text-4xl font-black" style={{ color: '#22c55e' }}>{count}</p>
+        <div style={{ position: 'absolute', right: 16, top: 14, fontSize: '2rem', opacity: 0.18, userSelect: 'none' }}>🎯</div>
+        <p style={{ fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(34,197,94,0.7)', marginBottom: 10 }}>Přesné výsledky</p>
+        <p style={{ fontSize: '2.8rem', fontWeight: 900, color: '#22c55e', lineHeight: 1, letterSpacing: '-0.02em' }}>{count}</p>
+        <p style={{ fontSize: '0.72rem', color: 'rgba(34,197,94,0.45)', marginTop: 6, fontWeight: 600 }}>přesných tipů →</p>
       </button>
 
       {open && (
