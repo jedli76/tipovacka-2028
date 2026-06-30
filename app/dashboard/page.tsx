@@ -393,7 +393,7 @@ export default async function DashboardPage() {
                           {/* Bonusová otázka */}
                           <div style={{ margin: '0 16px 12px', background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 10, padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
                             <div style={{ minWidth: 0 }}>
-                              <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(99,102,241,0.7)', marginBottom: 2 }}>Bonusovka</div>
+  
                               <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>Kdo dá první gól?</div>
                               {user && <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.3)', marginTop: 1 }}>Tip: Mbappé</div>}
                             </div>
@@ -448,7 +448,7 @@ export default async function DashboardPage() {
                         {/* Bonusová otázka */}
                         <div style={{ margin: '0 16px 12px', background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 10, padding: '8px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
                           <div style={{ minWidth: 0 }}>
-                            <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(99,102,241,0.7)', marginBottom: 2 }}>Bonusovka</div>
+
                             <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>Kdo dá první gól?</div>
                             {user && <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.3)', marginTop: 1 }}>Tip: —</div>}
                           </div>
