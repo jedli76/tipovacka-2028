@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useRef } from 'react'
 import { saveNewsPost, deleteNewsPost } from './actions'
+import { createClient } from '@/lib/supabase/client'
 
 type NewsPost = {
   id: string
@@ -29,6 +30,25 @@ function Editor({ post, onDone }: { post?: NewsPost; onDone: () => void }) {
   const [published, setPublished] = useState(post?.published ?? true)
   const [err, setErr] = useState('')
   const [pending, startTransition] = useTransition()
+  const [uploading, setUploading] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    try {
+      const supabase = createClient()
+      const ext = file.name.split('.').pop()
+      const path = `${Date.now()}.${ext}`
+      const { error } = await supabase.storage.from('news-images').upload(path, file, { upsert: true })
+      if (error) { setErr(error.message); return }
+      const { data } = supabase.storage.from('news-images').getPublicUrl(path)
+      setCoverImageUrl(data.publicUrl)
+    } finally {
+      setUploading(false)
+    }
+  }
 
   function submit() {
     setErr('')
@@ -57,17 +77,31 @@ function Editor({ post, onDone }: { post?: NewsPost; onDone: () => void }) {
         </div>
         <div>
           <label style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', display: 'block', marginBottom: 4 }}>
-            Náhledový obrázek (URL)
+            Náhledový obrázek
           </label>
-          <input
-            value={coverImageUrl}
-            onChange={e => setCoverImageUrl(e.target.value)}
-            placeholder="https://... (volitelné)"
-            style={inputStyle}
-          />
+          <input ref={fileRef} type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: '8px 16px', color: '#e2e8f0', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, opacity: uploading ? 0.6 : 1 }}
+            >
+              {uploading ? 'Nahrávám...' : '📁 Vybrat obrázek'}
+            </button>
+            {coverImageUrl && (
+              <button
+                type="button"
+                onClick={() => setCoverImageUrl('')}
+                style={{ background: 'none', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 8, padding: '8px 12px', color: '#ef4444', cursor: 'pointer', fontSize: '0.82rem' }}
+              >
+                Odebrat
+              </button>
+            )}
+          </div>
           {coverImageUrl && (
-            <div style={{ marginTop: 8, borderRadius: 8, overflow: 'hidden', maxHeight: 160 }}>
-              <img src={coverImageUrl} alt="náhled" style={{ width: '100%', objectFit: 'cover', maxHeight: 160, display: 'block' }} />
+            <div style={{ marginTop: 10, borderRadius: 8, overflow: 'hidden' }}>
+              <img src={coverImageUrl} alt="náhled" style={{ width: 180, height: 120, objectFit: 'cover', display: 'block', borderRadius: 8 }} />
             </div>
           )}
         </div>
