@@ -39,17 +39,18 @@ export default async function LeaderboardPage() {
             {leaderboard.map((entry, i) => {
               const isMe = entry.user_id === user.id
               const medals = ['🥇', '🥈', '🥉']
-              const prizes = ['20 000 Kč', '15 000 Kč', '10 000 Kč']
               const podiumColors = [
                 { bg: 'linear-gradient(135deg, rgba(251,191,36,0.13) 0%, rgba(245,158,11,0.05) 100%)', border: 'rgba(251,191,36,0.35)', pts: '#fbbf24' },
                 { bg: 'linear-gradient(135deg, rgba(148,163,184,0.13) 0%, rgba(100,116,139,0.05) 100%)', border: 'rgba(148,163,184,0.3)', pts: '#94a3b8' },
                 { bg: 'linear-gradient(135deg, rgba(180,83,9,0.13) 0%, rgba(146,64,14,0.05) 100%)', border: 'rgba(180,83,9,0.3)', pts: '#cd7c2f' },
               ]
               const name = (entry.profiles as { display_name: string })?.display_name ?? '–'
-              const isPodium = i < 3
+              // Pořadí se shodou — najdi první index se stejnými body
+              const rank = leaderboard.findIndex(e => e.total_points === entry.total_points) + 1
+              const isPodium = rank <= 3
 
               if (isPodium) {
-                const c = podiumColors[i]
+                const c = podiumColors[rank - 1]
                 return (
                   <Link
                     key={entry.user_id}
@@ -64,7 +65,7 @@ export default async function LeaderboardPage() {
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                      <span style={{ fontSize: '2rem', flexShrink: 0 }}>{medals[i]}</span>
+                      <span style={{ fontSize: '2rem', flexShrink: 0 }}>{medals[rank - 1]}</span>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ fontWeight: 800, fontSize: '1.05rem', color: isMe ? '#f59e0b' : '#fff', marginBottom: 2 }}>
                           {name}
@@ -94,7 +95,7 @@ export default async function LeaderboardPage() {
                     border: `1px solid ${isMe ? 'rgba(245,158,11,0.3)' : '#1f2d45'}`,
                   }}
                 >
-                  <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#4b5563', width: 28, textAlign: 'center', flexShrink: 0 }}>{i + 1}.</span>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#4b5563', width: 28, textAlign: 'center', flexShrink: 0 }}>{rank}.</span>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontWeight: 600, fontSize: '0.92rem', color: isMe ? '#f59e0b' : '#e2e8f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {name}

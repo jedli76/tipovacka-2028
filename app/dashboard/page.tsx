@@ -185,34 +185,35 @@ export default async function DashboardPage() {
                   'rgba(180,83,9,0.25)',
                 ]
                 const ptsColors = ['#fbbf24', '#94a3b8', '#cd7c2f']
-                const isPodium = i < 3
+                const rank = (leaderboard ?? []).findIndex(e => e.total_points === entry.total_points) + 1
+                const isPodium = rank <= 3
                 const name = (entry.profiles as { display_name: string })?.display_name ?? '–'
 
                 if (isPodium) {
                   return (
                     <Link key={entry.user_id} href={`/results/${entry.user_id}`} style={{
                       display: 'block', textDecoration: 'none',
-                      background: isMe ? 'rgba(245,158,11,0.13)' : podiumColors[i],
-                      border: `1px solid ${isMe ? 'rgba(245,158,11,0.5)' : podiumBorders[i]}`,
+                      background: isMe ? 'rgba(245,158,11,0.13)' : podiumColors[rank - 1],
+                      border: `1px solid ${isMe ? 'rgba(245,158,11,0.5)' : podiumBorders[rank - 1]}`,
                       borderRadius: 12, padding: '10px 12px', marginBottom: 2,
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ fontSize: '1.2rem', flexShrink: 0 }}>{medals[i]}</span>
+                        <span style={{ fontSize: '1.2rem', flexShrink: 0 }}>{medals[rank - 1]}</span>
                         <span style={{ fontSize: '0.82rem', fontWeight: 700, color: isMe ? '#f59e0b' : '#fff', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {name}
                         </span>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 900, color: ptsColors[i], flexShrink: 0 }}>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 900, color: ptsColors[rank - 1], flexShrink: 0 }}>
                           {entry.total_points}
                         </span>
                       </div>
                       <div style={{
                         marginTop: 7, background: 'rgba(0,0,0,0.2)',
-                        border: `1px solid ${podiumBorders[i]}`,
+                        border: `1px solid ${podiumBorders[rank - 1]}`,
                         borderRadius: 7, padding: '4px 10px',
                         display: 'flex', alignItems: 'center', gap: 6,
                       }}>
                         <span style={{ fontSize: '0.8rem' }}>🏆</span>
-                        <span style={{ fontWeight: 800, fontSize: '0.82rem', color: ptsColors[i] }}>{prizes[i]}</span>
+                        <span style={{ fontWeight: 800, fontSize: '0.82rem', color: ptsColors[rank - 1] }}>{prizes[rank - 1]}</span>
                       </div>
                     </Link>
                   )
@@ -227,7 +228,7 @@ export default async function DashboardPage() {
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
                       <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#64748b', minWidth: 22, textAlign: 'center', flexShrink: 0 }}>
-                        {i + 1}.
+                        {rank}.
                       </span>
                       <span style={{ fontSize: '0.83rem', fontWeight: isMe ? 700 : 500, color: isMe ? '#f59e0b' : '#e2e8f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {name}
