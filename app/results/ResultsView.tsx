@@ -422,9 +422,6 @@ export default function ResultsView({
                         <div style={{ fontWeight: 700, fontSize: '0.9rem', color: correct ? '#34d399' : wrong ? 'rgba(255,255,255,0.6)' : '#e2e8f0', marginBottom: 4 }}>
                           <AnswerTeams answer={tt.answer} inline />
                         </div>
-                        {wrong && q.correct_answer && (
-                          <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.25)' }}>✓ <AnswerTeams answer={q.correct_answer} inline /></div>
-                        )}
                         {pending && (
                           <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.2)' }}>čeká se na výsledek</div>
                         )}
