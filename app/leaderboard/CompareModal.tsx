@@ -429,9 +429,8 @@ export default function CompareModal({ players, asCard }: { players: Player[], a
                             label: 'Žolík',
                             render: (e: CompareEntry) => e.joker ? (
                               <div>
-                                <div style={{ color: '#f59e0b', fontWeight: 700, fontSize: '0.82rem' }}>
-                                  ⚡ {e.joker.match}
-                                </div>
+                                <div style={{ color: '#f59e0b', fontWeight: 700, fontSize: '0.75rem' }}>⚡</div>
+                                <div style={{ fontSize: '1.6rem', lineHeight: 1.2 }}>{e.joker.match}</div>
                                 {e.joker.points !== null && (
                                   <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.72rem' }}>
                                     {e.joker.points > 0 ? `+${e.joker.points} b` : 'odehráno'}
