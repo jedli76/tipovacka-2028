@@ -533,9 +533,10 @@ export default async function DashboardPage() {
                               <span style={{ fontWeight: 900, fontSize: '1.1rem', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.08em' }}>vs</span>
                             </div>
                             {userUpcomingTips[m.id] && (
-                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', fontWeight: 600 }}>
-                                  tip: {userUpcomingTips[m.id].home_score}:{userUpcomingTips[m.id].away_score}
+                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 8, padding: '4px 10px' }}>
+                                <span style={{ fontSize: '0.55rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#818cf8' }}>Můj tip</span>
+                                <span style={{ fontSize: '0.85rem', fontWeight: 900, color: '#a5b4fc', letterSpacing: '0.04em' }}>
+                                  {userUpcomingTips[m.id].home_score}:{userUpcomingTips[m.id].away_score}
                                 </span>
                                 {userUpcomingTips[m.id].is_joker && (
                                   <span style={{ fontSize: '0.6rem', color: '#fbbf24', fontWeight: 700 }}>⚡ žolík</span>
