@@ -487,6 +487,8 @@ export default async function DashboardPage() {
                                 awayPct={awayPct}
                                 total={d.total}
                                 tips={d.tips}
+                                correctHome={m.home_score}
+                                correctAway={m.away_score}
                               />
                             )
                           })()}

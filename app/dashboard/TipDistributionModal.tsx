@@ -20,9 +20,11 @@ type Props = {
   awayPct: number
   total: number
   tips: PlayerTip[]
+  correctHome?: number | null
+  correctAway?: number | null
 }
 
-export default function TipDistributionModal({ homeName, awayName, homeAbbr, awayAbbr, homePct, drawPct, awayPct, total, tips }: Props) {
+export default function TipDistributionModal({ homeName, awayName, homeAbbr, awayAbbr, homePct, drawPct, awayPct, total, tips, correctHome, correctAway }: Props) {
   const [open, setOpen] = useState(false)
   const [selectedScore, setSelectedScore] = useState<string | null>(null)
 
@@ -44,6 +46,7 @@ export default function TipDistributionModal({ homeName, awayName, homeAbbr, awa
   const sortedScores = Object.entries(scoreGroups).sort((a, b) => b[1].count - a[1].count)
   const maxCount = sortedScores[0]?.[1].count ?? 1
   const selected = selectedScore ? scoreGroups[selectedScore] : null
+  const correctKey = correctHome != null && correctAway != null ? `${correctHome}:${correctAway}` : null
 
   function getColor(score: string) {
     const [h, a] = score.split(':').map(Number)
@@ -102,11 +105,12 @@ export default function TipDistributionModal({ homeName, awayName, homeAbbr, awa
 
             <div style={{ overflowY: 'auto' }}>
 
-              {/* SEZNAM — minimalistický s levým border */}
+              {/* SEZNAM */}
               {!selectedScore && (
                 <div style={{ paddingTop: 6, paddingBottom: 10 }}>
                   {sortedScores.map(([score, { count, jokers }]) => {
-                    const color = getColor(score)
+                    const isCorrect = score === correctKey
+                    const color = isCorrect ? '#34d399' : getColor(score)
                     const barW = Math.round(count / maxCount * 100)
                     return (
                       <div
@@ -117,7 +121,7 @@ export default function TipDistributionModal({ homeName, awayName, homeAbbr, awa
                           padding: '9px 20px',
                           borderLeft: `3px solid ${color}`,
                           margin: '2px 0',
-                          background: `${color}08`,
+                          background: isCorrect ? 'rgba(52,211,153,0.08)' : `${getColor(score)}08`,
                           cursor: 'pointer',
                           transition: 'background 0.1s',
                         }}
@@ -128,6 +132,7 @@ export default function TipDistributionModal({ homeName, awayName, homeAbbr, awa
                             <div style={{ width: `${barW}%`, height: '100%', background: color, borderRadius: 2 }} />
                           </div>
                         </div>
+                        {isCorrect && <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#34d399', flexShrink: 0 }}>✓</span>}
                         {jokers > 0 && (
                           <span style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.35)', borderRadius: 99, padding: '1px 7px', fontSize: '0.7rem', fontWeight: 700, color: '#fbbf24', flexShrink: 0 }}>⚡{jokers}</span>
                         )}
@@ -143,7 +148,10 @@ export default function TipDistributionModal({ homeName, awayName, homeAbbr, awa
               {selectedScore && selected && (
                 <div style={{ padding: '16px 20px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ fontSize: '2rem', fontWeight: 900, color: getColor(selectedScore) }}>{selectedScore}</div>
+                    <div style={{ fontSize: '2rem', fontWeight: 900, color: selectedScore === correctKey ? '#34d399' : getColor(selectedScore) }}>{selectedScore}</div>
+                    {selectedScore === correctKey && (
+                      <span style={{ background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.3)', borderRadius: 99, padding: '3px 12px', fontSize: '0.78rem', fontWeight: 800, color: '#34d399' }}>✓ Správný výsledek</span>
+                    )}
                     {selected.count <= 5 && (
                       <span style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 99, padding: '3px 12px', fontSize: '0.78rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)' }}>🎲 Odvážný tip</span>
                     )}
