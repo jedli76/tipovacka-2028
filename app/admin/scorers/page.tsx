@@ -46,7 +46,7 @@ export default async function ScorersPage() {
             Každý tipující si vybral 3 střelce. Za každý gól střelce dostane tipující 10 bodů.
           </p>
         </div>
-        <ScorersAdmin scorers={scorerList} />
+        <ScorersAdmin scorers={scorerList} topBonusActive={false} />
       </div>
     </div>
   )
