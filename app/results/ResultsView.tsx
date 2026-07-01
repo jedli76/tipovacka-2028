@@ -182,7 +182,7 @@ export default function ResultsView({
     bonusByMatchCol[col].push(q)
   }
 
-  const matchPts = tips.reduce((s, t) => s + (t.points ?? 0), 0)
+  const matchPts = tips.reduce((s, t) => s + (t.points ?? 0) + (t.brave_bonus ?? 0), 0)
   const bonusPts = bonusTips.reduce((s, t) => s + (t.points ?? 0), 0)
   const tournPts = tournamentTips.reduce((s, t) => s + (t.points ?? 0), 0)
   const totalPts = matchPts + bonusPts + tournPts
@@ -563,7 +563,7 @@ export default function ResultsView({
                         }}>
                           <div style={S.label}>Body</div>
                           <div style={{ fontWeight: 900, fontSize: '1.4rem', color: accentColor ?? 'rgba(255,255,255,0.2)', lineHeight: 1 }}>
-                            {pts}
+                            {pts + braveBonus}
                           </div>
                         </div>
                       )}
