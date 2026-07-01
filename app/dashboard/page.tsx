@@ -275,8 +275,8 @@ export default async function DashboardPage() {
                   'rgba(180,83,9,0.25)',
                 ]
                 const ptsColors = ['#fbbf24', '#94a3b8', '#cd7c2f']
-                const rank = (leaderboard ?? []).findIndex(e => e.total_points === entry.total_points) + 1
-                const isPodium = rank <= 3
+                const rank = (leaderboard ?? []).indexOf(entry) + 1
+                const isPodium = rank <= 3 && entry.total_points > 0
                 const name = (entry.profiles as { display_name: string })?.display_name ?? '–'
 
                 if (isPodium) {
