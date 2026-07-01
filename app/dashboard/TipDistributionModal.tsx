@@ -114,8 +114,14 @@ export default function TipDistributionModal({ homeName, awayName, homeAbbr, awa
                       <div style={{ flex: 1, background: 'rgba(255,255,255,0.05)', borderRadius: 4, height: 8, overflow: 'hidden' }}>
                         <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: 4 }} />
                       </div>
-                      <div style={{ width: 90, textAlign: 'right', fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', flexShrink: 0 }}>
-                        {count}×{jokers > 0 && <span style={{ color: '#f59e0b' }}> · ⚡{jokers}</span>}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                        {jokers > 0 && (
+                          <span style={{
+                            background: 'rgba(245,158,11,0.18)', border: '1px solid rgba(245,158,11,0.45)',
+                            borderRadius: 99, padding: '1px 7px', fontSize: '0.7rem', fontWeight: 800, color: '#fbbf24',
+                          }}>⚡{jokers}</span>
+                        )}
+                        <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', minWidth: 28, textAlign: 'right' }}>{count}×</span>
                       </div>
                     </div>
                   )
