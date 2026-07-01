@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import ExactTipsCard, { type ExactTip } from './ExactTipsCard'
+import MissedByOneCard, { type MissedByOneTip } from './MissedByOneCard'
 import TeamName from '@/lib/TeamName'
 import { flag, abbr } from '@/lib/flags'
 
@@ -273,11 +274,29 @@ export default function ResultsView({
 
         {/* Stats row — 4 dlaždice */}
         {(() => {
-          const missedByOne = tipsWithResult.filter(t => {
-            const m = matchesMap[t.match_id]
-            if (!m || m.home_score === null || m.away_score === null) return false
-            return Math.abs(t.home_score - m.home_score) + Math.abs(t.away_score - m.away_score) === 1
-          }).length
+          const missedByOneTips: MissedByOneTip[] = tipsWithResult
+            .filter(t => {
+              const m = matchesMap[t.match_id]
+              if (!m || m.home_score === null || m.away_score === null) return false
+              return Math.abs(t.home_score - m.home_score) + Math.abs(t.away_score - m.away_score) === 1
+            })
+            .map(t => {
+              const m = matchesMap[t.match_id]
+              return {
+                match_id: t.match_id,
+                tip_home: t.home_score,
+                tip_away: t.away_score,
+                actual_home: m.home_score!,
+                actual_away: m.away_score!,
+                is_joker: t.is_joker,
+                points: t.points ?? 0,
+                home_team: m.home_team,
+                away_team: m.away_team,
+                kickoff_at: m.kickoff_at,
+                group_name: m.group_name,
+              }
+            })
+            .sort((a, b) => new Date(a.kickoff_at).getTime() - new Date(b.kickoff_at).getTime())
 
           return (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 16 }}>
@@ -297,11 +316,7 @@ export default function ResultsView({
               <ExactTipsCard exactTips={exactTips} totalWithResult={tipsWithResult.length} />
 
               {/* Utekl o gól */}
-              <div style={{ ...S.glass(), padding: '20px' }}>
-                <div style={S.label}>Uteklo o gól</div>
-                <div style={{ fontSize: '2.2rem', fontWeight: 900, color: '#fb923c', lineHeight: 1 }}>{missedByOne}</div>
-                <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem', marginTop: 4 }}>skoro přesný tip</div>
-              </div>
+              <MissedByOneCard tips={missedByOneTips} totalWithResult={tipsWithResult.length} />
 
               {/* Žolík */}
               <div style={{
