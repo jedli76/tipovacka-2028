@@ -293,8 +293,8 @@ export default function ResultsView({
 
           <div style={{ ...S.glass(), padding: '20px' }}>
             <div style={S.label}>Tipováno zápasů</div>
-            <div style={{ fontSize: '2.2rem', fontWeight: 900, color: '#60a5fa', lineHeight: 1 }}>{tips.length}</div>
-            <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem', marginTop: 4 }}>z {matches.length} celkem</div>
+            <div style={{ fontSize: '2.2rem', fontWeight: 900, color: '#60a5fa', lineHeight: 1 }}>{tipsWithResult.length}</div>
+            <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem', marginTop: 4 }}>z {matches.filter(m => m.home_score !== null).length} odehraných</div>
           </div>
         </div>
 
