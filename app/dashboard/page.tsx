@@ -30,6 +30,7 @@ export default async function DashboardPage() {
     { data: allTipsRaw },
     { data: allProfilesRaw },
     { data: newsPosts },
+    { data: allBonusQuestions },
   ] = await Promise.all([
     supabase.from('leaderboard').select('*, profiles(display_name)')
       .order('total_points', { ascending: false }).limit(40),
@@ -48,6 +49,7 @@ export default async function DashboardPage() {
       .not('matches.home_score', 'is', null),
     supabase.from('profiles').select('id, display_name'),
     supabase.from('news').select('id, title, content, cover_image_url, cover_image_position, created_at').eq('published', true).order('sort_order', { ascending: true }).limit(3),
+    supabase.from('bonus_questions').select('id, question, match_col_indices'),
   ])
 
   // Osobní data — jen pro přihlášené
@@ -117,6 +119,50 @@ export default async function DashboardPage() {
       if (t.home_score > t.away_score) d.home++
       else if (t.home_score < t.away_score) d.away++
       else d.draw++
+    }
+  }
+
+  // Bonus otázka pro každý zápas podle col_index
+  const bonusQuestionByMatchCol: Record<number, string> = {}
+  for (const q of allBonusQuestions ?? []) {
+    for (const colIdx of (q.match_col_indices ?? [])) {
+      bonusQuestionByMatchCol[colIdx] = q.question
+    }
+  }
+
+  // Tip distribuce pro nadcházející zápasy
+  const upcomingMatchIds = (upcomingMatches ?? []).map(m => m.id)
+  const upcomingTipDist: Record<string, DistEntry> = {}
+  if (upcomingMatchIds.length > 0) {
+    const { data: upcomingTips } = await supabase
+      .from('tips').select('match_id, home_score, away_score, is_joker, profiles(display_name)')
+      .in('match_id', upcomingMatchIds)
+    for (const t of upcomingTips ?? []) {
+      if (!upcomingTipDist[t.match_id]) upcomingTipDist[t.match_id] = { home: 0, draw: 0, away: 0, total: 0, tips: [] }
+      const d = upcomingTipDist[t.match_id]
+      d.total++
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      d.tips.push({ display_name: (t as any).profiles?.display_name ?? '?', home_score: t.home_score, away_score: t.away_score, is_joker: t.is_joker })
+      if (t.home_score > t.away_score) d.home++
+      else if (t.home_score < t.away_score) d.away++
+      else d.draw++
+    }
+  }
+
+  // Uživatelovy bonus tipy pro nadcházející zápasy
+  let userBonusTipsByQuestionId: Record<string, string> = {}
+  if (user) {
+    const upcomingColIndices = (upcomingMatches ?? []).map(m => m.col_index).filter(Boolean)
+    const relevantQuestionIds = (allBonusQuestions ?? [])
+      .filter(q => q.match_col_indices?.some((ci: number) => upcomingColIndices.includes(ci)))
+      .map(q => q.id)
+    if (relevantQuestionIds.length > 0) {
+      const { data: myBonusTips } = await supabase
+        .from('bonus_tips').select('question_id, answer').eq('user_id', user.id)
+        .in('question_id', relevantQuestionIds)
+      for (const bt of myBonusTips ?? []) {
+        userBonusTipsByQuestionId[bt.question_id] = bt.answer
+      }
     }
   }
 
@@ -481,11 +527,43 @@ export default async function DashboardPage() {
                             <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#e2e8f0', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{abbr(m.away_team)}</span>
                           </div>
                         </div>
+                        {/* Distribuce tipů */}
+                        {(() => {
+                          const d = upcomingTipDist[m.id]
+                          if (!d || d.total === 0) return null
+                          const homePct = Math.round(d.home / d.total * 100)
+                          const drawPct = Math.round(d.draw / d.total * 100)
+                          const awayPct = 100 - homePct - drawPct
+                          return (
+                            <TipDistributionModal
+                              matchId={m.id}
+                              homeName={m.home_team}
+                              awayName={m.away_team}
+                              homeAbbr={abbr(m.home_team)}
+                              awayAbbr={abbr(m.away_team)}
+                              homePct={homePct}
+                              drawPct={drawPct}
+                              awayPct={awayPct}
+                              total={d.total}
+                              tips={d.tips}
+                            />
+                          )
+                        })()}
                         {/* Bonusová otázka */}
-                        <div style={{ margin: '0 16px 12px', background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 10, padding: '7px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                          <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.55)', minWidth: 0 }}>Kdo dá první gól?{user && <span style={{ color: 'rgba(255,255,255,0.3)' }}> · tip: —</span>}</span>
-                          <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.2)', fontStyle: 'italic', flexShrink: 0 }}>čeká se</span>
-                        </div>
+                        {(() => {
+                          const bonusQ = m.col_index != null ? (allBonusQuestions ?? []).find(q => q.match_col_indices?.includes(m.col_index)) : null
+                          if (!bonusQ) return null
+                          const myAnswer = userBonusTipsByQuestionId[bonusQ.id]
+                          return (
+                            <div style={{ margin: '0 16px 12px', background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 10, padding: '7px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                              <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.55)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {bonusQ.question}
+                                {user && myAnswer && <span style={{ color: 'rgba(255,255,255,0.3)' }}> · tip: {myAnswer}</span>}
+                              </span>
+                              <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.2)', fontStyle: 'italic', flexShrink: 0 }}>čeká se</span>
+                            </div>
+                          )
+                        })()}
                       </div>
                     ))}
                   </div>
