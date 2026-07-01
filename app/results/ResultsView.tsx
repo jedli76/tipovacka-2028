@@ -253,29 +253,6 @@ export default function ResultsView({
             {bio}
           </p>
         )}
-        {scorerTips.length > 0 && (
-          <div style={{ marginBottom: rank ? 12 : 32 }}>
-            <div style={{ fontSize: '0.7rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>Tipy na střelce</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-              {scorerTips.map((s, i) => {
-                const pts = s.goals * 10
-                return (
-                  <div key={i} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '12px 14px' }}>
-                    <div style={{ fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: 4 }}>Střelec {i + 1}</div>
-                    <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#e2e8f0', marginBottom: 6 }}>
-                      ⚽ {s.name}{s.goals > 0 ? ` (${s.goals})` : ''}
-                    </div>
-                    {s.goals > 0 ? (
-                      <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#34d399' }}>+{pts} b</div>
-                    ) : (
-                      <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.2)' }}>zatím nedal gól</div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        )}
         {rank && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 32 }}>
             <span style={{
@@ -376,6 +353,34 @@ export default function ResultsView({
       </div>
 
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 20px 60px' }}>
+
+        {/* Tipy na střelce */}
+        {scorerTips.length > 0 && (
+          <section style={{ marginBottom: 48 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
+              <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
+                Tipy na střelce
+              </span>
+              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+              {scorerTips.map((s, i) => (
+                <div key={i} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '12px 14px' }}>
+                  <div style={{ fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: 4 }}>Střelec {i + 1}</div>
+                  <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#e2e8f0', marginBottom: 6 }}>
+                    ⚽ {s.name}{s.goals > 0 ? ` (${s.goals}× gól)` : ''}
+                  </div>
+                  {s.goals > 0 ? (
+                    <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#34d399' }}>+{s.goals * 10} b</div>
+                  ) : (
+                    <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.2)' }}>zatím nedal gól</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Velké turnajové bonusy */}
         {bigQ.length > 0 && (
