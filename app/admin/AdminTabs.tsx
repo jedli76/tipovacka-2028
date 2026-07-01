@@ -6,6 +6,7 @@ import ExportButton from './ExportButton'
 import BonusAdmin from './bonuses/BonusAdmin'
 import NewsAdmin from './news/NewsAdmin'
 import QuestionRow from './bonuses/QuestionRow'
+import ScorersAdmin from './scorers/ScorersAdmin'
 import { addTournamentQuestion, saveBonusAnswer } from './bonuses/actions'
 
 type Match = {
@@ -48,18 +49,26 @@ type NewsPost = {
   created_at: string
 }
 
+type Scorer = {
+  name: string
+  goals: number
+  tip_count: number
+}
+
 export default function AdminTabs({
   matches,
   bonusQuestions,
   tournamentQuestions,
   newsPosts,
+  scorers,
 }: {
   matches: Match[]
   bonusQuestions: BonusQ[]
   tournamentQuestions: TournamentQ[]
   newsPosts: NewsPost[]
+  scorers: Scorer[]
 }) {
-  const [tab, setTab] = useState<'matches' | 'news'>('matches')
+  const [tab, setTab] = useState<'matches' | 'news' | 'scorers'>('matches')
   const [addingNews, setAddingNews] = useState(false)
   const [addingBonus, setAddingBonus] = useState(false)
   const [newQuestion, setNewQuestion] = useState('')
@@ -88,7 +97,7 @@ export default function AdminTabs({
     })
   }
 
-  const tabBtn = (t: 'matches' | 'news', label: string, count: number) => (
+  const tabBtn = (t: 'matches' | 'news' | 'scorers', label: string, count: number) => (
     <button
       onClick={() => setTab(t)}
       style={{
@@ -122,6 +131,7 @@ export default function AdminTabs({
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', gap: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 12, padding: 4 }}>
           {tabBtn('matches', '⚽ Zápasy & bonusovky', matches.length)}
+          {tabBtn('scorers', '🎯 Střelci', scorers.length)}
           {tabBtn('news', '📰 Novinky', newsPosts.length)}
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -141,6 +151,11 @@ export default function AdminTabs({
                 + Přidat otázku
               </button>
             </>
+          )}
+          {tab === 'scorers' && (
+            <div style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.3)' }}>
+              Za každý gól střelce +10 b tipujícímu
+            </div>
           )}
           {tab === 'news' && (
             <button
@@ -216,6 +231,9 @@ export default function AdminTabs({
           <BonusAdmin tournamentQuestions={tournamentQuestions} />
         </div>
       )}
+
+      {/* Střelci */}
+      {tab === 'scorers' && <ScorersAdmin scorers={scorers} />}
 
       {/* Novinky */}
       {tab === 'news' && (
