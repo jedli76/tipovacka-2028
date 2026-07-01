@@ -123,7 +123,7 @@ export async function saveBonusAnswer(questionId: string, correctAnswer: string)
 
   if (!tips?.length) return {}
 
-  const ptsPerCorrect = q?.points_per_correct ?? 10
+  const ptsPerCorrect = q?.points_per_correct ?? 3
   await Promise.all(tips.map((tip: { id: string; user_id: string; answer: string }) => {
     const pts = tip.answer.trim().toLowerCase() === correctAnswer.trim().toLowerCase() ? ptsPerCorrect : 0
     return db.from('bonus_tips').update({ points: pts }).eq('id', tip.id)
