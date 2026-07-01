@@ -260,7 +260,7 @@ export default function ResultsView({
               fontWeight: 800,
               color: '#a78bfa',
             }}>
-              #{rank}. místo
+              {rank}. místo
             </span>
             {totalPlayers && (
               <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.82rem' }}>
