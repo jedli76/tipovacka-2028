@@ -30,11 +30,28 @@ export async function updateScorerGoals(scorerName: string, goals: number): Prom
 
   if (error) return { error: `DB error: ${error.message}` }
 
-  // Recalculate scorer points for all users
   const { error: rpcError } = await db.rpc('recalculate_scorer_points')
   if (rpcError) return { error: `Přepočet selhal: ${rpcError.message}` }
 
   revalidatePath('/leaderboard')
-  revalidatePath('/admin/scorers')
+  revalidatePath('/admin')
+  return {}
+}
+
+export async function setTopScorerBonusActive(active: boolean): Promise<{ error?: string }> {
+  if (!await checkAdmin()) return { error: 'Přístup odepřen.' }
+
+  const db = adminClient()
+  const { error } = await db
+    .from('settings')
+    .upsert({ key: 'top_scorer_bonus_active', value: active ? 'true' : 'false' })
+
+  if (error) return { error: `DB error: ${error.message}` }
+
+  const { error: rpcError } = await db.rpc('recalculate_scorer_points')
+  if (rpcError) return { error: `Přepočet selhal: ${rpcError.message}` }
+
+  revalidatePath('/leaderboard')
+  revalidatePath('/admin')
   return {}
 }
