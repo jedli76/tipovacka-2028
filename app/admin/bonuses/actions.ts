@@ -128,44 +128,20 @@ export async function saveBonusAnswer(questionId: string, correctAnswer: string,
 }
 
 // Uloží správnou odpověď na tournament_question a přepočítá body
-export async function saveTournamentAnswer(questionId: string, correctAnswer: string): Promise<{ error?: string }> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user || !isAdmin(user.email)) return { error: 'Přístup odepřen.' }
+export async function saveTournamentAnswer(questionId: string, correctAnswer: string, pointsPerCorrect?: number): Promise<{ error?: string }> {
+  if (!await checkAdmin()) return { error: 'Přístup odepřen.' }
 
-  const { data: q, error: qErr } = await supabase
-    .from('tournament_questions')
-    .update({ correct_answer: correctAnswer })
-    .eq('id', questionId)
-    .select('category, points_per_correct')
-    .single()
+  const db = adminClient()
 
-  if (qErr) return { error: qErr.message }
+  const updatePayload: Record<string, unknown> = { correct_answer: correctAnswer }
+  if (pointsPerCorrect != null) updatePayload.points_per_correct = pointsPerCorrect
 
-  const { data: tips } = await supabase
-    .from('tournament_tips')
-    .select('id, user_id, answer')
-    .eq('question_id', questionId)
+  const { error } = await db.from('tournament_questions').update(updatePayload).eq('id', questionId)
+  if (error) return { error: `DB error: ${error.message}` }
 
-  if (!tips?.length) return {}
+  const { error: rpcError } = await db.rpc('recalculate_tournament_question', { p_question_id: questionId })
+  if (rpcError) return { error: `Přepočet selhal: ${rpcError.message}` }
 
-  const ptsPerCorrect = q?.points_per_correct ?? 10
-
-  for (const tip of tips) {
-    let pts = 0
-    if (q?.category === 'group_advancement') {
-      // Odpověď je "Tým1, Tým2" — 10 bodů za každý správný tým
-      const correct = correctAnswer.split(',').map((s: string) => s.trim().toLowerCase())
-      const tipTeams = tip.answer.split(',').map((s: string) => s.trim().toLowerCase())
-      pts = tipTeams.filter((t: string) => correct.includes(t)).length * ptsPerCorrect
-    } else {
-      const isCorrect = tip.answer.trim().toLowerCase() === correctAnswer.trim().toLowerCase()
-      pts = isCorrect ? ptsPerCorrect : 0
-    }
-    await supabase.from('tournament_tips').update({ points: pts }).eq('id', tip.id)
-  }
-
-  const userIds = [...new Set(tips.map((t: { user_id: string }) => t.user_id))]
-  await updateLeaderboardForUsers(supabase, userIds)
+  revalidatePath('/leaderboard')
   return {}
 }
