@@ -7,6 +7,7 @@ import { flag, abbr } from '@/lib/flags'
 import HallOfFamePanel from './HallOfFame'
 import { computeHallOfFame } from '@/lib/hallOfFame'
 import NewsSection from './NewsSection'
+import TipDistributionModal from './TipDistributionModal'
 import { isAdmin } from '@/lib/admins'
 import DashboardChat from './DashboardChat'
 
@@ -101,15 +102,18 @@ export default async function DashboardPage() {
 
   // Distribuce tipů pro odehrané zápasy (po kickoffu — viditelné pro všechny)
   const lastMatchIds = (lastMatch ?? []).map(m => m.id)
-  const tipDistribution: Record<string, { home: number; draw: number; away: number; total: number }> = {}
+  type DistEntry = { home: number; draw: number; away: number; total: number; tips: { display_name: string; home_score: number; away_score: number; is_joker: boolean }[] }
+  const tipDistribution: Record<string, DistEntry> = {}
   if (lastMatchIds.length > 0) {
     const { data: allLastTips } = await supabase
-      .from('tips').select('match_id, home_score, away_score')
+      .from('tips').select('match_id, home_score, away_score, is_joker, user_id, profiles(display_name)')
       .in('match_id', lastMatchIds)
     for (const t of allLastTips ?? []) {
-      if (!tipDistribution[t.match_id]) tipDistribution[t.match_id] = { home: 0, draw: 0, away: 0, total: 0 }
+      if (!tipDistribution[t.match_id]) tipDistribution[t.match_id] = { home: 0, draw: 0, away: 0, total: 0, tips: [] }
       const d = tipDistribution[t.match_id]
       d.total++
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      d.tips.push({ display_name: (t as any).profiles?.display_name ?? '?', home_score: t.home_score, away_score: t.away_score, is_joker: t.is_joker })
       if (t.home_score > t.away_score) d.home++
       else if (t.home_score < t.away_score) d.away++
       else d.draw++
@@ -415,19 +419,18 @@ export default async function DashboardPage() {
                             const drawPct = Math.round(d.draw / d.total * 100)
                             const awayPct = 100 - homePct - drawPct
                             return (
-                              <div style={{ margin: '0 16px 10px' }}>
-                                <div style={{ display: 'flex', borderRadius: 6, overflow: 'hidden', height: 6 }}>
-                                  {homePct > 0 && <div style={{ width: `${homePct}%`, background: '#6366f1' }} />}
-                                  {drawPct > 0 && <div style={{ width: `${drawPct}%`, background: '#64748b' }} />}
-                                  {awayPct > 0 && <div style={{ width: `${awayPct}%`, background: '#f59e0b' }} />}
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
-                                  <span style={{ fontSize: '0.6rem', color: '#6366f1', fontWeight: 700 }}>{abbr(m.home_team)} {homePct}%</span>
-                                  <span style={{ fontSize: '0.6rem', color: '#64748b', fontWeight: 700 }}>Remíza {drawPct}%</span>
-                                  <span style={{ fontSize: '0.6rem', color: '#f59e0b', fontWeight: 700 }}>{awayPct}% {abbr(m.away_team)}</span>
-                                </div>
-                                <div style={{ fontSize: '0.58rem', color: 'rgba(255,255,255,0.2)', textAlign: 'center', marginTop: 2 }}>{d.total} tipů</div>
-                              </div>
+                              <TipDistributionModal
+                                matchId={m.id}
+                                homeName={m.home_team}
+                                awayName={m.away_team}
+                                homeAbbr={abbr(m.home_team)}
+                                awayAbbr={abbr(m.away_team)}
+                                homePct={homePct}
+                                drawPct={drawPct}
+                                awayPct={awayPct}
+                                total={d.total}
+                                tips={d.tips}
+                              />
                             )
                           })()}
                           {/* Bonusová otázka */}
