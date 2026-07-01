@@ -15,6 +15,7 @@ export default async function AdminPage() {
     { data: newsPosts },
     { data: scorerList },
     { data: scorerTips },
+    { data: topBonusSetting },
   ] = await Promise.all([
     supabase.from('matches').select('*').order('kickoff_at', { ascending: true }),
     supabase.from('bonus_questions').select('*').order('sort_order'),
@@ -22,12 +23,14 @@ export default async function AdminPage() {
     supabase.from('news').select('*').order('sort_order', { ascending: true }),
     supabase.from('scorers').select('name, goals').order('name'),
     supabase.from('scorer_tips').select('scorer_name'),
+    supabase.from('settings').select('value').eq('key', 'top_scorer_bonus_active').single(),
   ])
 
   const tipCountByScorer: Record<string, number> = {}
   for (const t of scorerTips ?? []) {
     tipCountByScorer[t.scorer_name] = (tipCountByScorer[t.scorer_name] ?? 0) + 1
   }
+  const topBonusActive = topBonusSetting?.value === 'true'
   const maxGoals = Math.max(0, ...(scorerList ?? []).map(s => s.goals))
   const scorers = (scorerList ?? []).map(s => ({
     name: s.name,
@@ -52,6 +55,7 @@ export default async function AdminPage() {
           tournamentQuestions={tournamentQuestions ?? []}
           newsPosts={newsPosts ?? []}
           scorers={scorers}
+          topBonusActive={topBonusActive}
         />
       </div>
     </div>
