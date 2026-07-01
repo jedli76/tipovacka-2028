@@ -103,12 +103,16 @@ async function updateLeaderboardForUsers(supabase: any, userIds: string[]) {
 export async function saveBonusAnswer(questionId: string, correctAnswer: string): Promise<{ error?: string }> {
   if (!await checkAdmin()) return { error: 'Přístup odepřen.' }
 
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key) return { error: `Chybí env: url=${!!url} key=${!!key}` }
+
   const { error } = await adminClient()
     .from('bonus_questions')
     .update({ correct_answer: correctAnswer })
     .eq('id', questionId)
 
-  if (error) return { error: error.message }
+  if (error) return { error: `DB error: ${error.message} (code: ${error.code})` }
 
   const db = adminClient()
 
