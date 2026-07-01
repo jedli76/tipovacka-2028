@@ -51,7 +51,7 @@ export default function ExactTipsCard({
     <>
       <button
         onClick={() => setOpen(true)}
-        style={{ ...glass, padding: '20px', cursor: 'pointer', textAlign: 'left', width: '100%' }}
+        style={{ ...glass, padding: '20px', cursor: 'pointer', textAlign: 'left', width: '100%', height: '100%', boxSizing: 'border-box' as const }}
       >
         <div style={labelStyle}>Přesných tipů</div>
         <div style={{ fontSize: '2.2rem', fontWeight: 900, color: '#34d399', lineHeight: 1 }}>{exactTips.length}/{totalWithResult}</div>

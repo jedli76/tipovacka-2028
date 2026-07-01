@@ -301,7 +301,7 @@ export default function ResultsView({
             .sort((a, b) => new Date(a.kickoff_at).getTime() - new Date(b.kickoff_at).getTime())
 
           return (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 16, alignItems: 'stretch' }}>
               {/* Celkem bodů */}
               <div style={{
                 ...S.glass(0.08),
@@ -327,21 +327,26 @@ export default function ResultsView({
                 background: 'linear-gradient(135deg, rgba(245,158,11,0.12) 0%, rgba(251,191,36,0.06) 100%)',
                 border: '1px solid rgba(245,158,11,0.35)',
               }}>
-                <div style={{ ...S.pill('#f59e0b'), marginBottom: 8, display: 'inline-flex' }}>⚡ Žolík</div>
+                <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: 8 }}>⚡ Žolík</div>
                 {jokerTip && jokerMatch ? (
                   <>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                      <span style={{ fontSize: '1.8rem', lineHeight: 1 }}>{flag(jokerMatch.home_team)}</span>
-                      <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.06em' }}>{abbr(jokerMatch.home_team)}</span>
-                      <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.8rem' }}>–</span>
-                      <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.06em' }}>{abbr(jokerMatch.away_team)}</span>
-                      <span style={{ fontSize: '1.8rem', lineHeight: 1 }}>{flag(jokerMatch.away_team)}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
+                      <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>{flag(jokerMatch.home_team)}</span>
+                      <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.06em' }}>{abbr(jokerMatch.home_team)}</span>
+                      <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.75rem' }}>–</span>
+                      <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.06em' }}>{abbr(jokerMatch.away_team)}</span>
+                      <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>{flag(jokerMatch.away_team)}</span>
                     </div>
-                    <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.72rem' }}>
+                    <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem', marginBottom: 6 }}>
                       Tip: {jokerTip.home_score}:{jokerTip.away_score}
                       {jokerMatch.home_score !== null && ` · ${jokerMatch.home_score}:${jokerMatch.away_score}`}
                     </div>
-                    <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#f59e0b', lineHeight: 1, marginTop: 6 }}>{jokerTip.points ?? '?'} <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', fontWeight: 400 }}>b</span></div>
+                    <div style={{ fontSize: '2.2rem', fontWeight: 900, color: '#f59e0b', lineHeight: 1 }}>
+                      {jokerMatch.home_score !== null ? (jokerTip.points ?? 0) : '–'}
+                      <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', fontWeight: 400, marginLeft: 4 }}>
+                        {jokerMatch.home_score !== null ? 'b' : ''}
+                      </span>
+                    </div>
                   </>
                 ) : (
                   <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.85rem' }}>–</div>

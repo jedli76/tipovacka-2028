@@ -53,7 +53,7 @@ export default function MissedByOneCard({
     <>
       <button
         onClick={() => setOpen(true)}
-        style={{ ...glass, padding: '20px', cursor: 'pointer', textAlign: 'left', width: '100%' }}
+        style={{ ...glass, padding: '20px', cursor: 'pointer', textAlign: 'left', width: '100%', height: '100%', boxSizing: 'border-box' as const }}
       >
         <div style={labelStyle}>Uteklo o gól</div>
         <div style={{ fontSize: '2.2rem', fontWeight: 900, color: '#fb923c', lineHeight: 1 }}>{tips.length}</div>
