@@ -65,59 +65,66 @@ async function recalculatePoints(supabase: any, matchId: string, homeScore: numb
 
   if (!tips || tips.length === 0) return
 
-  // Spočítej, kolik hráčů má přesný tip
   const exactCount = tips.filter(
     (t: { home_score: number; away_score: number }) =>
       t.home_score === homeScore && t.away_score === awayScore
   ).length
-
   const braveBase = exactCount <= 5 ? 15 : 0
 
-  for (const tip of tips) {
+  // Aktualizuj všechny tipy paralelně
+  await Promise.all(tips.map((tip: { id: string; home_score: number; away_score: number; is_joker: boolean }) => {
     const points = calculateMatchPoints(tip.home_score, tip.away_score, homeScore, awayScore, tip.is_joker)
     const isExact = tip.home_score === homeScore && tip.away_score === awayScore
     const brave_bonus = isExact && braveBase > 0 ? braveBase : 0
-    await supabase.from('tips').update({ points, brave_bonus }).eq('id', tip.id)
-  }
+    return supabase.from('tips').update({ points, brave_bonus }).eq('id', tip.id)
+  }))
 
   const userIds = [...new Set(tips.map((t: { user_id: string }) => t.user_id))]
-  for (const userId of userIds) {
-    const [
-      { data: userTips },
-      { data: userBonusTips },
-      { data: userTournamentTips },
-    ] = await Promise.all([
-      supabase
-        .from('tips')
-        .select('points, brave_bonus, home_score, away_score, matches(home_score, away_score)')
-        .eq('user_id', userId)
-        .not('points', 'is', null),
-      supabase
-        .from('bonus_tips')
-        .select('points')
-        .eq('user_id', userId),
-      supabase
-        .from('tournament_tips')
-        .select('points')
-        .eq('user_id', userId),
-    ])
 
-    const matchPoints = userTips?.reduce((s: number, t: { points: number; brave_bonus: number }) => s + (t.points ?? 0) + (t.brave_bonus ?? 0), 0) ?? 0
-    const bonusPoints = userBonusTips?.reduce((s: number, t: { points: number }) => s + (t.points ?? 0), 0) ?? 0
-    const tournamentPoints = userTournamentTips?.reduce((s: number, t: { points: number }) => s + (t.points ?? 0), 0) ?? 0
-    const totalPoints = matchPoints + bonusPoints + tournamentPoints
+  // Načti data pro všechny hráče najednou
+  const [
+    { data: allUserTips },
+    { data: allBonusTips },
+    { data: allTournamentTips },
+  ] = await Promise.all([
+    supabase
+      .from('tips')
+      .select('user_id, points, brave_bonus, home_score, away_score, matches(home_score, away_score)')
+      .in('user_id', userIds)
+      .not('points', 'is', null),
+    supabase.from('bonus_tips').select('user_id, points').in('user_id', userIds),
+    supabase.from('tournament_tips').select('user_id, points').in('user_id', userIds),
+  ])
+
+  // Sestavuj leaderboard záznamy pro všechny uživatele najednou
+  const upsertRows = (userIds as string[]).map((userId: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const uTips = (allUserTips ?? []).filter((t: any) => t.user_id === userId)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const uBonus = (allBonusTips ?? []).filter((t: any) => t.user_id === userId)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const uTournament = (allTournamentTips ?? []).filter((t: any) => t.user_id === userId)
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const correctResults = userTips?.filter((t: any) =>
+    const matchPoints = uTips.reduce((s: number, t: any) => s + (t.points ?? 0) + (t.brave_bonus ?? 0), 0)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const bonusPoints = uBonus.reduce((s: number, t: any) => s + (t.points ?? 0), 0)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const tournamentPoints = uTournament.reduce((s: number, t: any) => s + (t.points ?? 0), 0)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const correctResults = uTips.filter((t: any) =>
       t.matches?.home_score === t.home_score && t.matches?.away_score === t.away_score
-    ).length ?? 0
+    ).length
 
-    await supabase.from('leaderboard').upsert({
+    return {
       user_id: userId,
-      total_points: totalPoints,
+      total_points: matchPoints + bonusPoints + tournamentPoints,
       correct_results: correctResults,
-      tips_count: userTips?.length ?? 0,
+      tips_count: uTips.length,
       updated_at: new Date().toISOString(),
-    }, { onConflict: 'user_id' })
-  }
+    }
+  })
+
+  // Jeden hromadný upsert pro všechny hráče
+  await supabase.from('leaderboard').upsert(upsertRows, { onConflict: 'user_id' })
 }
