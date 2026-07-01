@@ -312,10 +312,14 @@ export default function ResultsView({
                 <div style={{ ...S.pill('#f59e0b'), marginBottom: 8, display: 'inline-flex' }}>⚡ Žolík</div>
                 {jokerTip && jokerMatch ? (
                   <>
-                    <div style={{ fontWeight: 700, color: '#fbbf24', fontSize: '0.85rem', marginBottom: 2 }}>
-                      <TeamName team={jokerMatch.home_team} flagSize="1.1em" /> – <TeamName team={jokerMatch.away_team} flagSize="1.1em" />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                      <span style={{ fontSize: '1.8rem', lineHeight: 1 }}>{flag(jokerMatch.home_team)}</span>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.06em' }}>{abbr(jokerMatch.home_team)}</span>
+                      <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.8rem' }}>–</span>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.06em' }}>{abbr(jokerMatch.away_team)}</span>
+                      <span style={{ fontSize: '1.8rem', lineHeight: 1 }}>{flag(jokerMatch.away_team)}</span>
                     </div>
-                    <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.72rem' }}>
+                    <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.72rem' }}>
                       Tip: {jokerTip.home_score}:{jokerTip.away_score}
                       {jokerMatch.home_score !== null && ` · ${jokerMatch.home_score}:${jokerMatch.away_score}`}
                     </div>
