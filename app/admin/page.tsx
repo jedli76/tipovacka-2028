@@ -39,10 +39,7 @@ export default async function AdminPage() {
       <nav style={{ background: 'rgba(10,15,30,0.95)', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '14px 20px', position: 'sticky', top: 0, zIndex: 50 }}>
         <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontWeight: 800, color: '#fff' }}>⚙️ Admin — Tipovačka MS 2026</span>
-          <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-            <Link href="/admin/scorers" style={{ color: '#a5b4fc', fontSize: '0.85rem', fontWeight: 700, textDecoration: 'none' }}>⚽ Střelci</Link>
-            <Link href="/dashboard" style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.85rem', textDecoration: 'none' }}>← Dashboard</Link>
-          </div>
+          <Link href="/dashboard" style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.85rem', textDecoration: 'none' }}>← Dashboard</Link>
         </div>
       </nav>
 
