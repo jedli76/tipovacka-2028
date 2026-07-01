@@ -270,62 +270,64 @@ export default function ResultsView({
           </div>
         )}
 
-        {/* Stats row */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 16 }}>
-          {/* Total points — big card */}
-          <div style={{
-            ...S.glass(0.08),
-            padding: '24px 20px',
-            background: 'linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(168,85,247,0.08) 100%)',
-            border: '1px solid rgba(99,102,241,0.3)',
-            gridColumn: 'span 2',
-          }}>
-            <div style={S.label}>Celkem bodů</div>
-            <div style={{ fontSize: '3.5rem', fontWeight: 900, color: '#a78bfa', lineHeight: 1, letterSpacing: '-0.04em' }}>
-              {totalPts}
-            </div>
-            <div style={{ marginTop: 8, color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>
-              Ze zápasů {matchPts} · Bonusy {bonusPts + tournPts}
-            </div>
-          </div>
+        {/* Stats row — 4 dlaždice */}
+        {(() => {
+          const missedByOne = tipsWithResult.filter(t => {
+            const m = matchesMap[t.match_id]
+            if (!m || m.home_score === null || m.away_score === null) return false
+            return Math.abs(t.home_score - m.home_score) + Math.abs(t.away_score - m.away_score) === 1
+          }).length
 
-          <ExactTipsCard exactTips={exactTips} totalWithResult={tipsWithResult.length} />
-
-          <div style={{ ...S.glass(), padding: '20px' }}>
-            <div style={S.label}>Tipováno zápasů</div>
-            <div style={{ fontSize: '2.2rem', fontWeight: 900, color: '#60a5fa', lineHeight: 1 }}>{tipsWithResult.length}</div>
-            <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem', marginTop: 4 }}>z {matches.filter(m => m.home_score !== null).length} odehraných</div>
-          </div>
-        </div>
-
-        {/* Joker */}
-        {jokerTip && jokerMatch && (
-          <div style={{
-            background: 'linear-gradient(135deg, rgba(245,158,11,0.12) 0%, rgba(251,191,36,0.06) 100%)',
-            border: '1px solid rgba(245,158,11,0.35)',
-            borderRadius: 16,
-            padding: '16px 20px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 12,
-          }}>
-            <div>
-              <div style={{ ...S.pill('#f59e0b'), marginBottom: 8 }}>⚡ Žolík</div>
-              <div style={{ fontWeight: 800, color: '#fbbf24', fontSize: '1rem' }}>
-                <TeamName team={jokerMatch.home_team} flagSize="1.6em" /> – <TeamName team={jokerMatch.away_team} flagSize="1.6em" />
+          return (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 16 }}>
+              {/* Celkem bodů */}
+              <div style={{
+                ...S.glass(0.08),
+                padding: '20px',
+                background: 'linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(168,85,247,0.08) 100%)',
+                border: '1px solid rgba(99,102,241,0.3)',
+              }}>
+                <div style={S.label}>Celkem bodů</div>
+                <div style={{ fontSize: '2.8rem', fontWeight: 900, color: '#a78bfa', lineHeight: 1, letterSpacing: '-0.03em' }}>{totalPts}</div>
+                <div style={{ marginTop: 6, color: 'rgba(255,255,255,0.4)', fontSize: '0.72rem' }}>Zápasy {matchPts} · Bonusy {bonusPts + tournPts}</div>
               </div>
-              <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem', marginTop: 2 }}>
-                Tip: {jokerTip.home_score}:{jokerTip.away_score}
-                {jokerMatch.home_score !== null && ` · Výsledek: ${jokerMatch.home_score}:${jokerMatch.away_score}`}
+
+              {/* Přesné tipy */}
+              <ExactTipsCard exactTips={exactTips} totalWithResult={tipsWithResult.length} />
+
+              {/* Utekl o gól */}
+              <div style={{ ...S.glass(), padding: '20px' }}>
+                <div style={S.label}>Uteklo o gól</div>
+                <div style={{ fontSize: '2.2rem', fontWeight: 900, color: '#fb923c', lineHeight: 1 }}>{missedByOne}</div>
+                <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem', marginTop: 4 }}>skoro přesný tip</div>
+              </div>
+
+              {/* Žolík */}
+              <div style={{
+                ...S.glass(0.08),
+                padding: '20px',
+                background: 'linear-gradient(135deg, rgba(245,158,11,0.12) 0%, rgba(251,191,36,0.06) 100%)',
+                border: '1px solid rgba(245,158,11,0.35)',
+              }}>
+                <div style={{ ...S.pill('#f59e0b'), marginBottom: 8, display: 'inline-flex' }}>⚡ Žolík</div>
+                {jokerTip && jokerMatch ? (
+                  <>
+                    <div style={{ fontWeight: 700, color: '#fbbf24', fontSize: '0.85rem', marginBottom: 2 }}>
+                      <TeamName team={jokerMatch.home_team} flagSize="1.1em" /> – <TeamName team={jokerMatch.away_team} flagSize="1.1em" />
+                    </div>
+                    <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.72rem' }}>
+                      Tip: {jokerTip.home_score}:{jokerTip.away_score}
+                      {jokerMatch.home_score !== null && ` · ${jokerMatch.home_score}:${jokerMatch.away_score}`}
+                    </div>
+                    <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#f59e0b', lineHeight: 1, marginTop: 6 }}>{jokerTip.points ?? '?'} <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', fontWeight: 400 }}>b</span></div>
+                  </>
+                ) : (
+                  <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.85rem' }}>–</div>
+                )}
               </div>
             </div>
-            <div style={{ textAlign: 'right', flexShrink: 0 }}>
-              <div style={{ fontSize: '2rem', fontWeight: 900, color: '#f59e0b', lineHeight: 1 }}>{jokerTip.points ?? '?'}</div>
-              <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.72rem' }}>bodů</div>
-            </div>
-          </div>
-        )}
+          )
+        })()}
       </div>
 
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 20px 60px' }}>
