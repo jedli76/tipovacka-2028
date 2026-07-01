@@ -7,6 +7,7 @@ type Scorer = {
   name: string
   goals: number
   tip_count: number
+  is_top: boolean
 }
 
 const inputStyle = {
@@ -41,6 +42,7 @@ function ScorerRow({ scorer }: { scorer: Scorer }) {
   }
 
   const changed = goals !== scorer.goals
+  const isTop = scorer.is_top && goals > 0
 
   return (
     <div style={{
@@ -48,11 +50,14 @@ function ScorerRow({ scorer }: { scorer: Scorer }) {
       alignItems: 'center',
       gap: 12,
       padding: '10px 14px',
-      background: scorer.goals > 0 ? 'rgba(52,211,153,0.04)' : 'rgba(255,255,255,0.02)',
-      border: `1px solid ${scorer.goals > 0 ? 'rgba(52,211,153,0.15)' : 'rgba(255,255,255,0.06)'}`,
+      background: isTop ? 'rgba(245,158,11,0.07)' : scorer.goals > 0 ? 'rgba(52,211,153,0.04)' : 'rgba(255,255,255,0.02)',
+      border: `1px solid ${isTop ? 'rgba(245,158,11,0.3)' : scorer.goals > 0 ? 'rgba(52,211,153,0.15)' : 'rgba(255,255,255,0.06)'}`,
       borderRadius: 10,
     }}>
-      <span style={{ flex: 1, fontSize: '0.88rem', color: '#e2e8f0', fontWeight: scorer.goals > 0 ? 700 : 400 }}>
+      <span style={{ fontSize: '1rem', flexShrink: 0, width: 20, textAlign: 'center' }}>
+        {isTop ? '👑' : ''}
+      </span>
+      <span style={{ flex: 1, fontSize: '0.88rem', color: isTop ? '#f59e0b' : '#e2e8f0', fontWeight: scorer.goals > 0 ? 700 : 400 }}>
         {scorer.name}
       </span>
       <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.25)', background: 'rgba(255,255,255,0.05)', borderRadius: 6, padding: '2px 8px', flexShrink: 0 }}>
@@ -75,8 +80,8 @@ function ScorerRow({ scorer }: { scorer: Scorer }) {
           style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, width: 28, height: 28, cursor: 'pointer', color: '#e2e8f0', fontSize: '1rem', lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >+</button>
       </div>
-      <span style={{ fontSize: '0.8rem', color: '#a5b4fc', fontWeight: 700, flexShrink: 0, minWidth: 48, textAlign: 'right' }}>
-        {goals > 0 ? `+${goals * 10} b` : ''}
+      <span style={{ fontSize: '0.8rem', fontWeight: 700, flexShrink: 0, minWidth: 60, textAlign: 'right', color: isTop ? '#f59e0b' : '#a5b4fc' }}>
+        {goals > 0 ? `+${goals * 10 + (isTop ? 10 : 0)} b` : ''}
       </span>
       {(changed || saved) && (
         <button
@@ -108,7 +113,8 @@ export default function ScorersAdmin({ scorers }: { scorers: Scorer[] }) {
   const [search, setSearch] = useState('')
   const withGoals = scorers.filter(s => s.goals > 0)
   const filtered = scorers.filter(s => s.name.toLowerCase().includes(search.toLowerCase()))
-  const totalPts = scorers.reduce((sum, s) => sum + s.goals * 10 * s.tip_count, 0)
+  const maxGoals = withGoals.length > 0 ? Math.max(...withGoals.map(s => s.goals)) : 0
+  const topScorers = withGoals.filter(s => s.goals === maxGoals)
 
   return (
     <div>
@@ -117,10 +123,12 @@ export default function ScorersAdmin({ scorers }: { scorers: Scorer[] }) {
           <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 2 }}>Střelci s góly</div>
           <div style={{ fontWeight: 900, fontSize: '1.4rem', color: '#f59e0b' }}>{withGoals.length}</div>
         </div>
-        <div>
-          <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 2 }}>Celkem bodů rozdáno</div>
-          <div style={{ fontWeight: 900, fontSize: '1.4rem', color: '#34d399' }}>{totalPts}</div>
-        </div>
+        {maxGoals > 0 && (
+          <div>
+            <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 2 }}>👑 Nejlepší střelec</div>
+            <div style={{ fontWeight: 900, fontSize: '1.4rem', color: '#f59e0b' }}>{topScorers.map(s => s.name).join(', ')} ({maxGoals} gólů)</div>
+          </div>
+        )}
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}

@@ -53,6 +53,7 @@ type Scorer = {
   name: string
   goals: number
   tip_count: number
+  is_top: boolean
 }
 
 export default function AdminTabs({

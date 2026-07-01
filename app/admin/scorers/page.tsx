@@ -19,10 +19,12 @@ export default async function ScorersPage() {
     tipCountByScorer[t.scorer_name] = (tipCountByScorer[t.scorer_name] ?? 0) + 1
   }
 
+  const maxGoals = Math.max(0, ...(scorers ?? []).map(s => s.goals))
   const scorerList = (scorers ?? []).map(s => ({
     name: s.name,
     goals: s.goals,
     tip_count: tipCountByScorer[s.name] ?? 0,
+    is_top: s.goals > 0 && s.goals === maxGoals,
   })).sort((a, b) => {
     if (b.goals !== a.goals) return b.goals - a.goals
     return b.tip_count - a.tip_count
