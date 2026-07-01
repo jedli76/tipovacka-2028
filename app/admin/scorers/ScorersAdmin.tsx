@@ -76,7 +76,7 @@ function ScorerRow({ scorer }: { scorer: Scorer }) {
         >+</button>
       </div>
       <span style={{ fontSize: '0.8rem', color: '#a5b4fc', fontWeight: 700, flexShrink: 0, minWidth: 48, textAlign: 'right' }}>
-        {goals > 0 ? `+${goals * 10 * scorer.tip_count} b` : ''}
+        {goals > 0 ? `+${goals * 10} b` : ''}
       </span>
       {(changed || saved) && (
         <button
