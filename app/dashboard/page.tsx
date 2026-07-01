@@ -99,6 +99,23 @@ export default async function DashboardPage() {
     }
   }
 
+  // Distribuce tipů pro odehrané zápasy (po kickoffu — viditelné pro všechny)
+  const lastMatchIds = (lastMatch ?? []).map(m => m.id)
+  const tipDistribution: Record<string, { home: number; draw: number; away: number; total: number }> = {}
+  if (lastMatchIds.length > 0) {
+    const { data: allLastTips } = await supabase
+      .from('tips').select('match_id, home_score, away_score')
+      .in('match_id', lastMatchIds)
+    for (const t of allLastTips ?? []) {
+      if (!tipDistribution[t.match_id]) tipDistribution[t.match_id] = { home: 0, draw: 0, away: 0, total: 0 }
+      const d = tipDistribution[t.match_id]
+      d.total++
+      if (t.home_score > t.away_score) d.home++
+      else if (t.home_score < t.away_score) d.away++
+      else d.draw++
+    }
+  }
+
   const medals = ['🥇', '🥈', '🥉']
 
   const namesMap: Record<string, string> = {}
@@ -390,6 +407,29 @@ export default async function DashboardPage() {
                               <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#e2e8f0', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{abbr(m.away_team)}</span>
                             </div>
                           </div>
+                          {/* Distribuce tipů */}
+                          {(() => {
+                            const d = tipDistribution[m.id]
+                            if (!d || d.total === 0) return null
+                            const homePct = Math.round(d.home / d.total * 100)
+                            const drawPct = Math.round(d.draw / d.total * 100)
+                            const awayPct = 100 - homePct - drawPct
+                            return (
+                              <div style={{ margin: '0 16px 10px' }}>
+                                <div style={{ display: 'flex', borderRadius: 6, overflow: 'hidden', height: 6 }}>
+                                  {homePct > 0 && <div style={{ width: `${homePct}%`, background: '#6366f1' }} />}
+                                  {drawPct > 0 && <div style={{ width: `${drawPct}%`, background: '#64748b' }} />}
+                                  {awayPct > 0 && <div style={{ width: `${awayPct}%`, background: '#f59e0b' }} />}
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+                                  <span style={{ fontSize: '0.6rem', color: '#6366f1', fontWeight: 700 }}>{abbr(m.home_team)} {homePct}%</span>
+                                  <span style={{ fontSize: '0.6rem', color: '#64748b', fontWeight: 700 }}>Remíza {drawPct}%</span>
+                                  <span style={{ fontSize: '0.6rem', color: '#f59e0b', fontWeight: 700 }}>{awayPct}% {abbr(m.away_team)}</span>
+                                </div>
+                                <div style={{ fontSize: '0.58rem', color: 'rgba(255,255,255,0.2)', textAlign: 'center', marginTop: 2 }}>{d.total} tipů</div>
+                              </div>
+                            )
+                          })()}
                           {/* Bonusová otázka */}
                           <div style={{ margin: '0 16px 12px', background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 10, padding: '7px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
                             <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.55)', minWidth: 0 }}>Kdo dá první gól?{user && <span style={{ color: 'rgba(255,255,255,0.3)' }}> · tip: Mbappé</span>}</span>
