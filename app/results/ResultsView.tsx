@@ -79,7 +79,7 @@ type Props = {
   bonusTips?: BonusTip[]
   tournamentQuestions?: TournamentQuestion[]
   tournamentTips?: TournamentTip[]
-  scorerTips?: string[]
+  scorerTips?: { name: string; goals: number }[]
   rank?: number | null
   totalPlayers?: number | null
   backHref: string
@@ -254,12 +254,26 @@ export default function ResultsView({
           </p>
         )}
         {scorerTips.length > 0 && (
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: rank ? 12 : 32 }}>
-            {scorerTips.map((name, i) => (
-              <span key={i} style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', borderRadius: 99, padding: '3px 12px', fontSize: '0.8rem', fontWeight: 700, color: '#f59e0b' }}>
-                ⚽ {name}
-              </span>
-            ))}
+          <div style={{ marginBottom: rank ? 12 : 32 }}>
+            <div style={{ fontSize: '0.7rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>Tipy na střelce</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+              {scorerTips.map((s, i) => {
+                const pts = s.goals * 10
+                return (
+                  <div key={i} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '12px 14px' }}>
+                    <div style={{ fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: 4 }}>Střelec {i + 1}</div>
+                    <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#e2e8f0', marginBottom: 6 }}>
+                      ⚽ {s.name}{s.goals > 0 ? ` (${s.goals})` : ''}
+                    </div>
+                    {s.goals > 0 ? (
+                      <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#34d399' }}>+{pts} b</div>
+                    ) : (
+                      <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.2)' }}>zatím nedal gól</div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
           </div>
         )}
         {rank && (
