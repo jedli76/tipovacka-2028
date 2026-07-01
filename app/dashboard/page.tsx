@@ -149,6 +149,17 @@ export default async function DashboardPage() {
     }
   }
 
+  // Uživatelovy tipy pro nadcházející zápasy
+  let userUpcomingTips: Record<string, { home_score: number; away_score: number; is_joker: boolean }> = {}
+  if (user && upcomingMatchIds.length > 0) {
+    const { data: uTips } = await supabase
+      .from('tips').select('match_id, home_score, away_score, is_joker')
+      .eq('user_id', user.id).in('match_id', upcomingMatchIds)
+    for (const t of uTips ?? []) {
+      userUpcomingTips[t.match_id] = { home_score: t.home_score, away_score: t.away_score, is_joker: t.is_joker }
+    }
+  }
+
   // Uživatelovy bonus tipy pro nadcházející zápasy
   let userBonusTipsByQuestionId: Record<string, string> = {}
   if (user) {
@@ -517,8 +528,20 @@ export default async function DashboardPage() {
                             </div>
                             <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#e2e8f0', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{abbr(m.home_team)}</span>
                           </div>
-                          <div style={{ background: 'rgba(0,0,0,0.35)', borderRadius: 10, padding: '5px 14px', border: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}>
-                            <span style={{ fontWeight: 900, fontSize: '1.1rem', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.08em' }}>vs</span>
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+                            <div style={{ background: 'rgba(0,0,0,0.35)', borderRadius: 10, padding: '5px 14px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                              <span style={{ fontWeight: 900, fontSize: '1.1rem', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.08em' }}>vs</span>
+                            </div>
+                            {userUpcomingTips[m.id] && (
+                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                                <span style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', fontWeight: 600 }}>
+                                  tip: {userUpcomingTips[m.id].home_score}:{userUpcomingTips[m.id].away_score}
+                                </span>
+                                {userUpcomingTips[m.id].is_joker && (
+                                  <span style={{ fontSize: '0.6rem', color: '#fbbf24', fontWeight: 700 }}>⚡ žolík</span>
+                                )}
+                              </div>
+                            )}
                           </div>
                           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
                             <div style={{ width: 44, height: 44, borderRadius: 10, background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.7rem', lineHeight: 1 }}>
