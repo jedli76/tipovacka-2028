@@ -97,7 +97,7 @@ export default function TipDistributionModal({ homeName, awayName, homeAbbr, awa
                 <span style={{ fontWeight: 700, fontSize: '0.95rem', color: '#fff' }}>Rozložení tipů</span>
                 <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.3)' }}>{homeName} – {awayName}</span>
               </div>
-              <button onClick={() => { setOpen(false); setSelectedScore(null) }} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: '1.3rem', cursor: 'pointer', lineHeight: 1, padding: 4 }}>×</button>
+              <button onClick={() => { if (selectedScore) { setSelectedScore(null) } else { setOpen(false) } }} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: '1.3rem', cursor: 'pointer', lineHeight: 1, padding: 4 }}>×</button>
             </div>
 
             <div style={{ overflowY: 'auto' }}>
@@ -128,7 +128,7 @@ export default function TipDistributionModal({ homeName, awayName, homeAbbr, awa
                             <div style={{ width: `${barW}%`, height: '100%', background: color, borderRadius: 2 }} />
                           </div>
                         </div>
-                        {count <= 10 && (
+                        {count <= 5 && (
                           <span style={{ fontSize: '0.85rem', flexShrink: 0 }} title="Odvážný tip">🎲</span>
                         )}
                         {jokers > 0 && (
@@ -146,7 +146,7 @@ export default function TipDistributionModal({ homeName, awayName, homeAbbr, awa
                 <div style={{ padding: '16px 20px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div style={{ fontSize: '2rem', fontWeight: 900, color: getColor(selectedScore) }}>{selectedScore}</div>
-                    {selected.count <= 10 && (
+                    {selected.count <= 5 && (
                       <span style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 99, padding: '3px 12px', fontSize: '0.78rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)' }}>🎲 Odvážný tip</span>
                     )}
                   </div>
