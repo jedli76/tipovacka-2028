@@ -62,12 +62,14 @@ export default function AdminTabs({
   tournamentQuestions,
   newsPosts,
   scorers,
+  topBonusActive,
 }: {
   matches: Match[]
   bonusQuestions: BonusQ[]
   tournamentQuestions: TournamentQ[]
   newsPosts: NewsPost[]
   scorers: Scorer[]
+  topBonusActive: boolean
 }) {
   const [tab, setTab] = useState<'matches' | 'news' | 'scorers'>('matches')
   const [addingNews, setAddingNews] = useState(false)
@@ -136,7 +138,6 @@ export default function AdminTabs({
           {tabBtn('news', '📰 Novinky', newsPosts.length)}
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <ExportButton />
           {tab === 'matches' && (
             <>
               <Link
@@ -234,7 +235,7 @@ export default function AdminTabs({
       )}
 
       {/* Střelci */}
-      {tab === 'scorers' && <ScorersAdmin scorers={scorers} />}
+      {tab === 'scorers' && <ScorersAdmin scorers={scorers} topBonusActive={topBonusActive} />}
 
       {/* Novinky */}
       {tab === 'news' && (
