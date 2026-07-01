@@ -337,27 +337,14 @@ export default function ResultsView({
                   {/* Žolík */}
                   <div style={{ ...cardBase, border: '1px solid rgba(245,158,11,0.25)', background: 'linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(251,191,36,0.04) 100%)' }}>
                     <div style={lbl}>⚡ Žolík</div>
-                    {jokerTip && jokerMatch ? (
-                      <>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
-                          <span style={{ fontSize: '1.2rem' }}>{flag(jokerMatch.home_team)}</span>
-                          <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#e2e8f0' }}>{abbr(jokerMatch.home_team)}</span>
-                          <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.75rem' }}>–</span>
-                          <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#e2e8f0' }}>{abbr(jokerMatch.away_team)}</span>
-                          <span style={{ fontSize: '1.2rem' }}>{flag(jokerMatch.away_team)}</span>
-                        </div>
-                        <div style={sub}>
-                          Tip: {jokerTip.home_score}:{jokerTip.away_score}
-                          {jokerMatch.home_score !== null && ` · výsl. ${jokerMatch.home_score}:${jokerMatch.away_score}`}
-                        </div>
-                        <div style={{ ...big('#f59e0b'), marginTop: 4 }}>
-                          {jokerMatch.home_score !== null ? (jokerTip.points ?? 0) : '–'}
-                          {jokerMatch.home_score !== null && <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', fontWeight: 400, marginLeft: 4 }}>b</span>}
-                        </div>
-                      </>
-                    ) : (
-                      <div style={{ ...big('rgba(255,255,255,0.15)'), marginTop: 4 }}>–</div>
-                    )}
+                    <div style={big('#f59e0b')}>
+                      {jokerTip && jokerMatch && jokerMatch.home_score !== null ? (jokerTip.points ?? 0) : '–'}
+                    </div>
+                    <div style={sub}>
+                      {jokerTip && jokerMatch
+                        ? `${abbr(jokerMatch.home_team)} ${jokerTip.home_score}:${jokerTip.away_score} ${abbr(jokerMatch.away_team)}`
+                        : 'žolík nevybrán'}
+                    </div>
                   </div>
                 </div>
               )
