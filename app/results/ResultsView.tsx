@@ -79,6 +79,7 @@ type Props = {
   bonusTips?: BonusTip[]
   tournamentQuestions?: TournamentQuestion[]
   tournamentTips?: TournamentTip[]
+  scorerTips?: string[]
   rank?: number | null
   totalPlayers?: number | null
   backHref: string
@@ -166,6 +167,7 @@ export default function ResultsView({
   displayName, matches, tips,
   bonusQuestions = [], bonusTips = [],
   tournamentQuestions = [], tournamentTips = [],
+  scorerTips = [],
   rank, totalPlayers,
   backHref, backLabel, bio,
 }: Props) {
@@ -247,9 +249,18 @@ export default function ResultsView({
           {displayName}
         </h1>
         {bio && (
-          <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.45)', fontStyle: 'italic', marginBottom: rank ? 12 : 32, maxWidth: 480 }}>
+          <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.45)', fontStyle: 'italic', marginBottom: 12, maxWidth: 480 }}>
             {bio}
           </p>
+        )}
+        {scorerTips.length > 0 && (
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: rank ? 12 : 32 }}>
+            {scorerTips.map((name, i) => (
+              <span key={i} style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', borderRadius: 99, padding: '3px 12px', fontSize: '0.8rem', fontWeight: 700, color: '#f59e0b' }}>
+                ⚽ {name}
+              </span>
+            ))}
+          </div>
         )}
         {rank && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 32 }}>

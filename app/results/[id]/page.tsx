@@ -22,6 +22,7 @@ export default async function PlayerResultsPage({ params }: { params: Promise<{ 
     { data: tournamentQuestions },
     { data: tournamentTips },
     { data: entry },
+    { data: scorerTips },
   ] = await Promise.all([
     supabase.from('matches').select('*').order('kickoff_at', { ascending: true }),
     supabase.from('tips').select('*').eq('user_id', id),
@@ -30,6 +31,7 @@ export default async function PlayerResultsPage({ params }: { params: Promise<{ 
     supabase.from('tournament_questions').select('*').order('sort_order'),
     supabase.from('tournament_tips').select('question_id, answer, points').eq('user_id', id),
     supabase.from('leaderboard').select('total_points').eq('user_id', id).single(),
+    supabase.from('scorer_tips').select('scorer_name').eq('user_id', id),
   ])
 
   const [{ count: rankCount }, { count: totalPlayers }] = await Promise.all([
@@ -47,6 +49,7 @@ export default async function PlayerResultsPage({ params }: { params: Promise<{ 
       bonusTips={bonusTips ?? []}
       tournamentQuestions={tournamentQuestions ?? []}
       tournamentTips={tournamentTips ?? []}
+      scorerTips={(scorerTips ?? []).map(t => t.scorer_name)}
       rank={entry ? (rankCount ?? 0) + 1 : null}
       totalPlayers={totalPlayers}
       backHref="/leaderboard"
