@@ -42,6 +42,7 @@ export default function TipDistributionModal({ homeName, awayName, homeAbbr, awa
   }
 
   const sortedScores = Object.entries(scoreGroups).sort((a, b) => b[1].count - a[1].count)
+  const maxCount = sortedScores[0]?.[1].count ?? 1
   const selected = selectedScore ? scoreGroups[selectedScore] : null
 
   function getColor(score: string) {
@@ -79,105 +80,89 @@ export default function TipDistributionModal({ homeName, awayName, homeAbbr, awa
           }}
         >
           <div style={{
-            background: 'linear-gradient(160deg, #0f1623 0%, #0a0f1a 100%)',
+            background: '#0f1623',
             border: '1px solid rgba(255,255,255,0.1)',
             borderRadius: 20,
-            width: '100%', maxWidth: 560,
+            width: '100%', maxWidth: 520,
             maxHeight: '85vh',
             display: 'flex', flexDirection: 'column',
             overflow: 'hidden',
           }}>
             {/* Header */}
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+            <div style={{ padding: '16px 20px 12px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 {selectedScore && (
-                  <button onClick={() => setSelectedScore(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '1.1rem', cursor: 'pointer', padding: '0 4px 0 0', lineHeight: 1 }}>←</button>
+                  <button onClick={() => setSelectedScore(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)', fontSize: '1.1rem', cursor: 'pointer', padding: '0 4px 0 0', lineHeight: 1 }}>←</button>
                 )}
-                <div>
-                  <span style={{ fontWeight: 800, fontSize: '1rem', color: '#fff' }}>Rozložení tipů</span>
-                  <span style={{ marginLeft: 8, fontSize: '0.8rem', color: 'rgba(255,255,255,0.35)' }}>{homeName} – {awayName}</span>
-                </div>
+                <span style={{ fontWeight: 700, fontSize: '0.95rem', color: '#fff' }}>Rozložení tipů</span>
+                <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.3)' }}>{homeName} – {awayName}</span>
               </div>
-              <button onClick={() => { setOpen(false); setSelectedScore(null) }} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.35)', fontSize: '1.4rem', cursor: 'pointer', lineHeight: 1, padding: 4 }}>×</button>
+              <button onClick={() => { setOpen(false); setSelectedScore(null) }} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: '1.3rem', cursor: 'pointer', lineHeight: 1, padding: 4 }}>×</button>
             </div>
 
-            <div style={{ overflowY: 'auto', padding: '14px 16px' }}>
+            <div style={{ overflowY: 'auto' }}>
 
-              {/* SEZNAM BARŮ */}
+              {/* SEZNAM — minimalistický s levým border */}
               {!selectedScore && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <div style={{ paddingTop: 6, paddingBottom: 10 }}>
                   {sortedScores.map(([score, { count, jokers }]) => {
-                    const pct = Math.round(count / total * 100)
                     const color = getColor(score)
+                    const barW = Math.round(count / maxCount * 100)
                     return (
                       <div
                         key={score}
                         onClick={() => setSelectedScore(score)}
                         style={{
-                          display: 'flex', alignItems: 'center', gap: 10,
-                          cursor: 'pointer', borderRadius: 8, padding: '5px 8px',
-                          transition: 'background 0.12s',
+                          display: 'flex', alignItems: 'center', gap: 14,
+                          padding: '9px 20px',
+                          borderLeft: `3px solid ${color}`,
+                          margin: '2px 0',
+                          background: `${color}08`,
+                          cursor: 'pointer',
+                          transition: 'background 0.1s',
                         }}
-                        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.04)')}
-                        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                       >
-                        <div style={{ width: 32, textAlign: 'center', fontWeight: 900, fontSize: '0.9rem', color, flexShrink: 0 }}>{score}</div>
-                        <div style={{ flex: 1, background: 'rgba(255,255,255,0.05)', borderRadius: 4, height: 8, overflow: 'hidden' }}>
-                          <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: 4 }} />
+                        <span style={{ fontWeight: 900, fontSize: '1rem', color, width: 32, fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>{score}</span>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 2, height: 5 }}>
+                            <div style={{ width: `${barW}%`, height: '100%', background: color, borderRadius: 2 }} />
+                          </div>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                          {jokers > 0 && (
-                            <span style={{
-                              background: 'rgba(245,158,11,0.18)', border: '1px solid rgba(245,158,11,0.45)',
-                              borderRadius: 99, padding: '1px 7px', fontSize: '0.7rem', fontWeight: 800, color: '#fbbf24',
-                            }}>⚡{jokers}</span>
-                          )}
-                          <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', minWidth: 28, textAlign: 'right' }}>{count}×</span>
-                        </div>
+                        {jokers > 0 && (
+                          <span style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.35)', borderRadius: 99, padding: '1px 7px', fontSize: '0.7rem', fontWeight: 700, color: '#fbbf24', flexShrink: 0 }}>⚡{jokers}</span>
+                        )}
+                        <span style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.5)', width: 36, textAlign: 'right', fontWeight: 600, flexShrink: 0 }}>{count}×</span>
                       </div>
                     )
                   })}
                 </div>
               )}
 
-              {/* DETAIL SKÓRE */}
+              {/* DETAIL */}
               {selectedScore && selected && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  {/* Velké skóre */}
-                  <div style={{ fontSize: '2.2rem', fontWeight: 900, color: getColor(selectedScore) }}>{selectedScore}</div>
+                <div style={{ padding: '16px 20px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  <div style={{ fontSize: '2rem', fontWeight: 900, color: getColor(selectedScore) }}>{selectedScore}</div>
 
-                  {/* Žolíci */}
                   {selected.jokers > 0 && (
                     <div>
-                      <div style={{ fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#f59e0b', marginBottom: 8 }}>
+                      <div style={{ fontSize: '0.62rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#f59e0b', marginBottom: 8 }}>
                         ⚡ Se žolíkem ({selected.jokers})
                       </div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                         {selected.players.filter(p => p.is_joker).map((p, i) => (
-                          <span key={i} style={{
-                            background: 'rgba(245,158,11,0.15)',
-                            border: '1px solid rgba(245,158,11,0.45)',
-                            borderRadius: 99, padding: '5px 14px',
-                            fontSize: '0.8rem', fontWeight: 700, color: '#fbbf24',
-                          }}>★ {p.display_name}</span>
+                          <span key={i} style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.4)', borderRadius: 99, padding: '5px 14px', fontSize: '0.8rem', fontWeight: 700, color: '#fbbf24' }}>★ {p.display_name}</span>
                         ))}
                       </div>
                     </div>
                   )}
 
-                  {/* Všichni tipující */}
                   <div>
-                    <div style={{ fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>
+                    <div style={{ fontSize: '0.62rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: 8 }}>
                       Všichni tipující ({selected.count})
                     </div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                       {selected.players.filter(p => !p.is_joker).map((p, i) => (
-                        <span key={i} style={{
-                          background: 'rgba(255,255,255,0.05)',
-                          border: '1px solid rgba(255,255,255,0.1)',
-                          borderRadius: 99, padding: '5px 14px',
-                          fontSize: '0.8rem', color: '#e2e8f0',
-                        }}>{p.display_name}</span>
+                        <span key={i} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 99, padding: '5px 14px', fontSize: '0.8rem', color: '#e2e8f0' }}>{p.display_name}</span>
                       ))}
                     </div>
                   </div>
