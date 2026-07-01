@@ -26,6 +26,7 @@ type BonusQ = {
   correct_answer: string | null
   sort_order: number
   match_col_indices?: number[]
+  points_per_correct: number
 }
 
 type TournamentQ = {

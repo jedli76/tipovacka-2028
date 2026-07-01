@@ -100,21 +100,24 @@ async function updateLeaderboardForUsers(supabase: any, userIds: string[]) {
 }
 
 // Uloží správnou odpověď na bonus_question a přepočítá body
-export async function saveBonusAnswer(questionId: string, correctAnswer: string): Promise<{ error?: string }> {
+export async function saveBonusAnswer(questionId: string, correctAnswer: string, pointsPerCorrect?: number): Promise<{ error?: string }> {
   if (!await checkAdmin()) return { error: 'Přístup odepřen.' }
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!url || !key) return { error: `Chybí env: url=${!!url} key=${!!key}` }
 
-  const { error } = await adminClient()
+  const db = adminClient()
+
+  const updatePayload: Record<string, unknown> = { correct_answer: correctAnswer }
+  if (pointsPerCorrect != null) updatePayload.points_per_correct = pointsPerCorrect
+
+  const { error } = await db
     .from('bonus_questions')
-    .update({ correct_answer: correctAnswer })
+    .update(updatePayload)
     .eq('id', questionId)
 
   if (error) return { error: `DB error: ${error.message} (code: ${error.code})` }
-
-  const db = adminClient()
 
   const [{ data: tips }, { data: q }] = await Promise.all([
     db.from('bonus_tips').select('id, user_id, answer').eq('question_id', questionId),
@@ -123,9 +126,12 @@ export async function saveBonusAnswer(questionId: string, correctAnswer: string)
 
   if (!tips?.length) return {}
 
-  const ptsPerCorrect = q?.points_per_correct ?? 3
+  const ptsPerCorrect = pointsPerCorrect ?? q?.points_per_correct ?? 3
+  // Více správných odpovědí oddělených čárkou
+  const correctAnswers = correctAnswer.split(',').map((s: string) => s.trim().toLowerCase()).filter(Boolean)
+
   await Promise.all(tips.map((tip: { id: string; user_id: string; answer: string }) => {
-    const pts = tip.answer.trim().toLowerCase() === correctAnswer.trim().toLowerCase() ? ptsPerCorrect : 0
+    const pts = correctAnswers.includes(tip.answer.trim().toLowerCase()) ? ptsPerCorrect : 0
     return db.from('bonus_tips').update({ points: pts }).eq('id', tip.id)
   }))
 
