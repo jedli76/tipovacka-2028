@@ -128,11 +128,8 @@ export default function TipDistributionModal({ homeName, awayName, homeAbbr, awa
                             <div style={{ width: `${barW}%`, height: '100%', background: color, borderRadius: 2 }} />
                           </div>
                         </div>
-                        {count <= 5 && (
-                          <span style={{ background: 'rgba(234,179,8,0.15)', border: '1px solid rgba(234,179,8,0.4)', borderRadius: 99, padding: '1px 7px', fontSize: '0.68rem', fontWeight: 800, color: '#eab308', flexShrink: 0 }}>🎯 +15 b</span>
-                        )}
-                        {count > 5 && count <= 10 && (
-                          <span style={{ background: 'rgba(168,85,247,0.12)', border: '1px solid rgba(168,85,247,0.35)', borderRadius: 99, padding: '1px 7px', fontSize: '0.68rem', fontWeight: 800, color: '#c084fc', flexShrink: 0 }}>🎯 +10 b</span>
+                        {count <= 10 && (
+                          <span style={{ fontSize: '0.85rem', flexShrink: 0 }} title="Odvážný tip">🎲</span>
                         )}
                         {jokers > 0 && (
                           <span style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.35)', borderRadius: 99, padding: '1px 7px', fontSize: '0.7rem', fontWeight: 700, color: '#fbbf24', flexShrink: 0 }}>⚡{jokers}</span>
@@ -149,11 +146,8 @@ export default function TipDistributionModal({ homeName, awayName, homeAbbr, awa
                 <div style={{ padding: '16px 20px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div style={{ fontSize: '2rem', fontWeight: 900, color: getColor(selectedScore) }}>{selectedScore}</div>
-                    {selected.count <= 5 && (
-                      <span style={{ background: 'rgba(234,179,8,0.15)', border: '1px solid rgba(234,179,8,0.4)', borderRadius: 99, padding: '3px 12px', fontSize: '0.78rem', fontWeight: 800, color: '#eab308' }}>🎯 Odvážný tip · +15 b</span>
-                    )}
-                    {selected.count > 5 && selected.count <= 10 && (
-                      <span style={{ background: 'rgba(168,85,247,0.12)', border: '1px solid rgba(168,85,247,0.35)', borderRadius: 99, padding: '3px 12px', fontSize: '0.78rem', fontWeight: 800, color: '#c084fc' }}>🎯 Odvážný tip · +10 b</span>
+                    {selected.count <= 10 && (
+                      <span style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 99, padding: '3px 12px', fontSize: '0.78rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)' }}>🎲 Odvážný tip</span>
                     )}
                   </div>
 
