@@ -49,7 +49,7 @@ export default async function DashboardPage() {
       .not('matches.home_score', 'is', null),
     supabase.from('profiles').select('id, display_name'),
     supabase.from('news').select('id, title, content, cover_image_url, cover_image_position, created_at').eq('published', true).order('sort_order', { ascending: true }).limit(3),
-    supabase.from('bonus_questions').select('id, question, match_col_indices'),
+    supabase.from('bonus_questions').select('id, question, match_col_indices, correct_answer, points_per_correct'),
   ])
 
   // Osobní data — jen pro přihlášené
@@ -160,20 +160,15 @@ export default async function DashboardPage() {
     }
   }
 
-  // Uživatelovy bonus tipy pro nadcházející zápasy
+  // Uživatelovy bonus tipy (upcoming + played)
   let userBonusTipsByQuestionId: Record<string, string> = {}
+  let userBonusTipsPoints: Record<string, number> = {}
   if (user) {
-    const upcomingColIndices = (upcomingMatches ?? []).map(m => m.col_index).filter(Boolean)
-    const relevantQuestionIds = (allBonusQuestions ?? [])
-      .filter(q => q.match_col_indices?.some((ci: number) => upcomingColIndices.includes(ci)))
-      .map(q => q.id)
-    if (relevantQuestionIds.length > 0) {
-      const { data: myBonusTips } = await supabase
-        .from('bonus_tips').select('question_id, answer').eq('user_id', user.id)
-        .in('question_id', relevantQuestionIds)
-      for (const bt of myBonusTips ?? []) {
-        userBonusTipsByQuestionId[bt.question_id] = bt.answer
-      }
+    const { data: myBonusTips } = await supabase
+      .from('bonus_tips').select('question_id, answer, points').eq('user_id', user.id)
+    for (const bt of myBonusTips ?? []) {
+      userBonusTipsByQuestionId[bt.question_id] = bt.answer
+      userBonusTipsPoints[bt.question_id] = bt.points ?? 0
     }
   }
 
@@ -493,10 +488,28 @@ export default async function DashboardPage() {
                             )
                           })()}
                           {/* Bonusová otázka */}
-                          <div style={{ margin: '0 16px 12px', background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 10, padding: '7px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                            <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.55)', minWidth: 0 }}>Kdo dá první gól?{user && <span style={{ color: 'rgba(255,255,255,0.3)' }}> · tip: Mbappé</span>}</span>
-                            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#34d399', flexShrink: 0 }}>+10 b</span>
-                          </div>
+                          {(() => {
+                            const bonusQ = m.col_index != null ? (allBonusQuestions ?? []).find((q: { match_col_indices?: number[] }) => q.match_col_indices?.includes(m.col_index!)) : null
+                            if (!bonusQ) return null
+                            const myAnswer = userBonusTipsByQuestionId[bonusQ.id]
+                            const myPts = userBonusTipsPoints[bonusQ.id]
+                            const answered = bonusQ.correct_answer != null
+                            return (
+                              <div style={{ margin: '0 16px 12px', background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 10, padding: '7px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                                <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.55)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  {bonusQ.question}
+                                  {myAnswer && <span style={{ color: 'rgba(255,255,255,0.3)' }}> · tip: {myAnswer}</span>}
+                                </span>
+                                {answered && myAnswer != null ? (
+                                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: myPts > 0 ? '#34d399' : 'rgba(255,255,255,0.2)', flexShrink: 0 }}>
+                                    {myPts > 0 ? `+${myPts} b` : '0 b'}
+                                  </span>
+                                ) : (
+                                  <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.2)', fontStyle: 'italic', flexShrink: 0 }}>čeká se</span>
+                                )}
+                              </div>
+                            )
+                          })()}
                         </div>
                       )
                     })}
