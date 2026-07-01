@@ -15,19 +15,32 @@ export type HofEntry = {
   value: number
 }
 
-export type HallOfFame = {
-  topMatchPoints: HofEntry | null
-  mostExact: HofEntry | null
-  bestStreak: HofEntry | null
-  currentStreak: HofEntry | null
-  currentZeroStreak: HofEntry | null
-  hotStreak: HofEntry | null
-  nearMiss: HofEntry | null
+export type HofCategory = {
+  leader: HofEntry
+  top10: HofEntry[]
 }
 
-function best(map: Record<string, number>, names: Record<string, string>): HofEntry | null {
-  const top = Object.entries(map).sort((a, b) => b[1] - a[1])[0]
-  return top && top[1] > 0 ? { user_id: top[0], display_name: names[top[0]] ?? '–', value: top[1] } : null
+export type HallOfFame = {
+  topMatchPoints: HofCategory | null
+  mostExact: HofCategory | null
+  bestStreak: HofCategory | null
+  currentStreak: HofCategory | null
+  currentZeroStreak: HofCategory | null
+  hotStreak: HofCategory | null
+  nearMiss: HofCategory | null
+}
+
+function topN(map: Record<string, number>, names: Record<string, string>, n = 10): HofEntry[] {
+  return Object.entries(map)
+    .filter(([, v]) => v > 0)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, n)
+    .map(([uid, val]) => ({ user_id: uid, display_name: names[uid] ?? '–', value: val }))
+}
+
+function toCategory(entries: HofEntry[]): HofCategory | null {
+  if (!entries.length) return null
+  return { leader: entries[0], top10: entries }
 }
 
 export function computeHallOfFame(
@@ -37,7 +50,6 @@ export function computeHallOfFame(
 ): HallOfFame {
   const played = tips.filter(t => t.match_home_score !== null && t.match_away_score !== null)
 
-  // Group by user, sorted by kickoff_at
   const byUser: Record<string, HofTip[]> = {}
   for (const t of played) {
     ;(byUser[t.user_id] ??= []).push(t)
@@ -63,44 +75,40 @@ export function computeHallOfFame(
   }
 
   // Streaks
-  let bestStreakUser = '', bestStreakVal = 0
-  let curStreakUser = '', curStreakVal = 0
-  let zeroStreakUser = '', zeroStreakVal = 0
+  const bestStreakMap: Record<string, number> = {}
+  const curStreakMap: Record<string, number> = {}
+  const zeroStreakMap: Record<string, number> = {}
 
   for (const [uid, utips] of Object.entries(byUser)) {
-    // Best ever streak
-    let cur = 0, best2 = 0
+    let cur = 0, bestVal = 0
     for (const t of utips) {
       const isExact = t.home_score === t.match_home_score && t.away_score === t.match_away_score
       cur = isExact ? cur + 1 : 0
-      if (cur > best2) best2 = cur
+      if (cur > bestVal) bestVal = cur
     }
-    if (best2 > bestStreakVal) { bestStreakVal = best2; bestStreakUser = uid }
+    if (bestVal > 0) bestStreakMap[uid] = bestVal
 
-    // Current exact streak
     let curExact = 0
     for (let i = utips.length - 1; i >= 0; i--) {
-      const t = utips[i]
-      if (t.home_score === t.match_home_score && t.away_score === t.match_away_score) curExact++
+      if (utips[i].home_score === utips[i].match_home_score && utips[i].away_score === utips[i].match_away_score) curExact++
       else break
     }
-    if (curExact > curStreakVal) { curStreakVal = curExact; curStreakUser = uid }
+    if (curExact > 0) curStreakMap[uid] = curExact
 
-    // Current zero streak
     let curZero = 0
     for (let i = utips.length - 1; i >= 0; i--) {
       if ((utips[i].points ?? 0) === 0) curZero++; else break
     }
-    if (curZero > zeroStreakVal) { zeroStreakVal = curZero; zeroStreakUser = uid }
+    if (curZero > 0) zeroStreakMap[uid] = curZero
   }
 
   return {
-    topMatchPoints: best(matchPtsMap, names),
-    mostExact: best(exactMap, names),
-    bestStreak: bestStreakVal > 0 ? { user_id: bestStreakUser, display_name: names[bestStreakUser] ?? '–', value: bestStreakVal } : null,
-    currentStreak: curStreakVal > 0 ? { user_id: curStreakUser, display_name: names[curStreakUser] ?? '–', value: curStreakVal } : null,
-    currentZeroStreak: zeroStreakVal > 0 ? { user_id: zeroStreakUser, display_name: names[zeroStreakUser] ?? '–', value: zeroStreakVal } : null,
-    hotStreak: best(hotMap, names),
-    nearMiss: best(nearMap, names),
+    topMatchPoints: toCategory(topN(matchPtsMap, names)),
+    mostExact: toCategory(topN(exactMap, names)),
+    bestStreak: toCategory(topN(bestStreakMap, names)),
+    currentStreak: toCategory(topN(curStreakMap, names)),
+    currentZeroStreak: toCategory(topN(zeroStreakMap, names)),
+    hotStreak: toCategory(topN(hotMap, names)),
+    nearMiss: toCategory(topN(nearMap, names)),
   }
 }
