@@ -101,39 +101,32 @@ async function updateLeaderboardForUsers(supabase: any, userIds: string[]) {
 
 // Uloží správnou odpověď na bonus_question a přepočítá body
 export async function saveBonusAnswer(questionId: string, correctAnswer: string): Promise<{ error?: string }> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user || !isAdmin(user.email)) return { error: 'Přístup odepřen.' }
+  if (!await checkAdmin()) return { error: 'Přístup odepřen.' }
 
-  const { error } = await supabase
+  const { error } = await adminClient()
     .from('bonus_questions')
     .update({ correct_answer: correctAnswer })
     .eq('id', questionId)
 
   if (error) return { error: error.message }
 
-  // Přepočítej body — 1 bod za správnou odpověď (přesná shoda)
-  const { data: tips } = await supabase
-    .from('bonus_tips')
-    .select('id, user_id, answer')
-    .eq('question_id', questionId)
+  const db = adminClient()
+
+  const [{ data: tips }, { data: q }] = await Promise.all([
+    db.from('bonus_tips').select('id, user_id, answer').eq('question_id', questionId),
+    db.from('bonus_questions').select('points_per_correct').eq('id', questionId).single(),
+  ])
 
   if (!tips?.length) return {}
 
-  for (const tip of tips) {
-    const isCorrect = tip.answer.trim().toLowerCase() === correctAnswer.trim().toLowerCase()
-    // Zjisti max body z otázky
-    const { data: q } = await supabase
-      .from('bonus_questions')
-      .select('points_per_correct')
-      .eq('id', questionId)
-      .single()
-    const pts = isCorrect ? (q?.points_per_correct ?? 10) : 0
-    await supabase.from('bonus_tips').update({ points: pts }).eq('id', tip.id)
-  }
+  const ptsPerCorrect = q?.points_per_correct ?? 10
+  await Promise.all(tips.map((tip: { id: string; user_id: string; answer: string }) => {
+    const pts = tip.answer.trim().toLowerCase() === correctAnswer.trim().toLowerCase() ? ptsPerCorrect : 0
+    return db.from('bonus_tips').update({ points: pts }).eq('id', tip.id)
+  }))
 
   const userIds = [...new Set(tips.map((t: { user_id: string }) => t.user_id))]
-  await updateLeaderboardForUsers(supabase, userIds)
+  await updateLeaderboardForUsers(db, userIds)
   return {}
 }
 
