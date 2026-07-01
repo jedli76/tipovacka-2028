@@ -104,7 +104,7 @@ export default async function DashboardPage() {
 
   // Distribuce tipů pro odehrané zápasy (po kickoffu — viditelné pro všechny)
   const lastMatchIds = (lastMatch ?? []).map(m => m.id)
-  type DistEntry = { home: number; draw: number; away: number; total: number; tips: { display_name: string; home_score: number; away_score: number; is_joker: boolean }[] }
+  type DistEntry = { home: number; draw: number; away: number; total: number; tips: { user_id: string; display_name: string; home_score: number; away_score: number; is_joker: boolean }[] }
   const tipDistribution: Record<string, DistEntry> = {}
   if (lastMatchIds.length > 0) {
     const { data: allLastTips } = await supabase
@@ -115,7 +115,7 @@ export default async function DashboardPage() {
       const d = tipDistribution[t.match_id]
       d.total++
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      d.tips.push({ display_name: (t as any).profiles?.display_name ?? '?', home_score: t.home_score, away_score: t.away_score, is_joker: t.is_joker })
+      d.tips.push({ user_id: t.user_id, display_name: (t as any).profiles?.display_name ?? '?', home_score: t.home_score, away_score: t.away_score, is_joker: t.is_joker })
       if (t.home_score > t.away_score) d.home++
       else if (t.home_score < t.away_score) d.away++
       else d.draw++
@@ -135,14 +135,14 @@ export default async function DashboardPage() {
   const upcomingTipDist: Record<string, DistEntry> = {}
   if (upcomingMatchIds.length > 0) {
     const { data: upcomingTips } = await supabase
-      .from('tips').select('match_id, home_score, away_score, is_joker, profiles(display_name)')
+      .from('tips').select('user_id, match_id, home_score, away_score, is_joker, profiles(display_name)')
       .in('match_id', upcomingMatchIds)
     for (const t of upcomingTips ?? []) {
       if (!upcomingTipDist[t.match_id]) upcomingTipDist[t.match_id] = { home: 0, draw: 0, away: 0, total: 0, tips: [] }
       const d = upcomingTipDist[t.match_id]
       d.total++
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      d.tips.push({ display_name: (t as any).profiles?.display_name ?? '?', home_score: t.home_score, away_score: t.away_score, is_joker: t.is_joker })
+      d.tips.push({ user_id: t.user_id, display_name: (t as any).profiles?.display_name ?? '?', home_score: t.home_score, away_score: t.away_score, is_joker: t.is_joker })
       if (t.home_score > t.away_score) d.home++
       else if (t.home_score < t.away_score) d.away++
       else d.draw++

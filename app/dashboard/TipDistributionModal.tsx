@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 
 type PlayerTip = {
+  user_id: string
   display_name: string
   home_score: number
   away_score: number
@@ -164,7 +166,7 @@ export default function TipDistributionModal({ homeName, awayName, homeAbbr, awa
                       </div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                         {selected.players.filter(p => p.is_joker).map((p, i) => (
-                          <span key={i} style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.4)', borderRadius: 99, padding: '5px 14px', fontSize: '0.8rem', fontWeight: 700, color: '#fbbf24' }}>★ {p.display_name}</span>
+                          <Link key={i} href={`/results/${p.user_id}`} onClick={() => setOpen(false)} style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.4)', borderRadius: 99, padding: '5px 14px', fontSize: '0.8rem', fontWeight: 700, color: '#fbbf24', textDecoration: 'none' }}>★ {p.display_name}</Link>
                         ))}
                       </div>
                     </div>
@@ -176,7 +178,7 @@ export default function TipDistributionModal({ homeName, awayName, homeAbbr, awa
                     </div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                       {selected.players.filter(p => !p.is_joker).map((p, i) => (
-                        <span key={i} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 99, padding: '5px 14px', fontSize: '0.8rem', color: '#e2e8f0' }}>{p.display_name}</span>
+                        <Link key={i} href={`/results/${p.user_id}`} onClick={() => setOpen(false)} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 99, padding: '5px 14px', fontSize: '0.8rem', color: '#e2e8f0', textDecoration: 'none' }}>{p.display_name}</Link>
                       ))}
                     </div>
                   </div>
