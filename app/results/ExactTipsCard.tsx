@@ -54,8 +54,7 @@ export default function ExactTipsCard({
         style={{ ...glass, padding: '20px', cursor: 'pointer', textAlign: 'left', width: '100%' }}
       >
         <div style={labelStyle}>Přesných tipů</div>
-        <div style={{ fontSize: '2.2rem', fontWeight: 900, color: '#34d399', lineHeight: 1 }}>{exactTips.length}</div>
-        <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem', marginTop: 4 }}>z {totalWithResult} odehraných</div>
+        <div style={{ fontSize: '2.2rem', fontWeight: 900, color: '#34d399', lineHeight: 1 }}>{exactTips.length}/{totalWithResult}</div>
       </button>
 
       {open && (
