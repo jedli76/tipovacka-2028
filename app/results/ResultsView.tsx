@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import ExactTipsCard, { type ExactTip } from './ExactTipsCard'
 import TeamName from '@/lib/TeamName'
+import { flag, abbr } from '@/lib/flags'
 
 function AnswerTeams({ answer, inline }: { answer: string; inline?: boolean }) {
   const teams = answer.split(',').map(s => s.trim()).filter(Boolean)
