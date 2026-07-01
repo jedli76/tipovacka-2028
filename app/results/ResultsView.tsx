@@ -301,58 +301,67 @@ export default function ResultsView({
             .sort((a, b) => new Date(a.kickoff_at).getTime() - new Date(b.kickoff_at).getTime())
 
           return (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 16, alignItems: 'stretch' }}>
-              {/* Celkem bodů */}
-              <div style={{
-                ...S.glass(0.08),
-                padding: '20px',
-                background: 'linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(168,85,247,0.08) 100%)',
-                border: '1px solid rgba(99,102,241,0.3)',
-              }}>
-                <div style={S.label}>Celkem bodů</div>
-                <div style={{ fontSize: '2.8rem', fontWeight: 900, color: '#a78bfa', lineHeight: 1, letterSpacing: '-0.03em' }}>{totalPts}</div>
-                <div style={{ marginTop: 6, color: 'rgba(255,255,255,0.4)', fontSize: '0.72rem' }}>Zápasy {matchPts} · Bonusy {bonusPts + tournPts}</div>
-              </div>
+            {(() => {
+              const cardBase: React.CSSProperties = {
+                ...S.glass(0.06),
+                padding: '18px 20px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 4,
+              }
+              const lbl: React.CSSProperties = {
+                fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em',
+                textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)',
+              }
+              const big = (color: string): React.CSSProperties => ({
+                fontSize: '2.4rem', fontWeight: 900, color, lineHeight: 1, letterSpacing: '-0.02em',
+              })
+              const sub: React.CSSProperties = {
+                fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', marginTop: 2,
+              }
+              return (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 16 }}>
+                  {/* Celkem bodů */}
+                  <div style={{ ...cardBase, border: '1px solid rgba(99,102,241,0.25)', background: 'linear-gradient(135deg, rgba(99,102,241,0.1) 0%, rgba(168,85,247,0.05) 100%)' }}>
+                    <div style={lbl}>Celkem bodů</div>
+                    <div style={big('#a78bfa')}>{totalPts}</div>
+                    <div style={sub}>Zápasy {matchPts} · Bonusy {bonusPts + tournPts}</div>
+                  </div>
 
-              {/* Přesné tipy */}
-              <ExactTipsCard exactTips={exactTips} totalWithResult={tipsWithResult.length} />
+                  {/* Přesné tipy */}
+                  <ExactTipsCard exactTips={exactTips} totalWithResult={tipsWithResult.length} />
 
-              {/* Utekl o gól */}
-              <MissedByOneCard tips={missedByOneTips} totalWithResult={tipsWithResult.length} />
+                  {/* Utekl o gól */}
+                  <MissedByOneCard tips={missedByOneTips} totalWithResult={tipsWithResult.length} />
 
-              {/* Žolík */}
-              <div style={{
-                ...S.glass(0.08),
-                padding: '20px',
-                background: 'linear-gradient(135deg, rgba(245,158,11,0.12) 0%, rgba(251,191,36,0.06) 100%)',
-                border: '1px solid rgba(245,158,11,0.35)',
-              }}>
-                <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: 8 }}>⚡ Žolík</div>
-                {jokerTip && jokerMatch ? (
-                  <>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
-                      <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>{flag(jokerMatch.home_team)}</span>
-                      <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.06em' }}>{abbr(jokerMatch.home_team)}</span>
-                      <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.75rem' }}>–</span>
-                      <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.06em' }}>{abbr(jokerMatch.away_team)}</span>
-                      <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>{flag(jokerMatch.away_team)}</span>
-                    </div>
-                    <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.7rem', marginBottom: 6 }}>
-                      Tip: {jokerTip.home_score}:{jokerTip.away_score}
-                      {jokerMatch.home_score !== null && ` · ${jokerMatch.home_score}:${jokerMatch.away_score}`}
-                    </div>
-                    <div style={{ fontSize: '2.2rem', fontWeight: 900, color: '#f59e0b', lineHeight: 1 }}>
-                      {jokerMatch.home_score !== null ? (jokerTip.points ?? 0) : '–'}
-                      <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', fontWeight: 400, marginLeft: 4 }}>
-                        {jokerMatch.home_score !== null ? 'b' : ''}
-                      </span>
-                    </div>
-                  </>
-                ) : (
-                  <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.85rem' }}>–</div>
-                )}
-              </div>
-            </div>
+                  {/* Žolík */}
+                  <div style={{ ...cardBase, border: '1px solid rgba(245,158,11,0.25)', background: 'linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(251,191,36,0.04) 100%)' }}>
+                    <div style={lbl}>⚡ Žolík</div>
+                    {jokerTip && jokerMatch ? (
+                      <>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                          <span style={{ fontSize: '1.2rem' }}>{flag(jokerMatch.home_team)}</span>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#e2e8f0' }}>{abbr(jokerMatch.home_team)}</span>
+                          <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: '0.75rem' }}>–</span>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#e2e8f0' }}>{abbr(jokerMatch.away_team)}</span>
+                          <span style={{ fontSize: '1.2rem' }}>{flag(jokerMatch.away_team)}</span>
+                        </div>
+                        <div style={sub}>
+                          Tip: {jokerTip.home_score}:{jokerTip.away_score}
+                          {jokerMatch.home_score !== null && ` · výsl. ${jokerMatch.home_score}:${jokerMatch.away_score}`}
+                        </div>
+                        <div style={{ ...big('#f59e0b'), marginTop: 4 }}>
+                          {jokerMatch.home_score !== null ? (jokerTip.points ?? 0) : '–'}
+                          {jokerMatch.home_score !== null && <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', fontWeight: 400, marginLeft: 4 }}>b</span>}
+                        </div>
+                      </>
+                    ) : (
+                      <div style={{ ...big('rgba(255,255,255,0.15)'), marginTop: 4 }}>–</div>
+                    )}
+                  </div>
+                </div>
+              )
+            })()}
           )
         })()}
       </div>

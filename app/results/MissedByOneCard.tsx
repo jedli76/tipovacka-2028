@@ -53,11 +53,23 @@ export default function MissedByOneCard({
     <>
       <button
         onClick={() => setOpen(true)}
-        style={{ ...glass, padding: '20px', cursor: 'pointer', textAlign: 'left', width: '100%', height: '100%', boxSizing: 'border-box' as const }}
+        style={{
+          ...glass,
+          padding: '18px 20px',
+          cursor: 'pointer',
+          textAlign: 'left',
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 4,
+          background: 'linear-gradient(135deg, rgba(251,146,60,0.08) 0%, rgba(249,115,22,0.04) 100%)',
+          border: '1px solid rgba(251,146,60,0.2)',
+          borderRadius: 20,
+        }}
       >
         <div style={labelStyle}>Uteklo o gól</div>
-        <div style={{ fontSize: '2.2rem', fontWeight: 900, color: '#fb923c', lineHeight: 1 }}>{tips.length}</div>
-        <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem', marginTop: 4 }}>skoro přesný tip</div>
+        <div style={{ fontSize: '2.4rem', fontWeight: 900, color: '#fb923c', lineHeight: 1, letterSpacing: '-0.02em' }}>{tips.length}</div>
+        <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>skoro přesný tip</div>
       </button>
 
       {open && (

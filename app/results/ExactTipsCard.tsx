@@ -51,10 +51,23 @@ export default function ExactTipsCard({
     <>
       <button
         onClick={() => setOpen(true)}
-        style={{ ...glass, padding: '20px', cursor: 'pointer', textAlign: 'left', width: '100%', height: '100%', boxSizing: 'border-box' as const }}
+        style={{
+          ...glass,
+          padding: '18px 20px',
+          cursor: 'pointer',
+          textAlign: 'left',
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 4,
+          background: 'linear-gradient(135deg, rgba(52,211,153,0.08) 0%, rgba(16,185,129,0.04) 100%)',
+          border: '1px solid rgba(52,211,153,0.2)',
+          borderRadius: 20,
+        }}
       >
         <div style={labelStyle}>Přesných tipů</div>
-        <div style={{ fontSize: '2.2rem', fontWeight: 900, color: '#34d399', lineHeight: 1 }}>{exactTips.length}/{totalWithResult}</div>
+        <div style={{ fontSize: '2.4rem', fontWeight: 900, color: '#34d399', lineHeight: 1, letterSpacing: '-0.02em' }}>{exactTips.length}/{totalWithResult}</div>
+        <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>přesný výsledek</div>
       </button>
 
       {open && (
