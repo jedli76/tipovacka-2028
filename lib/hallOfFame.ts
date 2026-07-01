@@ -40,7 +40,9 @@ function topN(map: Record<string, number>, names: Record<string, string>, n = 10
 
 function toCategory(entries: HofEntry[]): HofCategory | null {
   if (!entries.length) return null
-  return { leader: entries[0], top10: entries }
+  const topValue = entries[0].value
+  const tied = entries.filter(e => e.value === topValue)
+  return { leader: entries[0], top10: tied }
 }
 
 export function computeHallOfFame(
