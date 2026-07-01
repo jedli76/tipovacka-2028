@@ -55,7 +55,7 @@ export default function AdminTabs({
   tournamentQuestions: TournamentQ[]
   newsPosts: NewsPost[]
 }) {
-  const [tab, setTab] = useState<'matches' | 'bonuses' | 'news'>('matches')
+  const [tab, setTab] = useState<'matches' | 'news'>('matches')
   const [addingNews, setAddingNews] = useState(false)
   const [addingBonus, setAddingBonus] = useState(false)
   const [newQuestion, setNewQuestion] = useState('')
@@ -84,7 +84,7 @@ export default function AdminTabs({
     })
   }
 
-  const tabBtn = (t: 'matches' | 'bonuses' | 'news', label: string, count: number) => (
+  const tabBtn = (t: 'matches' | 'news', label: string, count: number) => (
     <button
       onClick={() => setTab(t)}
       style={{
@@ -117,27 +117,26 @@ export default function AdminTabs({
       {/* Záložky + akce */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', gap: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 12, padding: 4 }}>
-          {tabBtn('matches', '⚽ Zápasy', matches.length)}
-          {tabBtn('bonuses', '🎯 Bonusové otázky', bonusQuestions.length + tournamentQuestions.length)}
+          {tabBtn('matches', '⚽ Zápasy & bonusovky', matches.length)}
           {tabBtn('news', '📰 Novinky', newsPosts.length)}
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <ExportButton />
           {tab === 'matches' && (
-            <Link
-              href="/admin/matches/new"
-              style={{ background: '#22c55e', color: '#000', fontWeight: 700, padding: '8px 16px', borderRadius: 10, textDecoration: 'none', fontSize: '0.9rem' }}
-            >
-              + Přidat zápas
-            </Link>
-          )}
-          {tab === 'bonuses' && (
-            <button
-              onClick={() => setAddingBonus(true)}
-              style={{ background: '#4f46e5', color: '#fff', fontWeight: 700, padding: '8px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: '0.9rem' }}
-            >
-              + Přidat otázku
-            </button>
+            <>
+              <Link
+                href="/admin/matches/new"
+                style={{ background: '#22c55e', color: '#000', fontWeight: 700, padding: '8px 16px', borderRadius: 10, textDecoration: 'none', fontSize: '0.9rem' }}
+              >
+                + Přidat zápas
+              </Link>
+              <button
+                onClick={() => setAddingBonus(true)}
+                style={{ background: '#4f46e5', color: '#fff', fontWeight: 700, padding: '8px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: '0.9rem' }}
+              >
+                + Přidat otázku
+              </button>
+            </>
           )}
           {tab === 'news' && (
             <button
@@ -193,12 +192,15 @@ export default function AdminTabs({
         </div>
       )}
 
-      {/* Bonusy */}
-      {tab === 'bonuses' && (
-        <BonusAdmin
-          bonusQuestions={bonusQuestions}
-          tournamentQuestions={tournamentQuestions}
-        />
+      {/* Bonusy (součást záložky Zápasy) */}
+      {tab === 'matches' && (
+        <div style={{ marginTop: 32 }}>
+          <div style={{ fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: 12 }}>🎯 Bonusové otázky</div>
+          <BonusAdmin
+            bonusQuestions={bonusQuestions}
+            tournamentQuestions={tournamentQuestions}
+          />
+        </div>
       )}
 
       {/* Novinky */}
