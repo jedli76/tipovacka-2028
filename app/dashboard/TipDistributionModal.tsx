@@ -131,7 +131,7 @@ export default function TipDistributionModal({ homeName, awayName, homeAbbr, awa
                         {jokers > 0 && (
                           <span style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.35)', borderRadius: 99, padding: '1px 7px', fontSize: '0.7rem', fontWeight: 700, color: '#fbbf24', flexShrink: 0 }}>⚡{jokers}</span>
                         )}
-                        <span style={{ fontSize: '0.85rem', flexShrink: 0, width: 20, textAlign: 'center' }}>{count <= 5 ? '🎲' : ''}</span>
+                        <span style={{ fontSize: '0.85rem', flexShrink: 0, width: 20, textAlign: 'center' }} title={count <= 5 ? 'Ve hře je bonus za odvážný tip.' : undefined}>{count <= 5 ? '🎲' : ''}</span>
                         <span style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.5)', width: 36, textAlign: 'right', fontWeight: 600, flexShrink: 0 }}>{count}×</span>
                       </div>
                     )
