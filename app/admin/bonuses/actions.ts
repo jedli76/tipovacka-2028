@@ -119,24 +119,11 @@ export async function saveBonusAnswer(questionId: string, correctAnswer: string,
 
   if (error) return { error: `DB error: ${error.message} (code: ${error.code})` }
 
-  const [{ data: tips }, { data: q }] = await Promise.all([
-    db.from('bonus_tips').select('id, user_id, answer').eq('question_id', questionId),
-    db.from('bonus_questions').select('points_per_correct').eq('id', questionId).single(),
-  ])
+  // Přepočítej body přes SQL funkci (SECURITY DEFINER — obchází RLS)
+  const { error: rpcError } = await db.rpc('recalculate_bonus_question', { p_question_id: questionId })
+  if (rpcError) return { error: `Přepočet selhal: ${rpcError.message}` }
 
-  if (!tips?.length) return {}
-
-  const ptsPerCorrect = pointsPerCorrect ?? q?.points_per_correct ?? 3
-  // Více správných odpovědí oddělených čárkou
-  const correctAnswers = correctAnswer.split(',').map((s: string) => s.trim().toLowerCase()).filter(Boolean)
-
-  await Promise.all(tips.map((tip: { id: string; user_id: string; answer: string }) => {
-    const pts = correctAnswers.includes(tip.answer.trim().toLowerCase()) ? ptsPerCorrect : 0
-    return db.from('bonus_tips').update({ points: pts }).eq('id', tip.id)
-  }))
-
-  const userIds = [...new Set(tips.map((t: { user_id: string }) => t.user_id))]
-  await updateLeaderboardForUsers(db, userIds)
+  revalidatePath('/leaderboard')
   return {}
 }
 
