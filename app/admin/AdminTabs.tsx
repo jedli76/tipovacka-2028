@@ -5,7 +5,8 @@ import Link from 'next/link'
 import ExportButton from './ExportButton'
 import BonusAdmin from './bonuses/BonusAdmin'
 import NewsAdmin from './news/NewsAdmin'
-import { addTournamentQuestion } from './bonuses/actions'
+import QuestionRow from './bonuses/QuestionRow'
+import { addTournamentQuestion, saveBonusAnswer } from './bonuses/actions'
 
 type Match = {
   id: string
@@ -16,6 +17,7 @@ type Match = {
   stage: string
   home_score: number | null
   away_score: number | null
+  col_index: number | null
 }
 
 type BonusQ = {
@@ -23,6 +25,7 @@ type BonusQ = {
   question: string
   correct_answer: string | null
   sort_order: number
+  match_col_indices?: number[]
 }
 
 type TournamentQ = {
@@ -150,56 +153,66 @@ export default function AdminTabs({
       </div>
 
       {/* Zápasy */}
-      {tab === 'matches' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {matches.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.2)' }}>Žádné zápasy.</div>
-          ) : matches.map(m => (
-            <div key={m.id} style={{
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 12,
-              padding: '12px 16px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-            }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.95rem' }}>
-                  {m.home_team} vs {m.away_team}
+      {tab === 'matches' && (() => {
+        const colToBonusQ: Record<number, typeof bonusQuestions[0]> = {}
+        for (const bq of bonusQuestions) {
+          for (const ci of (bq.match_col_indices ?? [])) {
+            colToBonusQ[ci] = bq
+          }
+        }
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {matches.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.2)' }}>Žádné zápasy.</div>
+            ) : matches.map(m => {
+              const bq = m.col_index != null ? colToBonusQ[m.col_index] : undefined
+              return (
+                <div key={m.id} style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: 12,
+                  padding: '12px 16px',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '0.95rem' }}>
+                        {m.home_team} vs {m.away_team}
+                      </div>
+                      <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
+                        {new Date(m.kickoff_at).toLocaleString('cs-CZ', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        {m.group_name && ` · Skupina ${m.group_name}`}
+                        {m.stage && m.stage !== 'group' && ` · ${m.stage}`}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+                      {m.home_score !== null ? (
+                        <span style={{ fontWeight: 800, color: '#34d399', fontSize: '1rem' }}>{m.home_score}:{m.away_score}</span>
+                      ) : (
+                        <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.8rem' }}>bez výsledku</span>
+                      )}
+                      <Link
+                        href={`/admin/matches/${m.id}`}
+                        style={{ color: '#60a5fa', fontSize: '0.82rem', fontWeight: 600, textDecoration: 'none' }}
+                      >
+                        Upravit
+                      </Link>
+                    </div>
+                  </div>
+                  {bq && (
+                    <QuestionRow key={bq.id} q={bq} table="bonus_questions" onSave={saveBonusAnswer} compact />
+                  )}
                 </div>
-                <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
-                  {new Date(m.kickoff_at).toLocaleString('cs-CZ', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                  {m.group_name && ` · Skupina ${m.group_name}`}
-                  {m.stage && m.stage !== 'group' && ` · ${m.stage}`}
-                </div>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
-                {m.home_score !== null ? (
-                  <span style={{ fontWeight: 800, color: '#34d399', fontSize: '1rem' }}>{m.home_score}:{m.away_score}</span>
-                ) : (
-                  <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.8rem' }}>bez výsledku</span>
-                )}
-                <Link
-                  href={`/admin/matches/${m.id}`}
-                  style={{ color: '#60a5fa', fontSize: '0.82rem', fontWeight: 600, textDecoration: 'none' }}
-                >
-                  Upravit
-                </Link>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+              )
+            })}
+          </div>
+        )
+      })()}
 
-      {/* Bonusy (součást záložky Zápasy) */}
-      {tab === 'matches' && (
+      {/* Turnajové bonusové otázky (součást záložky Zápasy) */}
+      {tab === 'matches' && tournamentQuestions.length > 0 && (
         <div style={{ marginTop: 32 }}>
-          <div style={{ fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: 12 }}>🎯 Bonusové otázky</div>
-          <BonusAdmin
-            bonusQuestions={bonusQuestions}
-            tournamentQuestions={tournamentQuestions}
-          />
+          <div style={{ fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginBottom: 12 }}>🏆 Turnajové bonusové otázky</div>
+          <BonusAdmin tournamentQuestions={tournamentQuestions} />
         </div>
       )}
 
